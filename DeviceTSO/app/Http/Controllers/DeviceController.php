@@ -59,63 +59,22 @@ class DeviceController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        $validated = $request->validate([
             'room_id' => 'required|exists:rooms,room_id',
-            'device_name' => 'required|string|min:3|max:100',
-            'device_type' => 'nullable|string|max:50',
+            'device_name' => 'required|string|max:100',
+            'device_type' => 'required|string|max:50',
             'serial_number' => 'nullable|string|max:100',
-        ], [
-            'room_id.required' => 'Ruangan harus dipilih.',
-            'room_id.exists' => 'Ruangan yang dipilih tidak valid.',
-            'device_name.required' => 'Nama device harus diisi.',
-            'device_name.min' => 'Nama device minimal 3 karakter.',
-            'device_name.max' => 'Nama device maksimal 100 karakter.',
-            'device_type.max' => 'Tipe device maksimal 50 karakter.',
-            'serial_number.max' => 'Serial number maksimal 100 karakter.',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-                'message' => 'Validation failed'
-            ], 422);
+    
+        if ($request->hasFile('image')) {
+            $path = $request->file('image')->store('devices', 'public');
+            $validated['image_path'] = $path;
         }
-
-        try {
-            // Check if device name already exists in the same room
-            $existingDevice = Device::where('room_id', $request->room_id)
-                ->where('device_name', $request->device_name)
-                ->first();
-
-            if ($existingDevice) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Device dengan nama tersebut sudah ada di ruangan ini.'
-                ], 409);
-            }
-
-            $device = Device::create($request->only([
-                'room_id', 
-                'device_name', 
-                'device_type', 
-                'serial_number'
-            ]));
-
-            $device->load(['room.floor']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Device berhasil ditambahkan.',
-                'data' => $device
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal menambahkan device. Silakan coba lagi.'
-            ], 500);
-        }
+    
+        Device::create($validated);
+    
+        return redirect()->route('devices.index')->with('success', 'Device berhasil ditambahkan');
     }
 
     /**
@@ -143,73 +102,29 @@ class DeviceController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $validator = Validator::make($request->all(), [
+        $device = Device::findOrFail($id);
+
+        $validated = $request->validate([
             'room_id' => 'required|exists:rooms,room_id',
-            'device_name' => 'required|string|min:3|max:100',
-            'device_type' => 'nullable|string|max:50',
+            'device_name' => 'required|string|max:100',
+            'device_type' => 'required|string|max:50',
             'serial_number' => 'nullable|string|max:100',
-        ], [
-            'room_id.required' => 'Ruangan harus dipilih.',
-            'room_id.exists' => 'Ruangan yang dipilih tidak valid.',
-            'device_name.required' => 'Nama device harus diisi.',
-            'device_name.min' => 'Nama device minimal 3 karakter.',
-            'device_name.max' => 'Nama device maksimal 100 karakter.',
-            'device_type.max' => 'Tipe device maksimal 50 karakter.',
-            'serial_number.max' => 'Serial number maksimal 100 karakter.',
+            'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'errors' => $validator->errors(),
-                'message' => 'Validation failed'
-            ], 422);
-        }
-
-        try {
-            $device = Device::findOrFail($id);
-
-            // Check if device name already exists in the same room (excluding current device)
-            $existingDevice = Device::where('room_id', $request->room_id)
-                ->where('device_name', $request->device_name)
-                ->where('device_id', '!=', $id)
-                ->first();
-
-            if ($existingDevice) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Device dengan nama tersebut sudah ada di ruangan ini.'
-                ], 409);
+        if ($request->hasFile('image')) {
+            // hapus file lama kalau ada
+            if ($device->image_path && \Storage::disk('public')->exists($device->image_path)) {
+                \Storage::disk('public')->delete($device->image_path);
             }
-
-            $device->update($request->only([
-                'room_id', 
-                'device_name', 
-                'device_type', 
-                'serial_number'
-            ]));
-
-            $device->load(['room.floor']);
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Device berhasil diperbarui.',
-                'data' => $device
-            ]);
-
-        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Device tidak ditemukan.'
-            ], 404);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal memperbarui device. Silakan coba lagi.'
-            ], 500);
+            $path = $request->file('image')->store('devices', 'public');
+            $validated['image_path'] = $path;
         }
-    }
 
+        $device->update($validated);
+
+        return redirect()->route('devices.index')->with('success', 'Device berhasil diperbarui');
+    }
     /**
      * Remove the specified device
      */

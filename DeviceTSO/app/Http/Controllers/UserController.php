@@ -11,6 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class UserController extends Controller
 {
+    public function dashboard()
+    {
+        return view('dashboard');
+    }
+
     // Menampilkan halaman login
     public function showLoginForm()
     {
