@@ -385,15 +385,26 @@ function filterResults() {
 
 // Update statistics
 function updateStats() {
-    const passed = checkResults.reduce((acc, r) => acc + (r.passed_count || 0), 0);
-    const failed = checkResults.reduce((acc, r) => acc + (r.failed_count || 0), 0);
-    const pending = checkResults.reduce((acc, r) => acc + (r.pending_count || 0), 0);
-    const total = checkResults.reduce((acc, r) => acc + (r.total_items || 0), 0);
-    
+    let passed = 0;
+    let failed = 0;
+    let pending = 0;
+
+    checkResults.forEach(r => {
+        const f = r.failed_count || 0;
+        const p = r.pending_count || 0;
+        if (f > 0) {
+            failed += 1;
+        } else if (p > 0) {
+            pending += 1;
+        } else {
+            passed += 1;
+        }
+    });
+
     document.getElementById('passedCount').textContent = passed;
     document.getElementById('failedCount').textContent = failed;
     document.getElementById('pendingCount').textContent = pending;
-    document.getElementById('totalCount').textContent = total;
+    document.getElementById('totalCount').textContent = checkResults.length;
 }
 
 // Render table
@@ -733,30 +744,101 @@ function clearFilters() {
     filterResults();
 }
 
-// Export data
-function exportData() {
-    const csvContent = "data:text/csv;charset=utf-8," 
-        + "Device,Device Type,Serial,Room,Floor,Passed,Failed,Pending,Checked By,Date\n"
-        + filteredResults.map(result => [
-            result.device_name || '',
-            result.device_type || '',
-            result.serial_number || '',
-            result.room_name || '',
-            result.floor_name || '',
-            result.passed_count || 0,
-            result.failed_count || 0,
-            result.pending_count || 0,
-            result.checked_by || '',
-            formatDate(result.checked_at)
-        ].join(",")).join("\n");
-    
-    const encodedUri = encodeURI(csvContent);
-    const link = document.createElement("a");
-    link.setAttribute("href", encodedUri);
-    link.setAttribute("download", `device_check_results_${new Date().toISOString().split('T')[0]}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+// Lazy-load SheetJS if not present
+function loadXLSX() {
+    return new Promise((resolve, reject) => {
+        if (window.XLSX) return resolve();
+        const script = document.createElement('script');
+        script.src = 'https://cdn.sheetjs.com/xlsx-0.20.0/package/dist/xlsx.full.min.js';
+        script.onload = () => resolve();
+        script.onerror = () => reject(new Error('Failed to load XLSX library'));
+        document.head.appendChild(script);
+    });
+}
+
+// Export data to XLSX including all checklist questions per session
+async function exportData() {
+    try {
+        await loadXLSX();
+
+        const rows = [];
+
+        for (const result of filteredResults) {
+            const deviceId = result.device_id;
+            const checkedAt = result.checked_at || '';
+            const url = checkedAt
+                ? `/api/device-check-session-detail?device_id=${deviceId}&checked_at=${encodeURIComponent(checkedAt)}`
+                : `/api/device-check-session-detail?device_id=${deviceId}`;
+
+            try {
+                const resp = await fetch(url);
+                const items = await resp.json();
+                if (!Array.isArray(items) || items.length === 0) continue;
+
+                const first = items[0];
+                const device = first.device || {};
+                const room = device.room || {};
+                const floor = room.floor || {};
+                const user = first.user || {};
+                const deviceType = device.device_type || '';
+
+                let checklist = [];
+                if (deviceType) {
+                    try {
+                        const clRes = await fetch(`/api/checklist/${encodeURIComponent(deviceType)}`);
+                        checklist = await clRes.json();
+                    } catch (_) {}
+                }
+
+                const resultByChecklistId = {};
+                items.forEach(r => { resultByChecklistId[r.checklist_id] = r; });
+
+                const sourceList = (Array.isArray(checklist) && checklist.length > 0)
+                    ? checklist
+                    : items.map(i => i.checklistItem).filter(Boolean);
+
+                sourceList.forEach(ci => {
+                    const cid = ci.checklist_id;
+                    const res = resultByChecklistId[cid] || null;
+                    const status = res && res.status ? res.status : 'pending';
+                    const notes = res && res.notes ? res.notes : '';
+
+                    rows.push({
+                        'Device': device.device_name || result.device_name || '',
+                        'Device Type': deviceType || result.device_type || '',
+                        'Serial': device.serial_number || result.serial_number || '',
+                        'Room': room.room_name || result.room_name || '',
+                        'Floor': floor.floor_name || result.floor_name || '',
+                        'Checked By': user.full_name || result.checked_by || '',
+                        'Date': formatDate(first.checked_at || checkedAt),
+                        'Checklist': ci.question || '',
+                        'Status': status,
+                        'Notes': notes
+                    });
+                });
+            } catch (err) {
+                console.error('Export: error loading session detail', err);
+            }
+        }
+
+        if (rows.length === 0) {
+            showNotification('No data to export', 'info');
+            return;
+        }
+
+        const worksheet = XLSX.utils.json_to_sheet(rows, {
+            header: ['Device', 'Device Type', 'Serial', 'Room', 'Floor', 'Checked By', 'Date', 'Checklist', 'Status', 'Notes']
+        });
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Results');
+
+        const filename = `device_check_results_${new Date().toISOString().split('T')[0]}.xlsx`;
+        XLSX.writeFile(workbook, filename);
+        showNotification('Exported to XLSX successfully', 'success');
+    } catch (e) {
+        console.error('Error exporting data', e);
+        showNotification('Error exporting data', 'error');
+    }
 }
 
 // Show notification

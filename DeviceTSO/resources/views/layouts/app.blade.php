@@ -61,9 +61,9 @@
                         <p class="text-xs text-white/80">Telkomsel</p>
                     </div>
                 </div>
-                <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-white/10 transition-colors">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 19l-7-7 7-7m8 14l-7-7 7-7"/>
+                <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Toggle sidebar">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
             </div>
@@ -202,6 +202,7 @@
                         </svg>
                     </button>
                     
+                    
                     <!-- Page Title -->
                     <div>
                         <h1 class="text-2xl font-telkomsel font-bold text-telkomsel-blue">@yield('page-title', 'Dashboard')</h1>
@@ -211,14 +212,6 @@
 
                 <!-- User Profile -->
                 <div class="flex items-center space-x-4">
-                    <!-- Notifications -->
-                    <button class="p-2 rounded-lg text-gray-600 hover:bg-gray-100 relative">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-5 5v-5zM10.5 3.75a6 6 0 0 1 6 6v2.25a2.25 2.25 0 0 0 2.25 2.25H19.5a2.25 2.25 0 0 1-2.25 2.25h-6.75a2.25 2.25 0 0 1-2.25-2.25H6a2.25 2.25 0 0 1 2.25-2.25V9.75a6 6 0 0 1 6-6Z"/>
-                        </svg>
-                        <span class="absolute top-1 right-1 w-3 h-3 bg-telkomsel-red rounded-full"></span>
-                    </button>
-
                     <!-- User Menu -->
                     <div class="relative group">
                         <button class="flex items-center space-x-3 p-2 rounded-lg">
@@ -351,6 +344,20 @@
         
         .animate-fade-in {
             animation: fade-in 0.3s ease-out;
+        }
+
+        /* Collapsed sidebar styling */
+        #sidebar.w-16 nav a {
+            justify-content: center;
+        }
+        #sidebar.w-16 nav a > * + * {
+            margin-left: 0 !important; /* override Tailwind space-x-3 */
+        }
+        #sidebar.w-16 #logo-text {
+            display: none !important;
+        }
+        #sidebar.w-16 .nav-text {
+            display: none !important;
         }
 
         /* Mobile sidebar positioning */
