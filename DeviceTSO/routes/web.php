@@ -8,6 +8,12 @@ use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DeviceCheckResultController;
 use Illuminate\Support\Facades\Route;
 
+
+// Test route untuk debugging
+Route::get('/test', function () {
+    return 'Laravel berhasil jalan di Vercel!';
+});
+
 // Redirect root to login
 Route::get('/', function () {
     return redirect('/login');
