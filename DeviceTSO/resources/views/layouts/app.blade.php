@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'Dashboard') - Device Checker Telkomsel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -83,7 +84,7 @@
 
                     <!-- Device Checking -->
                     <li>
-                        <a href="{{ route('device-check-results.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('check.*') ? 'bg-white/20' : '' }}">
+                        <a href="{{ route('device-check.page') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('device-check.*') ? 'bg-white/20' : '' }}">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
@@ -216,11 +217,11 @@
                     <div class="relative group">
                         <button class="flex items-center space-x-3 p-2 rounded-lg hover:bg-gray-100">
                             <div class="w-8 h-8 bg-telkomsel-red rounded-full flex items-center justify-center text-white font-bold text-sm">
-                                {{ strtoupper(substr(auth()->user()->full_name, 0, 1)) }}
+                                {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->username ?? 'U', 0, 1)) }}
                             </div>
                             <div class="text-left hidden sm:block">
-                                <p class="text-sm font-medium text-gray-900">{{ auth()->user()->full_name }}</p>
-                                <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role }}</p>
+                                <p class="text-sm font-medium text-gray-900">{{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
+                                <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role ?? 'user' }}</p>
                             </div>
                             <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/>

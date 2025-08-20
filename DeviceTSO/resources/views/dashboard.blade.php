@@ -10,7 +10,7 @@
     <div class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red rounded-xl p-6 text-white">
         <div class="flex items-center justify-between">
             <div>
-                <h2 class="text-2xl font-telkomsel font-bold mb-2">Selamat Datang, {{ auth()->user()->full_name }}!</h2>
+                <h2 class="text-2xl font-telkomsel font-bold mb-2">Selamat Datang, {{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}!</h2>
                 <p class="text-white/90">Hari ini adalah {{ \Carbon\Carbon::now()->locale('id')->translatedFormat('l, d F Y') }}</p>
                 <p class="text-white/80 text-sm mt-1">Mari mulai pengecekan device untuk memastikan semua sistem berjalan dengan baik</p>
             </div>
@@ -156,7 +156,7 @@
                         </div>
                         <div class="flex-1 min-w-0">
                             <p class="text-sm text-gray-900">Smart Board di Meeting Room A telah dicek dan berfungsi normal</p>
-                            <p class="text-xs text-gray-500 mt-1">2 menit yang lalu • {{ auth()->user()->full_name }}</p>
+                            <p class="text-xs text-gray-500 mt-1">2 menit yang lalu • {{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
                         </div>
                     </div>
                     <div class="flex items-start space-x-4">

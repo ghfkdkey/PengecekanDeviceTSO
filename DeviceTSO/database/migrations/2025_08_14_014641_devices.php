@@ -14,6 +14,7 @@ return new class extends Migration
             $table->string('device_name', 100);
             $table->string('device_type', 50)->nullable();
             $table->string('serial_number', 100)->nullable();
+            $table->string('image_path')->nullable();
             $table->timestamps();
 
             $table->foreign('room_id')->references('room_id')->on('rooms')->onDelete('cascade');

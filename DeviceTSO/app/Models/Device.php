@@ -10,7 +10,15 @@ class Device extends Model
     use HasFactory;
 
     protected $primaryKey = 'device_id';
-    protected $fillable = ['room_id', 'device_name', 'device_type', 'serial_number'];
+    
+    // Tambahkan 'image_path' ke dalam fillable array
+    protected $fillable = [
+        'room_id', 
+        'device_name', 
+        'device_type', 
+        'serial_number',
+        'image_path'
+    ];
 
     public function room()
     {
@@ -20,5 +28,14 @@ class Device extends Model
     public function checkResults()
     {
         return $this->hasMany(DeviceCheckResult::class, 'device_id', 'device_id');
+    }
+
+    // Optional: Accessor untuk mendapatkan URL gambar lengkap
+    public function getImageUrlAttribute()
+    {
+        if ($this->image_path) {
+            return asset('storage/' . $this->image_path);
+        }
+        return null;
     }
 }

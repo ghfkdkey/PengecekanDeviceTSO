@@ -6,6 +6,7 @@ use App\Models\Device;
 use App\Models\Room;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Facades\Storage; // PENTING: Import Storage facade
 
 class DeviceController extends Controller
 {
@@ -39,6 +40,18 @@ class DeviceController extends Controller
         
         // Return view for regular page load
         return view('devices.index', compact('devices', 'rooms', 'deviceTypes'));
+    }
+
+    /**
+     * API: Return plain devices list for dropdowns (no wrappers)
+     */
+    public function apiIndex()
+    {
+        $devices = Device::with(['room.floor'])
+            ->select('device_id', 'room_id', 'device_name', 'device_type', 'serial_number')
+            ->orderBy('device_name')
+            ->get();
+        return response()->json($devices);
     }
 
     /**
@@ -213,6 +226,11 @@ class DeviceController extends Controller
                     'success' => false,
                     'message' => 'Device tidak dapat dihapus karena memiliki riwayat pemeriksaan. Harap hapus riwayat pemeriksaan terlebih dahulu.'
                 ], 409);
+            }
+
+            // Delete device image if exists
+            if ($device->image_path) {
+                Storage::disk('public')->delete($device->image_path);
             }
 
             $deviceName = $device->device_name;
@@ -440,6 +458,111 @@ class DeviceController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Gagal mengekspor data device.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Upload device image
+     */
+    public function uploadImage(Request $request)
+    {
+        // Validation
+        $validator = Validator::make($request->all(), [
+            'device_id' => 'required|exists:devices,device_id',
+            'image' => 'required|image|mimes:jpeg,png,jpg,gif|max:10240'
+        ], [
+            'device_id.required' => 'Device ID harus diisi.',
+            'device_id.exists' => 'Device tidak ditemukan.',
+            'image.required' => 'Gambar harus diupload.',
+            'image.image' => 'File harus berupa gambar.',
+            'image.mimes' => 'Format gambar harus jpeg, png, jpg, atau gif.',
+            'image.max' => 'Ukuran gambar maksimal 10MB.'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'errors' => $validator->errors(),
+                'message' => 'Validation failed'
+            ], 422);
+        }
+    
+        try {
+            $device = Device::findOrFail($request->device_id);
+            
+            // Delete old image if exists
+            if ($device->image_path) {
+                Storage::disk('public')->delete($device->image_path);
+            }
+            
+            // Store new image
+            $imagePath = $request->file('image')->store('device-images', 'public');
+            
+            // Update device
+            $device->update(['image_path' => $imagePath]);
+            
+            // Reload device untuk mendapatkan data terbaru
+            $device->refresh();
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Gambar berhasil diupload!',
+                'data' => [
+                    'image_path' => $imagePath,
+                    'image_url' => asset('storage/' . $imagePath),
+                    'device' => $device
+                ]
+            ]);
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Device tidak ditemukan.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengupload gambar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Delete device image
+     */
+    public function deleteImage($id)
+    {
+        try {
+            $device = Device::findOrFail($id);
+            
+            if ($device->image_path) {
+                // Delete image file from storage
+                Storage::disk('public')->delete($device->image_path);
+                
+                // Remove image path from database
+                $device->update(['image_path' => null]);
+                
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Gambar berhasil dihapus.'
+                ]);
+            } else {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Device tidak memiliki gambar.'
+                ], 404);
+            }
+            
+        } catch (\Illuminate\Database\Eloquent\ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Device tidak ditemukan.'
+            ], 404);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal menghapus gambar: ' . $e->getMessage()
             ], 500);
         }
     }

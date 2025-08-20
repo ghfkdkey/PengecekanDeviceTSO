@@ -18,17 +18,11 @@
                         </p>
                     </div>
                     <div class="flex space-x-3">
-                        <button onclick="openAddModal()" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
+                        <a href="{{ route('device-check.page') }}" class="inline-flex items-center px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
                             New Check
-                        </button>
-                        <a href="{{ route('devices.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
-                            <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v4a2 2 0 002 2h2m0-6h6a2 2 0 012 2v4a2 2 0 01-2 2h-6m0-6v6"></path>
-                            </svg>
-                            Manage Checklist
                         </a>
                     </div>
                 </div>
@@ -154,27 +148,12 @@
                 <table class="min-w-full divide-y divide-gray-200" id="resultsTable">
                     <thead class="bg-gray-50">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Device
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Location
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Checklist Item
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Status
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Checked By
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Date
-                            </th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Actions
-                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Device</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Checked By</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Date</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="resultsTableBody">
@@ -296,10 +275,10 @@ document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
 });
 
-// Load check results from API
+// Load check results from API (latest session per device)
 async function loadCheckResults() {
     try {
-        const response = await fetch('/api/device-check-results');
+        const response = await fetch('/api/device-check-sessions');
         checkResults = await response.json();
         filteredResults = [...checkResults];
         updateStats();
@@ -380,12 +359,18 @@ function filterResults() {
     
     filteredResults = checkResults.filter(result => {
         const matchesSearch = !searchTerm || 
-            result.device?.device_name?.toLowerCase().includes(searchTerm) ||
-            result.user?.full_name?.toLowerCase().includes(searchTerm) ||
-            result.checklistItem?.question?.toLowerCase().includes(searchTerm);
-        
-        const matchesStatus = !statusFilter || result.status === statusFilter;
-        const matchesDeviceType = !deviceTypeFilter || result.device?.device_type === deviceTypeFilter;
+            (result.device_name && result.device_name.toLowerCase().includes(searchTerm)) ||
+            (result.checked_by && result.checked_by.toLowerCase().includes(searchTerm)) ||
+            (result.room_name && result.room_name.toLowerCase().includes(searchTerm)) ||
+            (result.floor_name && result.floor_name.toLowerCase().includes(searchTerm));
+
+        const passed = result.passed_count || 0;
+        const failed = result.failed_count || 0;
+        const pending = result.pending_count || 0;
+        const sessionStatus = failed > 0 ? 'failed' : (pending > 0 ? 'pending' : 'passed');
+
+        const matchesStatus = !statusFilter || sessionStatus === statusFilter;
+        const matchesDeviceType = !deviceTypeFilter || result.device_type === deviceTypeFilter;
         
         const matchesDate = !dateFilter || 
             (result.checked_at && result.checked_at.startsWith(dateFilter));
@@ -400,10 +385,10 @@ function filterResults() {
 
 // Update statistics
 function updateStats() {
-    const passed = checkResults.filter(r => r.status === 'passed').length;
-    const failed = checkResults.filter(r => r.status === 'failed').length;
-    const pending = checkResults.filter(r => r.status === 'pending').length;
-    const total = checkResults.length;
+    const passed = checkResults.reduce((acc, r) => acc + (r.passed_count || 0), 0);
+    const failed = checkResults.reduce((acc, r) => acc + (r.failed_count || 0), 0);
+    const pending = checkResults.reduce((acc, r) => acc + (r.pending_count || 0), 0);
+    const total = checkResults.reduce((acc, r) => acc + (r.total_items || 0), 0);
     
     document.getElementById('passedCount').textContent = passed;
     document.getElementById('failedCount').textContent = failed;
@@ -423,7 +408,7 @@ function renderTable() {
     if (pageResults.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" class="px-6 py-4 text-center text-gray-500" style="font-family: 'Poppins', sans-serif;">
+                <td colspan="6" class="px-6 py-4 text-center text-gray-500" style="font-family: 'Poppins', sans-serif;">
                     No results found
                 </td>
             </tr>
@@ -435,37 +420,35 @@ function renderTable() {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50';
         
-        const statusBadge = getStatusBadge(result.status);
+        const passed = result.passed_count || 0;
+        const failed = result.failed_count || 0;
+        const pending = result.pending_count || 0;
+        const sessionStatus = failed > 0 ? 'failed' : (pending > 0 ? 'pending' : 'passed');
+        const statusBadge = getStatusBadge(sessionStatus);
         const formattedDate = formatDate(result.checked_at);
         
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm font-medium text-gray-900" style="font-family: 'Poppins', sans-serif;">
-                    ${result.device?.device_name || 'N/A'}
+                    ${result.device_name || 'N/A'}
                 </div>
                 <div class="text-sm text-gray-500" style="font-family: 'Poppins', sans-serif;">
-                    ${result.device?.device_type || 'N/A'} • ${result.device?.serial_number || 'N/A'}
+                    ${result.device_type || 'N/A'} • ${result.serial_number || 'N/A'}
                 </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900" style="font-family: 'Poppins', sans-serif;">
-                    ${result.device?.room?.room_name || 'N/A'}
+                    ${result.room_name || 'N/A'}
                 </div>
                 <div class="text-sm text-gray-500" style="font-family: 'Poppins', sans-serif;">
-                    ${result.device?.room?.floor?.floor_name || 'N/A'}
+                    ${result.floor_name || 'N/A'}
                 </div>
             </td>
-            <td class="px-6 py-4">
-                <div class="text-sm text-gray-900" style="font-family: 'Poppins', sans-serif;">
-                    ${result.checklistItem?.question || 'N/A'}
-                </div>
-            </td>
-            <td class="px-6 py-4 whitespace-nowrap">
-                ${statusBadge}
-            </td>
+            
+            <td class="px-6 py-4 whitespace-nowrap">${statusBadge}</td>
             <td class="px-6 py-4 whitespace-nowrap">
                 <div class="text-sm text-gray-900" style="font-family: 'Poppins', sans-serif;">
-                    ${result.user?.full_name || 'N/A'}
+                    ${result.checked_by || 'N/A'}
                 </div>
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500" style="font-family: 'Poppins', sans-serif;">
@@ -473,22 +456,13 @@ function renderTable() {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewDetail(${result.result_id})" class="text-blue-600 hover:text-blue-900">
+                    <button type="button" onclick="viewDetailSession(${result.device_id}, '${result.checked_at}')" class="text-blue-600 hover:text-blue-900">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                     </button>
-                    <button onclick="editResult(${result.result_id})" class="text-indigo-600 hover:text-indigo-900">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                        </svg>
-                    </button>
-                    <button onclick="deleteResult(${result.result_id})" class="text-red-600 hover:text-red-900">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
-                        </svg>
-                    </button>
+                    
                 </div>
             </td>
         `;
@@ -579,19 +553,6 @@ function updatePagination() {
     pagination.appendChild(nextButton);
 }
 
-// Modal functions
-function openAddModal() {
-    editingId = null;
-    document.getElementById('modalTitle').textContent = 'Add New Check Result';
-    document.getElementById('checkResultForm').reset();
-    document.getElementById('checked_at').value = new Date().toISOString().slice(0, 16);
-    document.getElementById('addModal').classList.remove('hidden');
-}
-
-function closeAddModal() {
-    document.getElementById('addModal').classList.add('hidden');
-}
-
 function editResult(id) {
     const result = checkResults.find(r => r.result_id === id);
     if (!result) return;
@@ -610,47 +571,96 @@ function editResult(id) {
     document.getElementById('addModal').classList.remove('hidden');
 }
 
-function viewDetail(id) {
-    const result = checkResults.find(r => r.result_id === id);
-    if (!result) return;
-    
-    const detailContent = document.getElementById('detailContent');
-    detailContent.innerHTML = `
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Device</label>
-                <p class="text-sm text-gray-900">${result.device?.device_name || 'N/A'}</p>
-                <p class="text-xs text-gray-500">${result.device?.device_type || 'N/A'} • ${result.device?.serial_number || 'N/A'}</p>
+async function viewDetailSession(deviceId, checkedAt) {
+    try {
+        const url = checkedAt 
+            ? `/api/device-check-session-detail?device_id=${deviceId}&checked_at=${encodeURIComponent(checkedAt)}` 
+            : `/api/device-check-session-detail?device_id=${deviceId}`;
+        const response = await fetch(url);
+        const items = await response.json();
+        if (!Array.isArray(items) || items.length === 0) return;
+
+        const first = items[0];
+        const deviceType = first?.device?.device_type || '';
+
+        // Ambil master checklist berdasarkan tipe device
+        let checklist = [];
+        if (deviceType) {
+            try {
+                const clRes = await fetch(`/api/checklist/${encodeURIComponent(deviceType)}`);
+                checklist = await clRes.json();
+            } catch (err) {
+                console.error('Error loading master checklist', err);
+            }
+        }
+
+        const detailContent = document.getElementById('detailContent');
+        const header = `
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Device</label>
+                    <p class="text-sm text-gray-900">${first.device?.device_name || 'N/A'}</p>
+                    <p class="text-xs text-gray-500">${first.device?.device_type || 'N/A'} • ${first.device?.serial_number || 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <p class="text-sm text-gray-900">${first.device?.room?.room_name || 'N/A'}</p>
+                    <p class="text-xs text-gray-500">${first.device?.room?.floor?.floor_name || 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Checked By</label>
+                    <p class="text-sm text-gray-900">${first.user?.full_name || 'N/A'}</p>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Check Date</label>
+                    <p class="text-sm text-gray-900">${formatDate(first.checked_at)}</p>
+                </div>
             </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
-                <p class="text-sm text-gray-900">${result.device?.room?.room_name || 'N/A'}</p>
-                <p class="text-xs text-gray-500">${result.device?.room?.floor?.floor_name || 'N/A'}</p>
+        `;
+
+        // Map hasil sesi by checklist_id
+        const resultByChecklistId = {};
+        items.forEach(r => { resultByChecklistId[r.checklist_id] = r; });
+
+        // Buat rows berdasarkan master checklist (fallback ke items jika master kosong)
+        const sourceList = (Array.isArray(checklist) && checklist.length > 0)
+            ? checklist
+            : items.map(i => i.checklistItem).filter(Boolean);
+
+        const rows = sourceList.map(ci => {
+            const cid = ci.checklist_id;
+            const res = resultByChecklistId[cid] || null;
+            const status = res?.status || 'pending';
+            const notes = res?.notes || '';
+            const question = ci.question || '';
+            return `
+                <tr>
+                    <td class="px-4 py-2 text-sm text-gray-900">${question}</td>
+                    <td class="px-4 py-2">${getStatusBadge(status)}</td>
+                    <td class="px-4 py-2 text-sm text-gray-700">${notes}</td>
+                </tr>
+            `;
+        }).join('');
+
+        detailContent.innerHTML = header + `
+            <div class="border rounded-lg overflow-hidden">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checklist</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">${rows}</tbody>
+                </table>
             </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Checklist Item</label>
-                <p class="text-sm text-gray-900">${result.checklistItem?.question || 'N/A'}</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                ${getStatusBadge(result.status)}
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Checked By</label>
-                <p class="text-sm text-gray-900">${result.user?.full_name || 'N/A'}</p>
-            </div>
-            <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Check Date</label>
-                <p class="text-sm text-gray-900">${formatDate(result.checked_at)}</p>
-            </div>
-            <div class="md:col-span-2">
-                <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                <p class="text-sm text-gray-900">${result.notes || 'No notes'}</p>
-            </div>
-        </div>
-    `;
-    
-    document.getElementById('detailModal').classList.remove('hidden');
+        `;
+        document.getElementById('detailModal').classList.remove('hidden');
+    } catch (e) {
+        console.error('Error loading session detail', e);
+        showNotification('Error loading session detail', 'error');
+    }
 }
 
 function closeDetailModal() {
@@ -726,15 +736,18 @@ function clearFilters() {
 // Export data
 function exportData() {
     const csvContent = "data:text/csv;charset=utf-8," 
-        + "Device,Location,Checklist Item,Status,Checked By,Date,Notes\n"
+        + "Device,Device Type,Serial,Room,Floor,Passed,Failed,Pending,Checked By,Date\n"
         + filteredResults.map(result => [
-            result.device?.device_name || '',
-            `${result.device?.room?.room_name || ''} - ${result.device?.room?.floor?.floor_name || ''}`,
-            result.checklistItem?.question || '',
-            result.status || '',
-            result.user?.full_name || '',
-            formatDate(result.checked_at),
-            (result.notes || '').replace(/,/g, ';')
+            result.device_name || '',
+            result.device_type || '',
+            result.serial_number || '',
+            result.room_name || '',
+            result.floor_name || '',
+            result.passed_count || 0,
+            result.failed_count || 0,
+            result.pending_count || 0,
+            result.checked_by || '',
+            formatDate(result.checked_at)
         ].join(",")).join("\n");
     
     const encodedUri = encodeURI(csvContent);

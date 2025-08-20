@@ -99,28 +99,17 @@
             </div>
         </div>
         
-        <div class="flex items-center space-x-3">
-            <button 
-                id="refresh-btn"
-                class="bg-white text-gray-700 border border-gray-300 px-4 py-2 rounded-lg hover:bg-gray-50 transition-all duration-200 flex items-center space-x-2"
-                title="Refresh Data"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                <span class="hidden sm:inline">Refresh</span>
-            </button>
-            
-            <button 
-                id="add-device-btn"
-                class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Tambah Device</span>
-            </button>
-        </div>
+                 <div class="flex items-center space-x-3">
+             <button 
+                 id="add-device-btn"
+                 class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+             >
+                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                 </svg>
+                 <span>Tambah Device</span>
+             </button>
+         </div>
     </div>
 
     <!-- Statistics Cards -->
@@ -143,12 +132,12 @@
             <div class="flex items-center">
                 <div class="bg-green-100 rounded-lg p-3">
                     <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Device Aktif</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $devices->where('status', 'active')->count() }}</p>
+                    <p class="text-sm font-medium text-gray-600">Device dengan Gambar</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $devices->whereNotNull('image_path')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -218,13 +207,24 @@
                         
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center space-x-3">
-                                <div class="bg-telkomsel-blue rounded-lg p-2 relative">
-                                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                                    </svg>
-                                    <!-- Status indicator -->
-                                    <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
-                                </div>
+                                @if($device->image_path)
+                                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 relative">
+                                        <img src="{{ asset('storage/' . $device->image_path) }}" 
+                                             alt="{{ $device->device_name }}" 
+                                             class="w-full h-full object-cover"
+                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNEg0NFY0MEgyMFYyNFoiIGZpbGw9IiNEM0Q3RDEiLz4KPHBhdGggZD0iTTI4IDMySDM2VjQwSDI4VjMyWiIgZmlsbD0iI0QzRDdEMSIvPgo8L3N2Zz4K'">
+                                        <!-- Status indicator -->
+                                        <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
+                                    </div>
+                                @else
+                                    <div class="bg-telkomsel-blue rounded-lg p-2 relative">
+                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                        </svg>
+                                        <!-- Status indicator -->
+                                        <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
+                                    </div>
+                                @endif
                                 <div>
                                     <h4 class="font-semibold text-gray-900 text-lg">{{ $device->device_name }}</h4>
                                     <p class="text-sm text-gray-600">ID: #{{ $device->device_id }}</p>
@@ -276,36 +276,19 @@
                         </div>
                         
                         <div class="mt-4 flex space-x-2">
-                    @php
-                        $checkRoute = Route::has('device.check') 
-                            ? route('device.check', $device->device_id) 
-                            : '#';
-                    @endphp
-                    
-                    @if($checkRoute !== '#')
-                        <a href="{{ $checkRoute }}" 
-                           class="flex-1 bg-telkomsel-gray text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-center block text-sm font-medium">
-                            Cek Device
-                        </a>
-                    @else
-                        <button 
-                            onclick="showComingSoonNotification()"
-                            class="flex-1 bg-gray-300 text-gray-500 px-4 py-2 rounded-lg cursor-not-allowed text-center block text-sm font-medium"
-                            disabled>
-                            Cek Device (Coming Soon)
-                        </button>
-                    @endif
-                    
-                    <button 
-                        class="bg-telkomsel-yellow/20 text-telkomsel-yellow px-4 py-2 rounded-lg hover:bg-telkomsel-yellow/30 transition-colors text-sm font-medium"
-                        onclick="showHistoryModal({{ $device->device_id }})"
-                        title="History Check"
-                    >
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                        </svg>
-                    </button>
-                </div>
+                            <button 
+                                class="edit-device-image-btn flex-1 bg-telkomsel-blue text-white px-4 py-2 rounded-lg hover:bg-telkomsel-blue/80 transition-colors text-sm font-medium flex items-center justify-center space-x-2"
+                                data-device-id="{{ $device->device_id }}"
+                                data-device-name="{{ $device->device_name }}"
+                                data-current-image="{{ $device->image_path }}"
+                                title="Edit Device Image"
+                            >
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                </svg>
+                                <span>{{ $device->image_path ? 'Edit Gambar' : 'Tambah Gambar' }}</span>
+                            </button>
+                        </div>
 
                     </div>
                     @endforeach
@@ -426,6 +409,28 @@
                 </div>
             </div>
             
+            <div>
+                <label for="device-image-form" class="block text-sm font-medium text-gray-700 mb-2">
+                    Gambar Device
+                </label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="device-image-form" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
+                                <span>Upload gambar</span>
+                                <input id="device-image-form" name="image" type="file" class="sr-only" accept="image/*">
+                            </label>
+                            <p class="pl-1">atau drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                    </div>
+                </div>
+                <div id="device_image_error" class="text-red-500 text-sm mt-1 hidden"></div>
+            </div>
+            
             <div class="flex space-x-4 pt-4">
                 <button 
                     type="button" 
@@ -441,6 +446,88 @@
                 >
                     <span id="submit-text">Simpan</span>
                     <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Image Upload Modal -->
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95">
+        <div class="p-6 border-b border-gray-200">
+            <div class="flex items-center justify-between">
+                <h3 id="image-modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Gambar Device</h3>
+                <button id="close-image-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+        </div>
+        
+        <form id="image-form" class="p-6 space-y-4">
+            @csrf
+            <input type="hidden" id="image-device-id" name="device_id">
+            <input type="hidden" id="image-form-method" name="_method" value="POST">
+            
+            <!-- Current Image Preview -->
+            <div id="current-image-preview" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini</label>
+                <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
+                    <img id="current-image" src="" alt="Current Image" class="w-full h-full object-cover">
+                </div>
+            </div>
+            
+            <!-- Image Upload -->
+            <div>
+                <label for="device-image" class="block text-sm font-medium text-gray-700 mb-2">
+                    Gambar Device <span class="text-red-500">*</span>
+                </label>
+                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
+                    <div class="space-y-1 text-center">
+                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="flex text-sm text-gray-600">
+                            <label for="device-image" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
+                                <span>Upload gambar</span>
+                                <input id="device-image" name="image" type="file" class="sr-only" accept="image/*" required>
+                            </label>
+                            <p class="pl-1">atau drag and drop</p>
+                        </div>
+                        <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                    </div>
+                </div>
+                <div id="image-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                
+                <!-- Image Preview -->
+                <div id="image-preview-container" class="hidden mt-3">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+                    <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
+                        <img id="image-preview" src="" alt="Preview" class="w-full h-full object-cover">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="flex space-x-4 pt-4">
+                <button 
+                    type="button" 
+                    id="cancel-image-btn"
+                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                >
+                    Batal
+                </button>
+                <button 
+                    type="submit" 
+                    id="submit-image-btn"
+                    class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium disabled:opacity-50"
+                >
+                    <span id="submit-image-text">Upload</span>
+                    <svg id="loading-image-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -502,9 +589,11 @@ document.addEventListener('DOMContentLoaded', function() {
     const addDeviceBtn = document.getElementById('add-device-btn');
     const deviceModal = document.getElementById('device-modal');
     const deleteModal = document.getElementById('delete-modal');
+    const imageModal = document.getElementById('image-modal');
     const closeModal = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const deviceForm = document.getElementById('device-form');
+    const imageForm = document.getElementById('image-form');
     const modalContent = document.getElementById('modal-content');
     const modalTitle = document.getElementById('modal-title');
     const submitBtn = document.getElementById('submit-btn');
@@ -513,7 +602,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const roomFilter = document.getElementById('room-filter');
     const typeFilter = document.getElementById('type-filter');
     const searchDevices = document.getElementById('search-devices');
-    const refreshBtn = document.getElementById('refresh-btn');
     const gridViewBtn = document.getElementById('grid-view');
     const listViewBtn = document.getElementById('list-view');
     const devicesContainer = document.getElementById('devices-container');
@@ -528,224 +616,596 @@ document.addEventListener('DOMContentLoaded', function() {
     const deviceTypeSelect = document.getElementById('device-type');
     const deviceIdInput = document.getElementById('device-id');
     const formMethod = document.getElementById('form-method');
-    
+
+    // Image modal elements
+    const closeImageModal = document.getElementById('close-image-modal');
+    const cancelImageBtn = document.getElementById('cancel-image-btn');
+    const submitImageBtn = document.getElementById('submit-image-btn');
+    const submitImageText = document.getElementById('submit-image-text');
+    const loadingImageSpinner = document.getElementById('loading-image-spinner');
+    const deviceImageInput = document.getElementById('device-image');
+    const imagePreviewContainer = document.getElementById('image-preview-container');
+    const imagePreview = document.getElementById('image-preview');
+    const currentImagePreview = document.getElementById('current-image-preview');
+    const currentImage = document.getElementById('current-image');
+    const imageModalTitle = document.getElementById('image-modal-title');
+    const imageDeviceId = document.getElementById('image-device-id');
+    const imageFormMethod = document.getElementById('image-form-method');
+
     // Delete modal elements
     const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
     const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
     const deleteDeviceName = document.getElementById('delete-device-name');
     const deleteText = document.getElementById('delete-text');
     const deleteSpinner = document.getElementById('delete-spinner');
-    
+
     let currentView = 'grid';
     let deleteDeviceId = null;
-    
+    let currentImageDeviceId = null;
+
     // Initialize
     init();
-    
+
     function init() {
         bindEvents();
         updateCharCounts();
         filterDevices();
     }
-    
+
     function bindEvents() {
         // Modal events
-        addDeviceBtn?.addEventListener('click', () => openModal('add'));
-        closeModal?.addEventListener('click', closeDeviceModal);
-        cancelBtn?.addEventListener('click', closeDeviceModal);
-        deviceModal?.addEventListener('click', (e) => {
-            if (e.target === deviceModal) closeDeviceModal();
-        });
-        
+        if (addDeviceBtn) {
+            addDeviceBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                openModal('add');
+            });
+        }
+
+        if (closeModal) {
+            closeModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeDeviceModal();
+            });
+        }
+
+        if (cancelBtn) {
+            cancelBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeDeviceModal();
+            });
+        }
+
+        if (deviceModal) {
+            deviceModal.addEventListener('click', function(e) {
+                if (e.target === deviceModal) {
+                    closeDeviceModal();
+                }
+            });
+        }
+
+        // Image modal events
+        if (closeImageModal) {
+            closeImageModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeImageModalHandler();
+            });
+        }
+
+        if (cancelImageBtn) {
+            cancelImageBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeImageModalHandler();
+            });
+        }
+
+        if (imageModal) {
+            imageModal.addEventListener('click', function(e) {
+                if (e.target === imageModal) {
+                    closeImageModalHandler();
+                }
+            });
+        }
+
         // Delete modal events
-        cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
-        deleteModal?.addEventListener('click', (e) => {
-            if (e.target === deleteModal) closeDeleteModal();
-        });
-        confirmDeleteBtn?.addEventListener('click', confirmDelete);
-        
+        if (cancelDeleteBtn) {
+            cancelDeleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeDeleteModal();
+            });
+        }
+
+        if (deleteModal) {
+            deleteModal.addEventListener('click', function(e) {
+                if (e.target === deleteModal) {
+                    closeDeleteModal();
+                }
+            });
+        }
+
+        if (confirmDeleteBtn) {
+            confirmDeleteBtn.addEventListener('click', function(e) {
+                e.preventDefault();
+                confirmDelete();
+            });
+        }
+
         // Form events
-        deviceForm?.addEventListener('submit', handleSubmit);
-        deviceNameInput?.addEventListener('input', updateCharCounts);
-        serialNumberInput?.addEventListener('input', updateCharCounts);
-        
+        if (deviceForm) {
+            deviceForm.addEventListener('submit', handleSubmit);
+        }
+
+        if (imageForm) {
+            imageForm.addEventListener('submit', handleImageSubmit);
+        }
+
+        if (deviceNameInput) {
+            deviceNameInput.addEventListener('input', updateCharCounts);
+        }
+
+        if (serialNumberInput) {
+            serialNumberInput.addEventListener('input', updateCharCounts);
+        }
+
+        // Image input events
+        if (deviceImageInput) {
+            deviceImageInput.addEventListener('change', handleImageChange);
+        }
+
         // Filter and search events
-        roomFilter?.addEventListener('change', filterDevices);
-        typeFilter?.addEventListener('change', filterDevices);
-        searchDevices?.addEventListener('input', debounce(filterDevices, 300));
-        refreshBtn?.addEventListener('click', refreshData);
-        
+        if (roomFilter) {
+            roomFilter.addEventListener('change', filterDevices);
+        }
+
+        if (typeFilter) {
+            typeFilter.addEventListener('change', filterDevices);
+        }
+
+        if (searchDevices) {
+            searchDevices.addEventListener('input', debounce(filterDevices, 300));
+        }
+
         // View toggle events
-        gridViewBtn?.addEventListener('click', () => toggleView('grid'));
-        listViewBtn?.addEventListener('click', () => toggleView('list'));
-        
+        if (gridViewBtn) {
+            gridViewBtn.addEventListener('click', function() {
+                toggleView('grid');
+            });
+        }
+
+        if (listViewBtn) {
+            listViewBtn.addEventListener('click', function() {
+                toggleView('list');
+            });
+        }
+
         // Dynamic event binding for device cards
         bindDeviceCardEvents();
-        
+
         // Keyboard shortcuts
         document.addEventListener('keydown', handleKeyboardShortcuts);
     }
-    
+
     function bindDeviceCardEvents() {
         // Edit buttons
-        document.querySelectorAll('.edit-device-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const deviceId = this.dataset.deviceId;
-                const deviceName = this.dataset.deviceName;
-                const deviceType = this.dataset.deviceType;
-                const serialNumber = this.dataset.serialNumber;
-                const roomId = this.dataset.roomId;
-                openModal('edit', { deviceId, deviceName, deviceType, serialNumber, roomId });
+        const editButtons = document.querySelectorAll('.edit-device-btn');
+        editButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const deviceId = this.getAttribute('data-device-id');
+                const deviceName = this.getAttribute('data-device-name');
+                const deviceType = this.getAttribute('data-device-type');
+                const serialNumber = this.getAttribute('data-serial-number');
+                const roomId = this.getAttribute('data-room-id');
+                
+                openModal('edit', { 
+                    deviceId: deviceId, 
+                    deviceName: deviceName, 
+                    deviceType: deviceType, 
+                    serialNumber: serialNumber, 
+                    roomId: roomId 
+                });
             });
         });
-        
+
+        // Image buttons
+        const imageButtons = document.querySelectorAll('.edit-device-image-btn');
+        imageButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const deviceId = this.getAttribute('data-device-id');
+                const deviceName = this.getAttribute('data-device-name');
+                const currentImage = this.getAttribute('data-current-image');
+                
+                openImageModal(deviceId, deviceName, currentImage);
+            });
+        });
+
         // Delete buttons
-        document.querySelectorAll('.delete-device-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const deviceId = this.dataset.deviceId;
-                const deviceName = this.dataset.deviceName;
+        const deleteButtons = document.querySelectorAll('.delete-device-btn');
+        deleteButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                const deviceId = this.getAttribute('data-device-id');
+                const deviceName = this.getAttribute('data-device-name');
+                
                 openDeleteModal(deviceId, deviceName);
             });
         });
     }
-    
-    function openModal(mode, data = null) {
+
+    function openModal(mode, data) {
+        data = data || {};
         const isEdit = mode === 'edit';
-        
+
         // Update modal title and button text
-        modalTitle.textContent = isEdit ? 'Edit Device' : 'Tambah Device';
-        submitText.textContent = isEdit ? 'Update' : 'Simpan';
-        
-        // Reset form
-        deviceForm.reset();
-        clearErrors();
-        
-        if (isEdit && data) {
-            deviceIdInput.value = data.deviceId;
-            deviceNameInput.value = data.deviceName || '';
-            deviceTypeSelect.value = data.deviceType || '';
-            serialNumberInput.value = data.serialNumber || '';
-            roomSelect.value = data.roomId;
-            formMethod.value = 'PUT';
-        } else {
-            deviceIdInput.value = '';
-            formMethod.value = 'POST';
+        if (modalTitle) {
+            modalTitle.textContent = isEdit ? 'Edit Device' : 'Tambah Device';
         }
-        
+        if (submitText) {
+            submitText.textContent = isEdit ? 'Update' : 'Simpan';
+        }
+
+        // Reset form
+        if (deviceForm) {
+            deviceForm.reset();
+        }
+        clearErrors();
+
+        if (isEdit && data) {
+            if (deviceIdInput) deviceIdInput.value = data.deviceId || '';
+            if (deviceNameInput) deviceNameInput.value = data.deviceName || '';
+            if (deviceTypeSelect) deviceTypeSelect.value = data.deviceType || '';
+            if (serialNumberInput) serialNumberInput.value = data.serialNumber || '';
+            if (roomSelect) roomSelect.value = data.roomId || '';
+            if (formMethod) formMethod.value = 'PUT';
+        } else {
+            if (deviceIdInput) deviceIdInput.value = '';
+            if (formMethod) formMethod.value = 'POST';
+        }
+
         updateCharCounts();
         showModal(deviceModal);
-        
+
         // Focus on first input
-        setTimeout(() => {
-            roomSelect.focus();
+        setTimeout(function() {
+            if (roomSelect) {
+                roomSelect.focus();
+            }
         }, 100);
     }
-    
+
     function closeDeviceModal() {
         hideModal(deviceModal);
         clearErrors();
     }
-    
+
+    function openImageModal(deviceId, deviceName, currentImage) {
+        currentImageDeviceId = deviceId;
+        
+        if (imageDeviceId) {
+            imageDeviceId.value = deviceId;
+        }
+        
+        if (imageModalTitle) {
+            imageModalTitle.textContent = currentImage ? 'Edit Gambar Device' : 'Tambah Gambar Device';
+        }
+        
+        if (submitImageText) {
+            submitImageText.textContent = currentImage ? 'Update' : 'Upload';
+        }
+
+        // Show current image if exists
+        if (currentImage && currentImage !== 'null' && currentImage !== '') {
+            if (currentImage) {
+                currentImage.src = '/storage/' + currentImage;
+            }
+            if (currentImagePreview) {
+                currentImagePreview.classList.remove('hidden');
+            }
+        } else {
+            if (currentImagePreview) {
+                currentImagePreview.classList.add('hidden');
+            }
+        }
+
+        // Reset form
+        if (imageForm) {
+            imageForm.reset();
+        }
+        if (imagePreviewContainer) {
+            imagePreviewContainer.classList.add('hidden');
+        }
+        hideImageError();
+
+        showModal(imageModal);
+    }
+
+    function closeImageModalHandler() {
+        hideModal(imageModal);
+        currentImageDeviceId = null;
+        if (imagePreviewContainer) {
+            imagePreviewContainer.classList.add('hidden');
+        }
+        if (currentImagePreview) {
+            currentImagePreview.classList.add('hidden');
+        }
+        hideImageError();
+    }
+
     function openDeleteModal(deviceId, deviceName) {
         deleteDeviceId = deviceId;
-        deleteDeviceName.textContent = deviceName;
+        if (deleteDeviceName) {
+            deleteDeviceName.textContent = deviceName;
+        }
         showModal(deleteModal);
     }
-    
+
     function closeDeleteModal() {
         hideModal(deleteModal);
         deleteDeviceId = null;
     }
-    
+
     function showModal(modal) {
+        if (!modal) return;
+        
         modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.querySelector('.bg-white').classList.remove('scale-95');
-            modal.querySelector('.bg-white').classList.add('scale-100');
+        setTimeout(function() {
+            const modalContent = modal.querySelector('.bg-white');
+            if (modalContent) {
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }
         }, 10);
         document.body.style.overflow = 'hidden';
     }
-    
+
     function hideModal(modal) {
-        modal.querySelector('.bg-white').classList.remove('scale-100');
-        modal.querySelector('.bg-white').classList.add('scale-95');
-        setTimeout(() => {
+        if (!modal) return;
+        
+        const modalContent = modal.querySelector('.bg-white');
+        if (modalContent) {
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+        }
+        setTimeout(function() {
             modal.classList.add('hidden');
             document.body.style.overflow = '';
         }, 200);
     }
-    
+
     function handleSubmit(e) {
         e.preventDefault();
-        
+
         if (!validateForm()) return;
-        
+
         const formData = new FormData(deviceForm);
-        const deviceId = deviceIdInput.value;
+        const deviceId = deviceIdInput ? deviceIdInput.value : '';
         const isEdit = deviceId !== '';
-        const url = isEdit ? `/devices/${deviceId}` : '/devices';
-        const method = isEdit ? 'PUT' : 'POST';
-        
+        const url = isEdit ? '/devices/' + deviceId : '/devices';
+
         setLoading(true);
-        
-        // Convert FormData to JSON for Laravel API
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            data[key] = value;
+
+        // Handle image file separately
+        const imageFile = formData.get('image');
+        if (imageFile && imageFile.size > 0) {
+            // If there's an image, use FormData for multipart/form-data
+            if (isEdit) {
+                formData.append('_method', 'PUT');
+            }
+
+            fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                setLoading(false);
+
+                if (result.success) {
+                    showNotification(result.message || 'Device berhasil disimpan!', 'success');
+                    closeDeviceModal();
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    if (result.errors) {
+                        showValidationErrors(result.errors);
+                    } else {
+                        showNotification(result.message || 'Terjadi kesalahan!', 'error');
+                    }
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                setLoading(false);
+                showNotification('Terjadi kesalahan pada server!', 'error');
+            });
+        } else {
+            // No image, convert to JSON
+            const data = {};
+            for (let pair of formData.entries()) {
+                if (pair[0] !== 'image') { // Skip image field
+                    data[pair[0]] = pair[1];
+                }
+            }
+
+            // Add CSRF token
+            const csrfToken = document.querySelector('meta[name="csrf-token"]');
+            const tokenInput = document.querySelector('input[name="_token"]');
+            data._token = csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : '');
+
+            if (isEdit) {
+                data._method = 'PUT';
+            }
+
+            fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(result) {
+                setLoading(false);
+
+                if (result.success) {
+                    showNotification(result.message || 'Device berhasil disimpan!', 'success');
+                    closeDeviceModal();
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                } else {
+                    if (result.errors) {
+                        showValidationErrors(result.errors);
+                    } else {
+                        showNotification(result.message || 'Terjadi kesalahan!', 'error');
+                    }
+                }
+            })
+            .catch(function(error) {
+                console.error('Error:', error);
+                setLoading(false);
+                showNotification('Terjadi kesalahan pada server!', 'error');
+            });
         }
-        
-        // Add CSRF token
-        data._token = document.querySelector('meta[name="csrf-token"]')?.content || 
-                     document.querySelector('input[name="_token"]')?.value;
-        
-        if (isEdit) {
-            data._method = 'PUT';
-        }
-        
-        fetch(url, {
+    }
+
+    function handleImageSubmit(e) {
+        e.preventDefault();
+
+        if (!validateImageForm()) return;
+
+        const formData = new FormData(imageForm);
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        const tokenInput = document.querySelector('input[name="_token"]');
+        formData.append('_token', csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : ''));
+
+        setImageLoading(true);
+
+        fetch('/devices/upload-image', {
             method: 'POST',
+            body: formData,
             headers: {
-                'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
                 'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
+            }
         })
-        .then(response => response.json())
-        .then(result => {
-            setLoading(false);
-            
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
+            setImageLoading(false);
+
             if (result.success) {
-                showNotification(result.message || 'Device berhasil disimpan!', 'success');
-                closeDeviceModal();
-                refreshData();
+                showNotification(result.message || 'Gambar berhasil diupload!', 'success');
+                closeImageModalHandler();
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
             } else {
                 if (result.errors) {
-                    showValidationErrors(result.errors);
+                    showImageError(result.errors.image ? result.errors.image[0] : 'Terjadi kesalahan!');
                 } else {
-                    showNotification(result.message || 'Terjadi kesalahan!', 'error');
+                    showImageError(result.message || 'Terjadi kesalahan!');
                 }
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
-            setLoading(false);
-            showNotification('Terjadi kesalahan pada server!', 'error');
+            setImageLoading(false);
+            showImageError('Terjadi kesalahan pada server!');
         });
     }
-    
+
+    function handleImageChange(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Validate file size (10MB)
+        if (file.size > 10 * 1024 * 1024) {
+            showImageError('Ukuran file maksimal 10MB');
+            e.target.value = '';
+            return;
+        }
+
+        // Validate file type
+        if (!file.type.startsWith('image/')) {
+            showImageError('File harus berupa gambar');
+            e.target.value = '';
+            return;
+        }
+
+        hideImageError();
+
+        // Show preview
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            if (imagePreview) {
+                imagePreview.src = e.target.result;
+            }
+            if (imagePreviewContainer) {
+                imagePreviewContainer.classList.remove('hidden');
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+
+    function validateImageForm() {
+        hideImageError();
+
+        if (!deviceImageInput.files || deviceImageInput.files.length === 0) {
+            showImageError('Pilih gambar terlebih dahulu');
+            return false;
+        }
+
+        return true;
+    }
+
+    function showImageError(message) {
+        const errorElement = document.getElementById('image-error');
+        if (errorElement) {
+            errorElement.textContent = message;
+            errorElement.classList.remove('hidden');
+        }
+    }
+
+    function hideImageError() {
+        const errorElement = document.getElementById('image-error');
+        if (errorElement) {
+            errorElement.classList.add('hidden');
+            errorElement.textContent = '';
+        }
+    }
+
     function confirmDelete() {
         if (!deleteDeviceId) return;
-        
+
         setDeleteLoading(true);
-        
-        const data = {
-            _token: document.querySelector('meta[name="csrf-token"]')?.content || 
-                   document.querySelector('input[name="_token"]')?.value,
-            _method: 'DELETE'
-        };
-        
-        fetch(`/devices/${deleteDeviceId}`, {
+
+        const data = {};
+        const csrfToken = document.querySelector('meta[name="csrf-token"]');
+        const tokenInput = document.querySelector('input[name="_token"]');
+        data._token = csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : '');
+        data._method = 'DELETE';
+
+        fetch('/devices/' + deleteDeviceId, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -754,73 +1214,84 @@ document.addEventListener('DOMContentLoaded', function() {
             },
             body: JSON.stringify(data)
         })
-        .then(response => response.json())
-        .then(result => {
+        .then(function(response) {
+            return response.json();
+        })
+        .then(function(result) {
             setDeleteLoading(false);
-            
+
             if (result.success) {
                 showNotification(result.message || 'Device berhasil dihapus!', 'success');
                 closeDeleteModal();
-                refreshData();
+                setTimeout(function() {
+                    location.reload();
+                }, 1000);
             } else {
                 showNotification(result.message || 'Gagal menghapus device!', 'error');
             }
         })
-        .catch(error => {
+        .catch(function(error) {
             console.error('Error:', error);
             setDeleteLoading(false);
             showNotification('Terjadi kesalahan pada server!', 'error');
         });
     }
-    
+
     function validateForm() {
         clearErrors();
         let isValid = true;
-        
+
         // Validate room selection
-        if (!roomSelect.value) {
+        if (roomSelect && !roomSelect.value) {
             showError('room_id-error', 'Pilih ruangan terlebih dahulu');
             isValid = false;
         }
-        
+
         // Validate device name
-        const deviceName = deviceNameInput.value.trim();
-        if (!deviceName) {
-            showError('device_name-error', 'Nama device tidak boleh kosong');
-            isValid = false;
-        } else if (deviceName.length < 3) {
-            showError('device_name-error', 'Nama device minimal 3 karakter');
-            isValid = false;
-        } else if (deviceName.length > 100) {
-            showError('device_name-error', 'Nama device maksimal 100 karakter');
-            isValid = false;
+        if (deviceNameInput) {
+            const deviceName = deviceNameInput.value.trim();
+            if (!deviceName) {
+                showError('device_name-error', 'Nama device tidak boleh kosong');
+                isValid = false;
+            } else if (deviceName.length < 3) {
+                showError('device_name-error', 'Nama device minimal 3 karakter');
+                isValid = false;
+            } else if (deviceName.length > 100) {
+                showError('device_name-error', 'Nama device maksimal 100 karakter');
+                isValid = false;
+            }
         }
-        
+
         // Validate serial number length
-        const serialNumber = serialNumberInput.value.trim();
-        if (serialNumber && serialNumber.length > 100) {
-            showError('serial_number-error', 'Serial number maksimal 100 karakter');
-            isValid = false;
+        if (serialNumberInput) {
+            const serialNumber = serialNumberInput.value.trim();
+            if (serialNumber && serialNumber.length > 100) {
+                showError('serial_number-error', 'Serial number maksimal 100 karakter');
+                isValid = false;
+            }
         }
-        
+
         return isValid;
     }
-    
+
     function showValidationErrors(errors) {
-        for (const [field, messages] of Object.entries(errors)) {
-            const errorElement = document.getElementById(`${field}-error`);
-            if (errorElement && messages.length > 0) {
-                showError(`${field}-error`, messages[0]);
+        for (const field in errors) {
+            if (errors.hasOwnProperty(field)) {
+                const messages = errors[field];
+                const errorElement = document.getElementById(field + '-error');
+                if (errorElement && messages.length > 0) {
+                    showError(field + '-error', messages[0]);
+                }
             }
         }
     }
-    
+
     function showError(elementId, message) {
         const errorElement = document.getElementById(elementId);
         if (errorElement) {
             errorElement.textContent = message;
             errorElement.classList.remove('hidden');
-            
+
             // Add error styling to input
             const input = errorElement.previousElementSibling;
             if (input) {
@@ -828,38 +1299,40 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    
+
     function clearErrors() {
-        document.querySelectorAll('[id$="-error"]').forEach(error => {
+        const errorElements = document.querySelectorAll('[id$="-error"]');
+        errorElements.forEach(function(error) {
             error.classList.add('hidden');
             error.textContent = '';
         });
-        
+
         // Remove error styling
-        document.querySelectorAll('input, select').forEach(input => {
+        const inputs = document.querySelectorAll('input, select');
+        inputs.forEach(function(input) {
             input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
         });
     }
-    
+
     function updateCharCounts() {
         // Device name character count
-        const deviceCount = deviceNameInput?.value.length || 0;
-        if (deviceCharCount) {
+        if (deviceNameInput && deviceCharCount) {
+            const deviceCount = deviceNameInput.value.length || 0;
             deviceCharCount.textContent = deviceCount;
             updateCharCountColor(deviceCharCount, deviceCount, 100);
         }
-        
+
         // Serial number character count
-        const serialCount = serialNumberInput?.value.length || 0;
-        if (serialCharCount) {
+        if (serialNumberInput && serialCharCount) {
+            const serialCount = serialNumberInput.value.length || 0;
             serialCharCount.textContent = serialCount;
             updateCharCountColor(serialCharCount, serialCount, 100);
         }
     }
-    
+
     function updateCharCountColor(element, count, max) {
         element.classList.remove('text-gray-500', 'text-yellow-600', 'text-red-500');
-        
+
         if (count > max) {
             element.classList.add('text-red-500');
         } else if (count > max * 0.8) {
@@ -868,34 +1341,35 @@ document.addEventListener('DOMContentLoaded', function() {
             element.classList.add('text-gray-500');
         }
     }
-    
+
     function filterDevices() {
-        const roomValue = roomFilter?.value || '';
-        const typeValue = typeFilter?.value || '';
-        const searchValue = searchDevices?.value.toLowerCase().trim() || '';
+        const roomValue = roomFilter ? roomFilter.value : '';
+        const typeValue = typeFilter ? typeFilter.value : '';
+        const searchValue = searchDevices ? searchDevices.value.toLowerCase().trim() : '';
         const deviceCards = document.querySelectorAll('.device-card');
-        
+
         let visibleCount = 0;
-        
-        deviceCards.forEach(card => {
-            const roomId = card.dataset.roomId;
-            const roomName = card.dataset.roomName.toLowerCase();
-            const deviceType = card.dataset.deviceType;
-            const deviceName = card.querySelector('h4').textContent.toLowerCase();
-            const deviceId = card.dataset.deviceId;
-            
+
+        deviceCards.forEach(function(card) {
+            const roomId = card.getAttribute('data-room-id');
+            const roomName = card.getAttribute('data-room-name').toLowerCase();
+            const deviceType = card.getAttribute('data-device-type');
+            const deviceNameElement = card.querySelector('h4');
+            const deviceName = deviceNameElement ? deviceNameElement.textContent.toLowerCase() : '';
+            const deviceId = card.getAttribute('data-device-id');
+
             let shouldShow = true;
-            
+
             // Filter by room
             if (roomValue && roomId !== roomValue) {
                 shouldShow = false;
             }
-            
+
             // Filter by device type
             if (typeValue && deviceType !== typeValue) {
                 shouldShow = false;
             }
-            
+
             // Filter by search
             if (searchValue && 
                 !deviceName.includes(searchValue) && 
@@ -904,7 +1378,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 !deviceType.includes(searchValue)) {
                 shouldShow = false;
             }
-            
+
             if (shouldShow) {
                 card.style.display = '';
                 visibleCount++;
@@ -912,12 +1386,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 card.style.display = 'none';
             }
         });
-        
+
         // Update count
         if (filteredCount) {
             filteredCount.textContent = visibleCount;
         }
-        
+
         // Show/hide empty state
         const emptyState = document.getElementById('empty-state');
         if (visibleCount === 0 && deviceCards.length > 0) {
@@ -928,88 +1402,63 @@ document.addEventListener('DOMContentLoaded', function() {
             emptyState.remove();
         }
     }
-    
+
     function showEmptySearchState() {
-        const emptyHtml = `
-            <div id="empty-state" class="text-center py-12">
-                <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>
-                <p class="text-gray-600 mb-4">Tidak ditemukan device yang sesuai dengan pencarian Anda.</p>
-                <button 
-                    class="text-telkomsel-red hover:text-telkomsel-dark-red font-medium"
-                    onclick="resetFilters()"
-                >
-                    Reset Filter
-                </button>
-            </div>
-        `;
-        
+        const emptyHtml = '<div id="empty-state" class="text-center py-12">' +
+            '<svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>' +
+            '</svg>' +
+            '<h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>' +
+            '<p class="text-gray-600 mb-4">Tidak ditemukan device yang sesuai dengan pencarian Anda.</p>' +
+            '<button class="text-telkomsel-red hover:text-telkomsel-dark-red font-medium" onclick="resetFilters()">Reset Filter</button>' +
+        '</div>';
+
         if (devicesGrid) {
             devicesGrid.insertAdjacentHTML('afterend', emptyHtml);
         }
     }
-    
+
     function resetFilters() {
         if (searchDevices) searchDevices.value = '';
         if (roomFilter) roomFilter.value = '';
         if (typeFilter) typeFilter.value = '';
         filterDevices();
     }
-    
+
     function toggleView(viewType) {
         currentView = viewType;
-        
+
         if (viewType === 'grid') {
-            gridViewBtn?.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            gridViewBtn?.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            
-            listViewBtn?.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            listViewBtn?.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            
+            if (gridViewBtn) {
+                gridViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
+                gridViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
+            }
+
+            if (listViewBtn) {
+                listViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
+                listViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
+            }
+
             if (devicesGrid) {
                 devicesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
             }
         } else {
-            listViewBtn?.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            listViewBtn?.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            
-            gridViewBtn?.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            gridViewBtn?.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            
+            if (listViewBtn) {
+                listViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
+                listViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
+            }
+
+            if (gridViewBtn) {
+                gridViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
+                gridViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
+            }
+
             if (devicesGrid) {
                 devicesGrid.className = 'space-y-4';
             }
         }
     }
-    
-    function refreshData() {
-        // Add loading state to refresh button
-        const originalHtml = refreshBtn?.innerHTML || '';
-        if (refreshBtn) {
-            refreshBtn.innerHTML = `
-                <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-                <span class="hidden sm:inline">Memuat...</span>
-            `;
-            refreshBtn.disabled = true;
-        }
-        
-        // Simulate refresh (in real app, this would reload data)
-        setTimeout(() => {
-            if (refreshBtn) {
-                refreshBtn.innerHTML = originalHtml;
-                refreshBtn.disabled = false;
-            }
-            showNotification('Data berhasil diperbarui!', 'success');
-            
-            // Re-bind events after refresh
-            bindDeviceCardEvents();
-        }, 1000);
-    }
-    
+
     function setLoading(loading) {
         if (loading) {
             if (submitBtn) submitBtn.disabled = true;
@@ -1021,7 +1470,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (loadingSpinner) loadingSpinner.classList.add('hidden');
         }
     }
-    
+
+    function setImageLoading(loading) {
+        if (loading) {
+            if (submitImageBtn) submitImageBtn.disabled = true;
+            if (submitImageText) submitImageText.classList.add('hidden');
+            if (loadingImageSpinner) loadingImageSpinner.classList.remove('hidden');
+        } else {
+            if (submitImageBtn) submitImageBtn.disabled = false;
+            if (submitImageText) submitImageText.classList.remove('hidden');
+            if (loadingImageSpinner) loadingImageSpinner.classList.add('hidden');
+        }
+    }
+
     function setDeleteLoading(loading) {
         if (loading) {
             if (confirmDeleteBtn) confirmDeleteBtn.disabled = true;
@@ -1033,95 +1494,100 @@ document.addEventListener('DOMContentLoaded', function() {
             if (deleteSpinner) deleteSpinner.classList.add('hidden');
         }
     }
-    
-    function showNotification(message, type = 'info') {
+
+    function showNotification(message, type) {
+        type = type || 'info';
+        
         // Create notification element
         const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 translate-x-full`;
-        
+        notification.className = 'fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 translate-x-full';
+
         const bgColor = type === 'success' ? 'bg-green-500' : 
                        type === 'error' ? 'bg-red-500' : 
                        type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
-        
+
         const icon = type === 'success' ? 'M5 13l4 4L19 7' :
                     type === 'error' ? 'M6 18L18 6M6 6l12 12' :
                     type === 'warning' ? 'M12 8v4m0 4h.01' :
                     'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-        
-        notification.innerHTML = `
-            <div class="${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/>
-                </svg>
-                <p class="flex-1">${message}</p>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        `;
-        
+
+        notification.innerHTML = '<div class="' + bgColor + ' text-white p-4 rounded-lg shadow-lg flex items-center space-x-3">' +
+            '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="' + icon + '"/>' +
+            '</svg>' +
+            '<p class="flex-1">' + message + '</p>' +
+            '<button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">' +
+                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
+                '</svg>' +
+            '</button>' +
+        '</div>';
+
         document.body.appendChild(notification);
-        
+
         // Slide in
-        setTimeout(() => {
+        setTimeout(function() {
             notification.classList.remove('translate-x-full');
             notification.classList.add('translate-x-0');
         }, 100);
-        
+
         // Auto remove after 5 seconds
-        setTimeout(() => {
+        setTimeout(function() {
             notification.classList.remove('translate-x-0');
             notification.classList.add('translate-x-full');
-            setTimeout(() => notification.remove(), 300);
+            setTimeout(function() {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 300);
         }, 5000);
     }
-    
+
     function handleKeyboardShortcuts(e) {
         // Ctrl/Cmd + N: Add new device
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
-            if (!deviceModal?.classList.contains('hidden')) return;
-            openModal('add');
+            if (!deviceModal || deviceModal.classList.contains('hidden')) {
+                openModal('add');
+            }
         }
-        
+
         // Escape: Close modals
         if (e.key === 'Escape') {
             if (deviceModal && !deviceModal.classList.contains('hidden')) {
                 closeDeviceModal();
             }
+            if (imageModal && !imageModal.classList.contains('hidden')) {
+                closeImageModalHandler();
+            }
             if (deleteModal && !deleteModal.classList.contains('hidden')) {
                 closeDeleteModal();
             }
         }
-        
+
         // Ctrl/Cmd + F: Focus search
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             e.preventDefault();
-            searchDevices?.focus();
-        }
-        
-        // Ctrl/Cmd + R: Refresh (prevent default browser refresh)
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-            e.preventDefault();
-            refreshData();
+            if (searchDevices) {
+                searchDevices.focus();
+            }
         }
     }
-    
+
     // Utility function for debouncing
     function debounce(func, wait) {
         let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
+        return function executedFunction() {
+            const args = arguments;
+            const later = function() {
                 clearTimeout(timeout);
-                func(...args);
+                func.apply(null, args);
             };
             clearTimeout(timeout);
             timeout = setTimeout(later, wait);
         };
     }
-    
+
     // Make resetFilters available globally
     window.resetFilters = resetFilters;
 });
