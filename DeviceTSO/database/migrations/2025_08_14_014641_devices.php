@@ -15,9 +15,11 @@ return new class extends Migration
             $table->string('device_type', 50)->nullable();
             $table->string('serial_number', 100)->nullable();
             $table->string('image_path')->nullable();
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
 
             $table->foreign('room_id')->references('room_id')->on('rooms')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

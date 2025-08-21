@@ -17,8 +17,14 @@ class Device extends Model
         'device_name', 
         'device_type', 
         'serial_number',
-        'image_path'
+        'image_path',
+        'user_id'
     ];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 
     public function room()
     {

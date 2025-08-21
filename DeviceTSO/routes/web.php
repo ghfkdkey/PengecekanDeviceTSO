@@ -75,7 +75,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/rooms/{floor}', [DeviceCheckResultController::class, 'getRoomsByFloor'])->name('rooms.by-floor');
         Route::get('/devices/{room}', [DeviceCheckResultController::class, 'getDevicesByRoom'])->name('devices.by-room');
         Route::get('/checklist/{deviceType}', [DeviceCheckResultController::class, 'getChecklistByDeviceType'])->name('checklist.by-type');
-    
+
         // Device Check Results API
         Route::post('/device-check-results/multiple', [DeviceCheckResultController::class, 'storeMultipleResults'])->name('device-check-results.multiple');
         Route::get('/device-check-results', [DeviceCheckResultController::class, 'apiIndex'])->name('device-check-results.api-index');
@@ -83,22 +83,26 @@ Route::middleware('auth')->group(function () {
         Route::post('/device-check-results', [DeviceCheckResultController::class, 'store'])->name('device-check-results.store');
         Route::put('/device-check-results/{id}', [DeviceCheckResultController::class, 'update'])->name('device-check-results.update');
         Route::delete('/device-check-results/{id}', [DeviceCheckResultController::class, 'destroy'])->name('device-check-results.destroy');
-    
+
         // Aggregated sessions
         Route::get('/device-check-sessions', [DeviceCheckResultController::class, 'listLatestPerDevice'])->name('device-check-results.sessions-latest');
         Route::get('/device-check-session-detail', [DeviceCheckResultController::class, 'sessionDetail'])->name('device-check-results.session-detail');
-    
+
         // Supporting APIs for dropdowns and management
         Route::get('/devices', [DeviceController::class, 'apiIndex'])->name('devices.api-index');
         Route::get('/checklist-items', [ChecklistItemController::class, 'apiIndex'])->name('checklist-items.api-index');
-        
+
         // ✅ FIX: Tambahkan semua CRUD untuk Users API
-        Route::get('/users', [UserController::class, 'index'])->name('users.api-index');
-        Route::post('/users', [UserController::class, 'store'])->name('users.api-store');
-        Route::get('/users/{id}', [UserController::class, 'show'])->name('users.api-show');
-        Route::put('/users/{id}', [UserController::class, 'update'])->name('users.api-update');
-        Route::delete('/users/{id}', [UserController::class, 'destroy'])->name('users.api-destroy');
-    
+        Route::get('/users', [UserController::class, 'apiIndex'])->name('users.api-index');
+        Route::post('/users', [UserController::class, 'apiStore'])->name('users.api-store');
+        Route::get('/users/{id}', [UserController::class, 'apiShow'])->name('users.api-show');
+        Route::put('/users/{id}', [UserController::class, 'apiUpdate'])->name('users.api-update');
+        Route::delete('/users/{id}', [UserController::class, 'apiDestroy'])->name('users.api-destroy');
+
+        // Dashboard API Routes
+        Route::get('/dashboard/stats', [App\Http\Controllers\DashboardController::class, 'stats'])->name('dashboard.stats');
+        Route::get('/dashboard/activities', [App\Http\Controllers\DashboardController::class, 'activities'])->name('dashboard.activities');
+
         Route::get('/floors', [FloorController::class, 'apiIndex'])->name('floors.api-index');
         Route::get('/rooms', [RoomController::class, 'apiIndex'])->name('rooms.api-index');
     });

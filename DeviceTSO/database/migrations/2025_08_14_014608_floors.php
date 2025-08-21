@@ -11,7 +11,10 @@ return new class extends Migration
         Schema::create('floors', function (Blueprint $table) {
             $table->id('floor_id');
             $table->string('floor_name', 50);
+            $table->unsignedBigInteger('user_id');
             $table->timestamps();
+
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

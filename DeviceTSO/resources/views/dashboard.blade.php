@@ -23,7 +23,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <!-- Total Devices -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
@@ -34,76 +34,37 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Total Device</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $totalDevices ?? 24 }}</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex items-center text-sm">
-                    <span class="text-green-600 font-medium">↑ 2 device</span>
-                    <span class="text-gray-600 ml-2">dari bulan lalu</span>
+                    <p class="text-2xl font-bold text-gray-900" id="totalDevices">-</p>
                 </div>
             </div>
         </div>
 
-        <!-- Checked Today -->
+        <!-- Total Floors -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
-                <div class="bg-green-100 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <div class="bg-purple-100 rounded-lg p-3">
+                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Dicek Hari Ini</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $checkedToday ?? 18 }}</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex items-center text-sm">
-                    <span class="text-green-600 font-medium">{{ $checkedTodayPercentage ?? 75 }}%</span>
-                    <span class="text-gray-600 ml-2">dari total device</span>
+                    <p class="text-sm font-medium text-gray-600">Total Lantai</p>
+                    <p class="text-2xl font-bold text-gray-900" id="totalFloors">-</p>
                 </div>
             </div>
         </div>
 
-        <!-- Issues Found -->
+        <!-- Total Rooms -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
-                <div class="bg-red-100 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                <div class="bg-indigo-100 rounded-lg p-3">
+                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Issues Ditemukan</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $issuesFound ?? 3 }}</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex items-center text-sm">
-                    <span class="text-red-600 font-medium">↑ 1 issue</span>
-                    <span class="text-gray-600 ml-2">dari kemarin</span>
-                </div>
-            </div>
-        </div>
-
-        <!-- Completion Rate -->
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="bg-telkomsel-yellow/20 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-telkomsel-yellow" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Tingkat Penyelesaian</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $completionRate ?? 92 }}%</p>
-                </div>
-            </div>
-            <div class="mt-4">
-                <div class="flex items-center text-sm">
-                    <span class="text-green-600 font-medium">↑ 5%</span>
-                    <span class="text-gray-600 ml-2">dari minggu lalu</span>
+                    <p class="text-sm font-medium text-gray-600">Total Ruangan</p>
+                    <p class="text-2xl font-bold text-gray-900" id="totalRooms">-</p>
                 </div>
             </div>
         </div>
@@ -115,90 +76,11 @@
             <div class="p-6 border-b border-gray-200">
                 <div class="flex items-center justify-between">
                     <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Aktivitas Terbaru</h3>
-                    <a href="{{ route('reports.index') }}" class="text-telkomsel-red hover:text-telkomsel-dark-red text-sm font-medium">
-                        Lihat Semua →
-                    </a>
                 </div>
             </div>
             <div class="p-6">
-                <div class="space-y-4">
-                    @forelse($recentActivities ?? [] as $activity)
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            @if($activity['type'] == 'check')
-                                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                    </svg>
-                                </div>
-                            @elseif($activity['type'] == 'issue')
-                                <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                    <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
-                                    </svg>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">{{ $activity['description'] }}</p>
-                            <p class="text-xs text-gray-500 mt-1">{{ $activity['time'] }} • {{ $activity['user'] }}</p>
-                        </div>
-                    </div>
-                    @empty
-                    <!-- Sample Data -->
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">Smart Board di Meeting Room A telah dicek dan berfungsi normal</p>
-                            <p class="text-xs text-gray-500 mt-1">2 menit yang lalu • {{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">Issue ditemukan pada LED Diorama Lantai 2 - tidak menyala</p>
-                            <p class="text-xs text-gray-500 mt-1">15 menit yang lalu • Ahmad Fadli</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">Tablet Meeting Room B berhasil di-update dan berfungsi normal</p>
-                            <p class="text-xs text-gray-500 mt-1">1 jam yang lalu • Siti Nurhaliza</p>
-                        </div>
-                    </div>
-                    <div class="flex items-start space-x-4">
-                        <div class="flex-shrink-0">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                                </svg>
-                            </div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <p class="text-sm text-gray-900">Pengecekan rutin Smart TV Lobby telah selesai dilakukan</p>
-                            <p class="text-xs text-gray-500 mt-1">2 jam yang lalu • Budi Santoso</p>
-                        </div>
-                    </div>
-                    @endforelse
+                <div class="space-y-4" id="recentActivities">
+                    <!-- Activities will be loaded here dynamically -->
                 </div>
             </div>
         </div>
@@ -217,14 +99,6 @@
                         </svg>
                         <span class="font-medium">Mulai Pengecekan</span>
                     </a>
-                    
-                    <a href="{{ route('reports.index') }}" class="w-full bg-gray-100 text-gray-700 rounded-lg p-4 flex items-center space-x-3 hover:bg-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                        </svg>
-                        <span class="font-medium">Lihat Laporan</span>
-                    </a>
-                    
                     @if(auth()->user()->isAdmin())
                     <a href="{{ route('devices.index') }}" class="w-full bg-gray-100 text-gray-700 rounded-lg p-4 flex items-center space-x-3 hover:bg-gray-200 transition-colors">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -244,142 +118,35 @@
                 </div>
                 <div class="p-6">
                     <div class="space-y-4">
-                        <!-- Normal -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Normal</span>
-                            </div>
-                            <span class="text-sm font-medium text-gray-900">{{ $normalDevices ?? 21 }}</span>
-                        </div>
-                        
-                        <!-- Warning -->
+                        <!-- Pending -->
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Warning</span>
+                                <span class="text-sm text-gray-700">Pending</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900">{{ $warningDevices ?? 0 }}</span>
+                            <span class="text-sm font-medium text-gray-900" id="pendingDevices">-</span>
                         </div>
                         
-                        <!-- Error -->
+                        <!-- Passed -->
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center space-x-3">
+                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                <span class="text-sm text-gray-700">Passed</span>
+                            </div>
+                            <span class="text-sm font-medium text-gray-900" id="passedDevices">-</span>
+                        </div>
+                        
+                        <!-- Failed -->
                         <div class="flex items-center justify-between">
                             <div class="flex items-center space-x-3">
                                 <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Error</span>
+                                <span class="text-sm text-gray-700">Failed</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900">{{ $errorDevices ?? 3 }}</span>
-                        </div>
-                        
-                        <!-- Not Checked -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
-                                <div class="w-3 h-3 bg-gray-400 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Belum Dicek</span>
-                            </div>
-                            <span class="text-sm font-medium text-gray-900">{{ $notCheckedDevices ?? 6 }}</span>
-                        </div>
-                    </div>
-                    
-                    <!-- Progress Bar -->
-                    <div class="mt-6">
-                        <div class="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Progress Hari Ini</span>
-                            <span>{{ $checkedTodayPercentage ?? 75 }}%</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2">
-                            <div class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red h-2 rounded-full" style="width: {{ $checkedTodayPercentage ?? 75 }}%"></div>
+                            <span class="text-sm font-medium text-gray-900" id="failedDevices">-</span>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <!-- Recent Issues -->
-    <div class="bg-white rounded-xl shadow-sm border border-gray-200">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Issues Terbaru</h3>
-                <a href="{{ route('reports.index') }}?filter=issues" class="text-telkomsel-red hover:text-telkomsel-dark-red text-sm font-medium">
-                    Lihat Semua Issues →
-                </a>
-            </div>
-        </div>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Device</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Lokasi</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Issue</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Waktu</th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
-                    @forelse($recentIssues ?? [] as $issue)
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">{{ $issue['device'] }}</div>
-                            <div class="text-sm text-gray-500">{{ $issue['device_type'] }}</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $issue['location'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $issue['description'] }}</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Error
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $issue['time'] }}</td>
-                    </tr>
-                    @empty
-                    <!-- Sample Data -->
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">LED Diorama #003</div>
-                            <div class="text-sm text-gray-500">LED Display</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Lantai 2 - Lobby</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Display tidak menyala</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Error
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15 menit yang lalu</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">Smart Board #005</div>
-                            <div class="text-sm text-gray-500">Interactive Display</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Lantai 3 - Meeting Room C</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Touch screen tidak responsif</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Error
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 jam yang lalu</td>
-                    </tr>
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <div class="text-sm font-medium text-gray-900">Tablet Meeting #007</div>
-                            <div class="text-sm text-gray-500">Android Tablet</div>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Lantai 1 - Meeting Room A</td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Aplikasi sering crash</td>
-                        <td class="px-6 py-4 whitespace-nowrap">
-                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Error
-                            </span>
-                        </td>
-                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">3 jam yang lalu</td>
-                    </tr>
-                    @endforelse
-                </tbody>
-            </table>
         </div>
     </div>
 </div>
@@ -387,16 +154,147 @@
 
 @push('scripts')
 <script>
-    // Auto refresh dashboard every 5 minutes
-    setInterval(function() {
-        // You can add AJAX calls here to refresh specific parts of the dashboard
-        console.log('Dashboard auto refresh...');
-    }, 300000);
+    // Dashboard data
+    let dashboardData = {
+        stats: {},
+        activities: []
+    };
 
-    // Add any dashboard-specific JavaScript here
+    // Load dashboard data
+    async function loadDashboardData() {
+        try {
+            // Load statistics from database
+            const statsResponse = await fetch('/api/dashboard/stats');
+            if (statsResponse.ok) {
+                dashboardData.stats = await statsResponse.json();
+                updateStats();
+            }
+
+            // Load recent activities (5 most recent)
+            const activitiesResponse = await fetch('/api/dashboard/activities?limit=5');
+            if (activitiesResponse.ok) {
+                dashboardData.activities = await activitiesResponse.json();
+                updateActivities();
+            }
+        } catch (error) {
+            console.error('Error loading dashboard data:', error);
+        }
+    }
+
+    // Update statistics
+    function updateStats() {
+        const stats = dashboardData.stats;
+        document.getElementById('totalDevices').textContent = stats.total_devices || 0;
+        document.getElementById('totalFloors').textContent = stats.total_floors || 0;
+        document.getElementById('totalRooms').textContent = stats.total_rooms || 0;
+        
+        // Update device status using the same logic as device-check-results
+        document.getElementById('pendingDevices').textContent = stats.pending_devices || 0;
+        document.getElementById('passedDevices').textContent = stats.passed_devices || 0;
+        document.getElementById('failedDevices').textContent = stats.failed_devices || 0;
+    }
+
+    // Update activities
+    function updateActivities() {
+        const container = document.getElementById('recentActivities');
+        const activities = dashboardData.activities;
+
+        if (activities.length === 0) {
+            container.innerHTML = `
+                <div class="text-center text-gray-500 py-8">
+                    <p>Tidak ada aktivitas terbaru</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = activities.map(activity => {
+            const icon = getActivityIcon(activity.type);
+            const timeAgo = formatTimeAgo(activity.created_at);
+            
+            return `
+                <div class="flex items-start space-x-4">
+                    <div class="flex-shrink-0">
+                        ${icon}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <p class="text-sm text-gray-900">${activity.description}</p>
+                        <p class="text-xs text-gray-500 mt-1">${timeAgo} • ${activity.user_name}</p>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+
+    // Get activity icon based on type
+    function getActivityIcon(type) {
+        const icons = {
+            'device_check': `
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            `,
+            'device_added': `
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                    </svg>
+                </div>
+            `,
+            'floor_added': `
+                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                    </svg>
+                </div>
+            `,
+            'room_added': `
+                <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                    </svg>
+                </div>
+            `,
+            'default': `
+                <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                    </svg>
+                </div>
+            `
+        };
+        
+        return icons[type] || icons.default;
+    }
+
+    // Format time ago
+    function formatTimeAgo(dateString) {
+        const now = new Date();
+        const date = new Date(dateString);
+        const diffInSeconds = Math.floor((now - date) / 1000);
+        
+        if (diffInSeconds < 60) {
+            return 'Baru saja';
+        } else if (diffInSeconds < 3600) {
+            const minutes = Math.floor(diffInSeconds / 60);
+            return `${minutes} menit yang lalu`;
+        } else if (diffInSeconds < 86400) {
+            const hours = Math.floor(diffInSeconds / 3600);
+            return `${hours} jam yang lalu`;
+        } else {
+            const days = Math.floor(diffInSeconds / 86400);
+            return `${days} hari yang lalu`;
+        }
+    }
+
+    // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
-        // Initialize dashboard components
-        console.log('Dashboard loaded');
+        loadDashboardData();
+        
+        // Auto refresh every 30 seconds
+        setInterval(loadDashboardData, 30000);
     });
 </script>
 @endpush

@@ -39,7 +39,7 @@
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
             <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-blue-100">
@@ -63,19 +63,6 @@
                     <div class="ml-4">
                         <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Admins</p>
                         <p class="text-2xl font-bold text-red-600" id="adminCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
-                    </div>
-                </div>
-            </div>
-            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-amber-100">
-                        <svg class="w-6 h-6 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Supervisors</p>
-                        <p class="text-2xl font-bold text-amber-600" id="supervisorCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
                     </div>
                 </div>
             </div>
@@ -114,7 +101,6 @@
                         <select id="roleFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <option value="">All Roles</option>
                             <option value="admin">Admin</option>
-                            <option value="supervisor">Supervisor</option>
                             <option value="user">User</option>
                         </select>
                     </div>
@@ -212,7 +198,6 @@
                         <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <option value="">Select Role</option>
                             <option value="admin">Admin</option>
-                            <option value="supervisor">Supervisor</option>
                             <option value="user">User</option>
                         </select>
                     </div>
@@ -369,12 +354,10 @@ function filterUsers() {
 function updateStats() {
     const total = users.length;
     const admins = users.filter(u => u.role === 'admin').length;
-    const supervisors = users.filter(u => u.role === 'supervisor').length;
     const regularUsers = users.filter(u => u.role === 'user').length;
     
     document.getElementById('totalUsers').textContent = total;
     document.getElementById('adminCount').textContent = admins;
-    document.getElementById('supervisorCount').textContent = supervisors;
     document.getElementById('userCount').textContent = regularUsers;
 }
 
@@ -434,18 +417,18 @@ function renderTable() {
             </td>
             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                 <div class="flex space-x-2">
-                    <button onclick="viewDetail(${user.user_id})" class="text-blue-600 hover:text-blue-900" title="View Details">
+                    <button onclick="viewDetail(${user.id})" class="text-blue-600 hover:text-blue-900" title="View Details">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                         </svg>
                     </button>
-                    <button onclick="editUser(${user.user_id})" class="text-indigo-600 hover:text-indigo-900" title="Edit User">
+                    <button onclick="editUser(${user.id})" class="text-indigo-600 hover:text-indigo-900" title="Edit User">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
                         </svg>
                     </button>
-                    <button onclick="deleteUser(${user.user_id})" class="text-red-600 hover:text-red-900" title="Delete User">
+                    <button onclick="deleteUser(${user.id})" class="text-red-600 hover:text-red-900" title="Delete User">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
                         </svg>
@@ -469,7 +452,6 @@ function renderTable() {
 function getRoleBadge(role) {
     const badges = {
         'admin': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Admin</span>',
-        'supervisor': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Supervisor</span>',
         'user': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">User</span>'
     };
     return badges[role] || '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unknown</span>';
@@ -566,7 +548,7 @@ function closeAddModal() {
 }
 
 function editUser(id) {
-    const user = users.find(u => u.user_id === id);
+    const user = users.find(u => u.id === id);
     if (!user) return;
     
     editingId = id;
@@ -585,7 +567,7 @@ function editUser(id) {
 }
 
 function viewDetail(id) {
-    const user = users.find(u => u.user_id === id);
+    const user = users.find(u => u.id === id);
     if (!user) return;
     
     const detailContent = document.getElementById('detailContent');
@@ -605,7 +587,7 @@ function viewDetail(id) {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">User ID</label>
-                <p class="text-sm text-gray-900">${user.user_id || 'N/A'}</p>
+                <p class="text-sm text-gray-900">${user.id || 'N/A'}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Created Date</label>

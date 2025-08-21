@@ -18,12 +18,15 @@ class RoomController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'floor_id' => 'required|exists:floors,floor_id',
             'room_name' => 'required|string|max:100'
         ]);
+        
+        // TAMBAHKAN user_id dari user yang sedang login
+        $validated['user_id'] = auth()->id();
 
-        $room = Room::create($request->all());
+        $room = Room::create($validated); // Gunakan $validated bukan $request->all()
 
         if ($request->ajax()) {
             return response()->json([
@@ -45,8 +48,13 @@ class RoomController extends Controller
 
     public function update(Request $request, $id)
     {
+        $validated = $request->validate([
+            'floor_id' => 'required|exists:floors,floor_id',
+            'room_name' => 'required|string|max:100'
+        ]);
+        
         $room = Room::findOrFail($id);
-        $room->update($request->all());
+        $room->update($validated); // Gunakan $validated bukan $request->all()
 
         if ($request->ajax()) {
             return response()->json([
@@ -60,7 +68,7 @@ class RoomController extends Controller
                          ->with('success', 'Room berhasil diperbarui.');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id) // Tambahkan parameter Request $request
     {
         Room::destroy($id);
         

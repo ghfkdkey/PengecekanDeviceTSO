@@ -20,7 +20,8 @@ return new class extends Migration
 
             $table->foreign('device_id')->references('device_id')->on('devices')->onDelete('cascade');
             $table->foreign('checklist_id')->references('checklist_id')->on('checklist_items')->onDelete('cascade');
-            $table->foreign('user_id')->references('user_id')->on('users')->onDelete('cascade');
+            // UBAH: merujuk ke 'id' bukan 'user_id' di tabel users
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 

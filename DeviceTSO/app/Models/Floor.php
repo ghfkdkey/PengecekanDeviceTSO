@@ -19,7 +19,16 @@ class Floor extends Model
      */
     protected $fillable = [
         'floor_name',
+        'user_id',
     ];
+
+    /**
+     * Get the user who created this floor.
+     */
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 
     /**
      * Get the rooms for this floor.

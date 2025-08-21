@@ -10,7 +10,12 @@ class Room extends Model
     use HasFactory;
 
     protected $primaryKey = 'room_id';
-    protected $fillable = ['floor_id', 'room_name'];
+    protected $fillable = ['floor_id', 'room_name', 'user_id'];
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 
     public function floor()
     {

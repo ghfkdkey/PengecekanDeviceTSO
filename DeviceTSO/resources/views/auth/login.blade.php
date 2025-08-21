@@ -113,7 +113,7 @@
                             >
                             <div class="absolute left-4 top-1/2 transform -translate-y-1/2">
                                 <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z"/>
                                 </svg>
                             </div>
                             <button type="button" class="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600" onclick="togglePassword()">
@@ -126,17 +126,6 @@
                         @error('password')
                             <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                         @enderror
-                    </div>
-
-                    <!-- Remember Me -->
-                    <div class="flex items-center justify-between">
-                        <label class="flex items-center">
-                            <input type="checkbox" name="remember" class="w-4 h-4 text-telkomsel-red bg-gray-100 border-gray-300 rounded focus:ring-telkomsel-red focus:ring-2">
-                            <span class="ml-2 text-sm text-gray-600">Ingat saya</span>
-                        </label>
-                        <a href="#" class="text-sm text-telkomsel-red hover:text-telkomsel-dark-red transition-colors">
-                            Lupa password?
-                        </a>
                     </div>
 
                     <!-- Submit Button -->

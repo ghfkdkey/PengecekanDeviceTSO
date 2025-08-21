@@ -176,15 +176,18 @@
                         </div>
                     </li>
 
-                    <!-- Users Management -->
                     <li>
-                      <a href="{{ route('logout') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('users.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300"> Logout </span>
-                        </a>
+                        <form method="POST" action="{{ route('logout') }}">
+                            @csrf
+                            <button type="submit" class="flex items-center space-x-3 w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300"> Logout </span>
+                            </button>
+                        </form>
                     </li>
+
                     @endif
                 </ul>
             </nav>

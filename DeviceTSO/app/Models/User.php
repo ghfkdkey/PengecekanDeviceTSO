@@ -11,7 +11,7 @@ class User extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'users';
-    protected $primaryKey = 'user_id';
+    protected $primaryKey = 'id'; // Changed from 'user_id' to 'id' to match migration
 
     /**
      * The attributes that are mass assignable.
@@ -43,7 +43,7 @@ class User extends Authenticatable
     protected function casts(): array
     {
         return [
-            'password' => 'hashed',
+            'password_hash' => 'hashed',
         ];
     }
 
@@ -56,11 +56,11 @@ class User extends Authenticatable
     }
 
     /**
-     * Override getAuthIdentifierName to use user_id
+     * Override getAuthIdentifierName to use id
      */
     public function getAuthIdentifierName()
     {
-        return 'user_id';
+        return 'id';
     }
 
     /**
@@ -68,7 +68,7 @@ class User extends Authenticatable
      */
     public function deviceCheckResults()
     {
-        return $this->hasMany(DeviceCheckResult::class, 'user_id', 'user_id');
+        return $this->hasMany(DeviceCheckResult::class, 'user_id', 'id');
     }
 
     /**

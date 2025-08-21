@@ -66,16 +66,19 @@ class DeviceController extends Controller
             'serial_number' => 'nullable|string|max:100',
             'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
         ]);
-    
+
         if ($request->hasFile('image')) {
             $path = $request->file('image')->store('devices', 'public');
             $validated['image_path'] = $path;
         }
-    
+
+        $validated['user_id'] = auth()->id();
+
         Device::create($validated);
-    
+
         return redirect()->route('devices.index')->with('success', 'Device berhasil ditambahkan');
     }
+
 
     /**
      * Display the specified device

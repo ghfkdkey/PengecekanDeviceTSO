@@ -31,7 +31,8 @@ class FloorController extends Controller
         ]);
 
         $floor = Floor::create([
-            'floor_name' => $request->floor_name
+            'floor_name' => $request->floor_name,
+            'user_id' => auth()->id()
         ]);
 
         if ($request->ajax()) {
