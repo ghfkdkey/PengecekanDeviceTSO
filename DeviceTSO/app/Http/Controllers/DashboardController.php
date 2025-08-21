@@ -9,6 +9,7 @@ use App\Models\DeviceCheckResult;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -71,17 +72,21 @@ class DashboardController extends Controller
         try {
             $limit = $request->get('limit', 10);
             
-            // Get recent device check activities
+            // Get recent device check activities dengan timezone yang benar
             $checkActivities = DeviceCheckResult::with(['device.room.floor', 'user'])
+                ->where('checked_at', '>=', now()->subDays(7))
                 ->orderBy('checked_at', 'desc')
                 ->limit($limit)
                 ->get()
                 ->map(function ($result) {
+                    // Pastikan timezone sesuai dengan aplikasi (Asia/Jakarta)
+                    $checkedAt = Carbon::parse($result->checked_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
+                    
                     return [
                         'type' => 'device_check',
                         'description' => "{$result->user->full_name} mengecek {$result->device->device_name} di {$result->device->room->room_name}",
                         'user_name' => $result->user->full_name,
-                        'created_at' => $result->checked_at,
+                        'created_at' => $checkedAt->toISOString(), // Format ISO untuk JavaScript
                         'status' => $result->status
                     ];
                 });
@@ -93,14 +98,14 @@ class DashboardController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(function ($device) {
-                    // Ambil nama user yang benar-benar menambahkan device
                     $userName = $device->creator ? $device->creator->full_name : 'Unknown User';
+                    $createdAt = Carbon::parse($device->created_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
                     
                     return [
                         'type' => 'device_added',
                         'description' => "Device {$device->device_name} ditambahkan di {$device->room->room_name}",
                         'user_name' => $userName,
-                        'created_at' => $device->created_at
+                        'created_at' => $createdAt->toISOString()
                     ];
                 });
             
@@ -111,14 +116,14 @@ class DashboardController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(function ($floor) {
-                    // Ambil nama user yang benar-benar menambahkan floor
                     $userName = $floor->creator ? $floor->creator->full_name : 'Unknown User';
+                    $createdAt = Carbon::parse($floor->created_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
                     
                     return [
                         'type' => 'floor_added',
                         'description' => "Lantai {$floor->floor_name} ditambahkan",
                         'user_name' => $userName,
-                        'created_at' => $floor->created_at
+                        'created_at' => $createdAt->toISOString()
                     ];
                 });
             
@@ -129,14 +134,14 @@ class DashboardController extends Controller
                 ->limit($limit)
                 ->get()
                 ->map(function ($room) {
-                    // Ambil nama user yang benar-benar menambahkan room
                     $userName = $room->creator ? $room->creator->full_name : 'Unknown User';
+                    $createdAt = Carbon::parse($room->created_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
                     
                     return [
                         'type' => 'room_added',
                         'description' => "Ruangan {$room->room_name} ditambahkan di {$room->floor->floor_name}",
                         'user_name' => $userName,
-                        'created_at' => $room->created_at
+                        'created_at' => $createdAt->toISOString()
                     ];
                 });
             
@@ -145,7 +150,9 @@ class DashboardController extends Controller
                 ->concat($deviceActivities)
                 ->concat($floorActivities)
                 ->concat($roomActivities)
-                ->sortByDesc('created_at')
+                ->sortByDesc(function ($activity) {
+                    return Carbon::parse($activity['created_at']);
+                })
                 ->take($limit)
                 ->values();
             

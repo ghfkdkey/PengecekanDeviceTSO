@@ -81,7 +81,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
                 <div class="bg-blue-100 rounded-lg p-3">
@@ -123,22 +123,6 @@
                 </div>
             </div>
         </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="bg-telkomsel-red/20 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-telkomsel-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Rata-rata Device/Ruangan</p>
-                    <p class="text-2xl font-bold text-gray-900">
-                        {{ $rooms->count() > 0 ? number_format($rooms->sum(function($room) { return $room->devices->count(); }) / $rooms->count(), 1) : '0' }}
-                    </p>
-                </div>
-            </div>
-        </div>
     </div>
 
     <!-- Rooms Grid -->
@@ -148,19 +132,6 @@
                 <div>
                     <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Daftar Ruangan</h3>
                     <p class="text-sm text-gray-600 mt-1">Total <span id="filtered-count">{{ $rooms->count() }}</span> ruangan ditemukan</p>
-                </div>
-                
-                <div class="flex items-center space-x-2">
-                    <button id="grid-view" class="p-2 rounded-lg text-telkomsel-red bg-telkomsel-red/10 border border-telkomsel-red/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                        </svg>
-                    </button>
-                    <button id="list-view" class="p-2 rounded-lg text-gray-600 hover:text-telkomsel-red hover:bg-gray-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                        </svg>
-                    </button>
                 </div>
             </div>
         </div>
@@ -386,6 +357,7 @@
 
 @push('scripts')
 <script>
+// FIXED ROOM AJAX IMPLEMENTATION
 document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const addRoomBtn = document.getElementById('add-room-btn');
@@ -395,350 +367,512 @@ document.addEventListener('DOMContentLoaded', function() {
     const cancelBtn = document.getElementById('cancel-btn');
     const roomForm = document.getElementById('room-form');
     const modalContent = document.getElementById('modal-content');
-    const modalTitle = document.getElementById('modal-title');
-    const submitBtn = document.getElementById('submit-btn');
-    const submitText = document.getElementById('submit-text');
-    const loadingSpinner = document.getElementById('loading-spinner');
+    const searchInput = document.getElementById('search-rooms');
     const floorFilter = document.getElementById('floor-filter');
-    const searchRooms = document.getElementById('search-rooms');
-    const refreshBtn = document.getElementById('refresh-btn');
-    const gridViewBtn = document.getElementById('grid-view');
-    const listViewBtn = document.getElementById('list-view');
-    const roomsContainer = document.getElementById('rooms-container');
-    const roomsGrid = document.getElementById('rooms-grid');
-    const filteredCount = document.getElementById('filtered-count');
-    const totalRoomsElement = document.getElementById('total-rooms');
-    const roomNameInput = document.getElementById('room-name');
-    const charCount = document.getElementById('char-count');
-    const floorSelect = document.getElementById('floor-select');
-    const roomIdInput = document.getElementById('room-id');
-    const formMethod = document.getElementById('form-method');
-    
-    // Delete modal elements
-    const cancelDeleteBtn = document.getElementById('cancel-delete-btn');
-    const confirmDeleteBtn = document.getElementById('confirm-delete-btn');
-    const deleteRoomName = document.getElementById('delete-room-name');
-    const deleteText = document.getElementById('delete-text');
-    const deleteSpinner = document.getElementById('delete-spinner');
-    
-    let currentView = 'grid';
-    let deleteRoomId = null;
-    
-    // Initialize
-    init();
-    
-    function init() {
-        bindEvents();
-        updateCharCount();
-        filterRooms();
-    }
-    
-    function bindEvents() {
-        // Modal events
-        addRoomBtn?.addEventListener('click', () => openModal('add'));
-        closeModal?.addEventListener('click', closeRoomModal);
-        cancelBtn?.addEventListener('click', closeRoomModal);
-        roomModal?.addEventListener('click', (e) => {
-            if (e.target === roomModal) closeRoomModal();
-        });
-        
-        // Delete modal events
-        cancelDeleteBtn?.addEventListener('click', closeDeleteModal);
-        deleteModal?.addEventListener('click', (e) => {
-            if (e.target === deleteModal) closeDeleteModal();
-        });
-        confirmDeleteBtn?.addEventListener('click', confirmDelete);
-        
-        // Form events
-        roomForm?.addEventListener('submit', handleSubmit);
-        roomNameInput?.addEventListener('input', updateCharCount);
-        
-        // Filter and search events
-        floorFilter?.addEventListener('change', filterRooms);
-        searchRooms?.addEventListener('input', debounce(filterRooms, 300));
-        refreshBtn?.addEventListener('click', refreshData);
-        
-        // View toggle events
-        gridViewBtn?.addEventListener('click', () => toggleView('grid'));
-        listViewBtn?.addEventListener('click', () => toggleView('list'));
-        
-        // Dynamic event binding for room cards
-        bindRoomCardEvents();
-        
-        // Keyboard shortcuts
-        document.addEventListener('keydown', handleKeyboardShortcuts);
-    }
-    
-    function bindRoomCardEvents() {
-        // Edit buttons
-        document.querySelectorAll('.edit-room-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const roomId = this.dataset.roomId;
-                const roomName = this.dataset.roomName;
-                const floorId = this.dataset.floorId;
-                openModal('edit', { roomId, roomName, floorId });
-            });
-        });
-        
-        // Delete buttons
-        document.querySelectorAll('.delete-room-btn').forEach(btn => {
-            btn.addEventListener('click', function() {
-                const roomId = this.dataset.roomId;
-                const roomName = this.dataset.roomName;
-                openDeleteModal(roomId, roomName);
-            });
-        });
-    }
-    
-    function openModal(mode, data = null) {
-        const isEdit = mode === 'edit';
-        
-        // Update modal title and button text
-        modalTitle.textContent = isEdit ? 'Edit Ruangan' : 'Tambah Ruangan';
-        submitText.textContent = isEdit ? 'Update' : 'Simpan';
-        
-        // Reset form
-        roomForm.reset();
-        clearErrors();
-        
-        if (isEdit && data) {
-            roomIdInput.value = data.roomId;
-            roomNameInput.value = data.roomName;
-            floorSelect.value = data.floorId;
+
+    // Modal functions
+    function openModal(isEdit = false, roomData = null) {
+        const modalTitle = document.getElementById('modal-title');
+        const roomId = document.getElementById('room-id');
+        const roomName = document.getElementById('room-name');
+        const floorSelect = document.getElementById('floor-select');
+        const formMethod = document.getElementById('form-method');
+        const submitText = document.getElementById('submit-text');
+
+        if (isEdit && roomData) {
+            modalTitle.textContent = 'Edit Ruangan';
+            roomId.value = roomData.roomId;
+            roomName.value = roomData.roomName;
+            floorSelect.value = roomData.floorId;
             formMethod.value = 'PUT';
+            submitText.textContent = 'Update';
         } else {
-            roomIdInput.value = '';
+            modalTitle.textContent = 'Tambah Ruangan';
+            roomId.value = '';
+            roomName.value = '';
+            floorSelect.value = '';
             formMethod.value = 'POST';
+            submitText.textContent = 'Simpan';
         }
-        
-        updateCharCount();
-        showModal(roomModal);
-        
-        // Focus on first input
-        setTimeout(() => {
-            floorSelect.focus();
-        }, 100);
-    }
-    
-    function closeRoomModal() {
-        hideModal(roomModal);
-        clearErrors();
-    }
-    
-    function openDeleteModal(roomId, roomName) {
-        deleteRoomId = roomId;
-        deleteRoomName.textContent = roomName;
-        showModal(deleteModal);
-    }
-    
-    function closeDeleteModal() {
-        hideModal(deleteModal);
-        deleteRoomId = null;
-    }
-    
-    function showModal(modal) {
-        modal.classList.remove('hidden');
-        setTimeout(() => {
-            modal.querySelector('.bg-white').classList.remove('scale-95');
-            modal.querySelector('.bg-white').classList.add('scale-100');
-        }, 10);
-        document.body.style.overflow = 'hidden';
-    }
-    
-    function hideModal(modal) {
-        modal.querySelector('.bg-white').classList.remove('scale-100');
-        modal.querySelector('.bg-white').classList.add('scale-95');
-        setTimeout(() => {
-            modal.classList.add('hidden');
-            document.body.style.overflow = '';
-        }, 200);
-    }
-    
-    function handleSubmit(e) {
-        e.preventDefault();
-        
-        if (!validateForm()) return;
-        
-        const formData = new FormData(roomForm);
-        const roomId = roomIdInput.value;
-        const isEdit = roomId !== '';
-        const url = isEdit ? `/rooms/${roomId}` : '/rooms';
-        const method = isEdit ? 'PUT' : 'POST';
-        
-        setLoading(true);
-        
-        // Convert FormData to JSON for Laravel API
-        const data = {};
-        for (let [key, value] of formData.entries()) {
-            data[key] = value;
-        }
-        
-        // Add CSRF token
-        data._token = document.querySelector('meta[name="csrf-token"]')?.content || 
-                     document.querySelector('input[name="_token"]')?.value;
-        
-        if (isEdit) {
-            data._method = 'PUT';
-        }
-        
-        fetch(url, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            setLoading(false);
-            
-            if (result.success) {
-                showNotification(result.message || 'Ruangan berhasil disimpan!', 'success');
-                closeRoomModal();
-                refreshData();
-            } else {
-                if (result.errors) {
-                    showValidationErrors(result.errors);
-                } else {
-                    showNotification(result.message || 'Terjadi kesalahan!', 'error');
-                }
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            setLoading(false);
-            showNotification('Terjadi kesalahan pada server!', 'error');
-        });
-    }
-    
-    function confirmDelete() {
-        if (!deleteRoomId) return;
-        
-        setDeleteLoading(true);
-        
-        const data = {
-            _token: document.querySelector('meta[name="csrf-token"]')?.content || 
-                   document.querySelector('input[name="_token"]')?.value,
-            _method: 'DELETE'
-        };
-        
-        fetch(`/rooms/${deleteRoomId}`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
-        })
-        .then(response => response.json())
-        .then(result => {
-            setDeleteLoading(false);
-            
-            if (result.success) {
-                showNotification(result.message || 'Ruangan berhasil dihapus!', 'success');
-                closeDeleteModal();
-                refreshData();
-            } else {
-                showNotification(result.message || 'Gagal menghapus ruangan!', 'error');
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-            setDeleteLoading(false);
-            showNotification('Terjadi kesalahan pada server!', 'error');
-        });
-    }
-    
-    function validateForm() {
-        clearErrors();
-        let isValid = true;
-        
-        // Validate floor selection
-        if (!floorSelect.value) {
-            showError('floor-error', 'Pilih lantai terlebih dahulu');
-            isValid = false;
-        }
-        
-        // Validate room name
-        const roomName = roomNameInput.value.trim();
-        if (!roomName) {
-            showError('room-name-error', 'Nama ruangan tidak boleh kosong');
-            isValid = false;
-        } else if (roomName.length < 3) {
-            showError('room-name-error', 'Nama ruangan minimal 3 karakter');
-            isValid = false;
-        } else if (roomName.length > 100) {
-            showError('room-name-error', 'Nama ruangan maksimal 100 karakter');
-            isValid = false;
-        }
-        
-        return isValid;
-    }
-    
-    function showValidationErrors(errors) {
-        for (const [field, messages] of Object.entries(errors)) {
-            const errorElement = document.getElementById(`${field}-error`);
-            if (errorElement && messages.length > 0) {
-                showError(`${field}-error`, messages[0]);
-            }
-        }
-    }
-    
-    function showError(elementId, message) {
-        const errorElement = document.getElementById(elementId);
-        if (errorElement) {
-            errorElement.textContent = message;
-            errorElement.classList.remove('hidden');
-            
-            // Add error styling to input
-            const input = errorElement.previousElementSibling;
-            if (input) {
-                input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-            }
-        }
-    }
-    
-    function clearErrors() {
+
+        // Clear errors
         document.querySelectorAll('[id$="-error"]').forEach(error => {
             error.classList.add('hidden');
-            error.textContent = '';
         });
+
+        roomModal.classList.remove('hidden');
+        setTimeout(() => {
+            modalContent.classList.remove('scale-95');
+            modalContent.classList.add('scale-100');
+        }, 10);
         
-        // Remove error styling
-        document.querySelectorAll('input, select').forEach(input => {
-            input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
-        });
+        // Focus first input
+        setTimeout(() => floorSelect.focus(), 100);
     }
-    
-    function updateCharCount() {
-        const count = roomNameInput.value.length;
-        charCount.textContent = count;
+
+    function closeModalFunc() {
+        modalContent.classList.remove('scale-100');
+        modalContent.classList.add('scale-95');
+        setTimeout(() => {
+            roomModal.classList.add('hidden');
+            roomForm.reset();
+            document.querySelectorAll('[id$="-error"]').forEach(error => {
+                error.classList.add('hidden');
+            });
+        }, 300);
+    }
+
+    // Event listeners
+    addRoomBtn.addEventListener('click', () => openModal());
+    closeModal.addEventListener('click', closeModalFunc);
+    cancelBtn.addEventListener('click', closeModalFunc);
+
+    // Close modal when clicking outside
+    roomModal.addEventListener('click', function(e) {
+        if (e.target === roomModal) {
+            closeModalFunc();
+        }
+    });
+
+    // Edit room buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-room-btn')) {
+            const btn = e.target.closest('.edit-room-btn');
+            const roomData = {
+                roomId: btn.dataset.roomId,
+                roomName: btn.dataset.roomName,
+                floorId: btn.dataset.floorId
+            };
+            openModal(true, roomData);
+        }
+    });
+
+    // Delete room buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-room-btn')) {
+            const btn = e.target.closest('.delete-room-btn');
+            const roomId = btn.dataset.roomId;
+            const roomName = btn.dataset.roomName;
+            
+            document.getElementById('delete-room-name').textContent = roomName;
+            document.getElementById('confirm-delete-btn').dataset.roomId = roomId;
+            deleteModal.classList.remove('hidden');
+        }
+    });
+
+    // Cancel delete
+    document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+        deleteModal.classList.add('hidden');
+    });
+
+    // Confirm delete
+    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
+        const roomId = this.dataset.roomId;
+        const deleteText = document.getElementById('delete-text');
+        const deleteSpinner = document.getElementById('delete-spinner');
         
-        if (count > 100) {
-            charCount.classList.add('text-red-500');
-            charCount.classList.remove('text-gray-500');
-        } else if (count > 80) {
-            charCount.classList.add('text-yellow-600');
-            charCount.classList.remove('text-gray-500', 'text-red-500');
-        } else {
-            charCount.classList.add('text-gray-500');
-            charCount.classList.remove('text-yellow-600', 'text-red-500');
+        // Show loading state
+        deleteText.classList.add('hidden');
+        deleteSpinner.classList.remove('hidden');
+        this.disabled = true;
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value;
+        
+        // Submit delete request
+        fetch(`/rooms/${roomId}`, {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw data;
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log('Success:', data.message);
+                
+                // Remove room card from UI
+                removeRoomCard(roomId);
+                
+                // Close delete modal
+                deleteModal.classList.add('hidden');
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Show success notification (optional)
+                showNotification('Ruangan berhasil dihapus!', 'success');
+            } else {
+                throw data;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            // Reset loading state
+            deleteText.classList.remove('hidden');
+            deleteSpinner.classList.add('hidden');
+            this.disabled = false;
+            
+            // Show error notification
+            showNotification(error.message || 'Gagal menghapus ruangan!', 'error');
+        });
+    });
+
+    // Close delete modal when clicking outside
+    deleteModal.addEventListener('click', function(e) {
+        if (e.target === deleteModal) {
+            deleteModal.classList.add('hidden');
+        }
+    });
+
+    // Form submission - FIXED VERSION
+    roomForm.addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        const submitBtn = document.getElementById('submit-btn');
+        const submitText = document.getElementById('submit-text');
+        const loadingSpinner = document.getElementById('loading-spinner');
+        
+        // Clear previous errors
+        document.querySelectorAll('[id$="-error"]').forEach(error => {
+            error.classList.add('hidden');
+        });
+        
+        // Show loading state
+        submitText.classList.add('hidden');
+        loadingSpinner.classList.remove('hidden');
+        submitBtn.disabled = true;
+        
+        // Get form data
+        const formData = new FormData(this);
+        const roomId = document.getElementById('room-id').value;
+        const method = document.getElementById('form-method').value;
+        
+        // Get CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
+                         document.querySelector('input[name="_token"]')?.value;
+        
+        // Determine URL and method
+        let url = '/rooms';
+        if (method === 'PUT' && roomId) {
+            url = `/rooms/${roomId}`;
+        }
+        
+        // Prepare request body
+        const requestBody = {
+            room_name: formData.get('room_name'),
+            floor_id: formData.get('floor_id'),
+            _token: csrfToken
+        };
+        
+        if (method === 'PUT') {
+            requestBody._method = 'PUT';
+        }
+        
+        // Submit form
+        fetch(url, {
+            method: 'POST', // Always POST for Laravel with _method override
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken
+            },
+            body: JSON.stringify(requestBody)
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(data => {
+                    throw data;
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                console.log('Success:', data.message);
+                
+                if (method === 'POST') {
+                    // ADD NEW ROOM CARD
+                    addNewRoomCard(data.room);
+                } else {
+                    // UPDATE EXISTING ROOM CARD
+                    updateRoomCard(data.room);
+                }
+                
+                // Close modal
+                closeModalFunc();
+                
+                // Update statistics
+                updateStatistics();
+                
+                // Show success notification (optional)
+                showNotification(data.message || 'Ruangan berhasil disimpan!', 'success');
+                
+                // Re-apply current filters
+                filterRooms();
+                
+            } else {
+                throw data;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            
+            // Show validation errors
+            if (error.errors) {
+                for (const [field, messages] of Object.entries(error.errors)) {
+                    const errorElement = document.getElementById(`${field.replace('_', '-')}-error`);
+                    if (errorElement && messages.length > 0) {
+                        errorElement.textContent = messages[0];
+                        errorElement.classList.remove('hidden');
+                    }
+                }
+            } else {
+                // Show general error
+                showNotification(error.message || 'Terjadi kesalahan saat menyimpan data.', 'error');
+            }
+        })
+        .finally(() => {
+            // Reset loading state
+            submitText.classList.remove('hidden');
+            loadingSpinner.classList.add('hidden');
+            submitBtn.disabled = false;
+        });
+    });
+
+    // Function to add new room card to UI
+    function addNewRoomCard(room) {
+        const roomsGrid = document.getElementById('rooms-grid');
+        const emptyState = document.getElementById('empty-state');
+        
+        // Remove empty state if exists
+        if (emptyState) {
+            emptyState.remove();
+        }
+        
+        // Create room card HTML
+        const roomCardHtml = createRoomCardHtml(room);
+        
+        // Insert new card at the beginning
+        if (roomsGrid) {
+            roomsGrid.insertAdjacentHTML('afterbegin', roomCardHtml);
+            
+            // Add animation to new card
+            const newCard = roomsGrid.firstElementChild;
+            newCard.style.opacity = '0';
+            newCard.style.transform = 'translateY(-20px)';
+            
+            setTimeout(() => {
+                newCard.style.transition = 'all 0.3s ease';
+                newCard.style.opacity = '1';
+                newCard.style.transform = 'translateY(0)';
+            }, 10);
         }
     }
-    
+
+    // Function to update existing room card
+    function updateRoomCard(room) {
+        const existingCard = document.querySelector(`[data-room-id="${room.room_id}"]`);
+        if (!existingCard) return;
+        
+        // Update card content
+        const roomNameElement = existingCard.querySelector('h4');
+        const floorNameElement = existingCard.querySelector('.font-semibold.text-telkomsel-blue');
+        const editBtn = existingCard.querySelector('.edit-room-btn');
+        
+        if (roomNameElement) {
+            roomNameElement.textContent = room.room_name;
+        }
+        
+        if (floorNameElement && room.floor) {
+            floorNameElement.textContent = room.floor.floor_name;
+        }
+        
+        // Update data attributes
+        existingCard.dataset.roomName = room.room_name;
+        existingCard.dataset.floorId = room.floor_id;
+        existingCard.dataset.floorName = room.floor ? room.floor.floor_name : '';
+        
+        if (editBtn) {
+            editBtn.dataset.roomName = room.room_name;
+            editBtn.dataset.floorId = room.floor_id;
+        }
+        
+        // Flash effect
+        existingCard.style.backgroundColor = '#f0f9ff';
+        setTimeout(() => {
+            existingCard.style.transition = 'background-color 0.3s ease';
+            existingCard.style.backgroundColor = '';
+        }, 100);
+    }
+
+    // Function to remove room card from UI
+    function removeRoomCard(roomId) {
+        const roomCard = document.querySelector(`[data-room-id="${roomId}"]`);
+        if (!roomCard) return;
+        
+        // Animate out
+        roomCard.style.transition = 'all 0.3s ease';
+        roomCard.style.opacity = '0';
+        roomCard.style.transform = 'translateX(100px)';
+        
+        setTimeout(() => {
+            roomCard.remove();
+            
+            // Show empty state if no rooms left
+            const remainingCards = document.querySelectorAll('.room-card');
+            if (remainingCards.length === 0) {
+                showEmptyState();
+            }
+        }, 300);
+    }
+
+    // Function to create room card HTML
+    function createRoomCardHtml(room) {
+        const deviceCount = room.devices ? room.devices.length : 0;
+        const floorName = room.floor ? room.floor.floor_name : 'N/A';
+        
+        return `
+            <div class="room-card bg-gray-50 rounded-lg p-6 hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-telkomsel-red/30" 
+                 data-room-id="${room.room_id}" 
+                 data-floor-id="${room.floor_id}"
+                 data-room-name="${room.room_name}"
+                 data-floor-name="${floorName}">
+                
+                <div class="flex items-start justify-between mb-4">
+                    <div class="flex items-center space-x-3">
+                        <div class="bg-telkomsel-blue rounded-lg p-2">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-900 text-lg">${room.room_name}</h4>
+                            <p class="text-sm text-gray-600">ID: #${room.room_id}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="flex space-x-2">
+                        <button 
+                            class="edit-room-btn text-gray-600 hover:text-telkomsel-red p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            data-room-id="${room.room_id}"
+                            data-room-name="${room.room_name}"
+                            data-floor-id="${room.floor_id}"
+                            title="Edit Ruangan"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                            </svg>
+                        </button>
+                        <button 
+                            class="delete-room-btn text-gray-600 hover:text-red-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                            data-room-id="${room.room_id}"
+                            data-room-name="${room.room_name}"
+                            title="Hapus Ruangan"
+                        >
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                        <span class="text-sm text-gray-600">Lantai</span>
+                        <span class="font-semibold text-telkomsel-blue">${floorName}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                        <span class="text-sm text-gray-600">Device</span>
+                        <span class="font-semibold text-gray-900">${deviceCount}</span>
+                    </div>
+                </div>
+                
+                <div class="mt-4 flex space-x-2">
+                    <a href="/devices?room=${room.room_id}" 
+                       class="flex-1 bg-telkomsel-gray text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300 transition-colors text-center block text-sm font-medium">
+                        Lihat Device
+                    </a>
+                    <button 
+                        class="bg-telkomsel-yellow/20 text-telkomsel-yellow px-4 py-2 rounded-lg hover:bg-telkomsel-yellow/30 transition-colors text-sm font-medium"
+                        title="Quick Stats"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        `;
+    }
+
+    // Function to show empty state
+    function showEmptyState() {
+        const roomsContainer = document.getElementById('rooms-container');
+        const emptyStateHtml = `
+            <div id="empty-state" class="text-center py-12">
+                <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                </svg>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Ruangan</h3>
+                <p class="text-gray-600 mb-4">Mulai dengan menambahkan ruangan pertama untuk sistem Anda.</p>
+                <button 
+                    class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200"
+                    onclick="document.getElementById('add-room-btn').click()"
+                >
+                    Tambah Ruangan Pertama
+                </button>
+            </div>
+        `;
+        
+        // Insert empty state after rooms grid
+        const roomsGrid = document.getElementById('rooms-grid');
+        if (roomsGrid) {
+            roomsGrid.insertAdjacentHTML('afterend', emptyStateHtml);
+        }
+    }
+
+    // Function to update statistics
+    function updateStatistics() {
+        const totalRoomsElement = document.getElementById('total-rooms');
+        const totalRooms = document.querySelectorAll('.room-card').length;
+        
+        if (totalRoomsElement) {
+            totalRoomsElement.textContent = totalRooms;
+        }
+        
+        // Update filtered count
+        const filteredCountElement = document.getElementById('filtered-count');
+        if (filteredCountElement) {
+            const visibleRooms = document.querySelectorAll('.room-card:not([style*="display: none"])').length;
+            filteredCountElement.textContent = visibleRooms;
+        }
+    }
+
+    // Search and filter functionality
     function filterRooms() {
-        const floorValue = floorFilter.value;
-        const searchValue = searchRooms.value.toLowerCase().trim();
+        const floorValue = floorFilter ? floorFilter.value : '';
+        const searchValue = searchInput ? searchInput.value.toLowerCase().trim() : '';
         const roomCards = document.querySelectorAll('.room-card');
         
         let visibleCount = 0;
         
         roomCards.forEach(card => {
             const floorId = card.dataset.floorId;
-            const floorName = card.dataset.floorName.toLowerCase();
+            const floorName = (card.dataset.floorName || '').toLowerCase();
             const roomName = card.querySelector('h4').textContent.toLowerCase();
             const roomId = card.dataset.roomId;
             
@@ -763,248 +897,36 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         
-        // Update count
-        filteredCount.textContent = visibleCount;
-        
-        // Show/hide empty state
-        const emptyState = document.getElementById('empty-state');
-        if (visibleCount === 0 && roomCards.length > 0) {
-            if (!emptyState) {
-                showEmptySearchState();
-            }
-        } else if (emptyState) {
-            emptyState.remove();
+        // Update filtered count
+        const filteredCountElement = document.getElementById('filtered-count');
+        if (filteredCountElement) {
+            filteredCountElement.textContent = visibleCount;
         }
     }
-    
-    function showEmptySearchState() {
-        const emptyHtml = `
-            <div id="empty-state" class="text-center py-12">
-                <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                </svg>
-                <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>
-                <p class="text-gray-600 mb-4">Tidak ditemukan ruangan yang sesuai dengan pencarian Anda.</p>
-                <button 
-                    class="text-telkomsel-red hover:text-telkomsel-dark-red font-medium"
-                    onclick="document.getElementById('search-rooms').value = ''; document.getElementById('floor-filter').value = ''; filterRooms();"
-                >
-                    Reset Filter
-                </button>
-            </div>
-        `;
-        
-        if (roomsGrid) {
-            roomsGrid.insertAdjacentHTML('afterend', emptyHtml);
-        }
+
+    // Bind filter events
+    if (floorFilter) {
+        floorFilter.addEventListener('change', filterRooms);
     }
     
-    function toggleView(viewType) {
-        currentView = viewType;
-        
-        if (viewType === 'grid') {
-            gridViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            gridViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            
-            listViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            listViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            
-            if (roomsGrid) {
-                roomsGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-            }
-        } else {
-            listViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            listViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            
-            gridViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            gridViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            
-            if (roomsGrid) {
-                roomsGrid.className = 'space-y-4';
-            }
-        }
-    }
-    
-    function refreshData() {
-        // Add loading state to refresh button
-        const originalHtml = refreshBtn.innerHTML;
-        refreshBtn.innerHTML = `
-            <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-            </svg>
-            <span class="hidden sm:inline">Memuat...</span>
-        `;
-        refreshBtn.disabled = true;
-        
-        // Simulate refresh (in real app, this would reload data)
-        setTimeout(() => {
-            refreshBtn.innerHTML = originalHtml;
-            refreshBtn.disabled = false;
-            showNotification('Data berhasil diperbarui!', 'success');
-            
-            // Re-bind events after refresh
-            bindRoomCardEvents();
-        }, 1000);
-    }
-    
-    function setLoading(loading) {
-        if (loading) {
-            submitBtn.disabled = true;
-            submitText.classList.add('hidden');
-            loadingSpinner.classList.remove('hidden');
-        } else {
-            submitBtn.disabled = false;
-            submitText.classList.remove('hidden');
-            loadingSpinner.classList.add('hidden');
-        }
-    }
-    
-    function setDeleteLoading(loading) {
-        if (loading) {
-            confirmDeleteBtn.disabled = true;
-            deleteText.classList.add('hidden');
-            deleteSpinner.classList.remove('hidden');
-        } else {
-            confirmDeleteBtn.disabled = false;
-            deleteText.classList.remove('hidden');
-            deleteSpinner.classList.add('hidden');
-        }
-    }
-    
-    function showNotification(message, type = 'info') {
-        // Create notification element
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 translate-x-full`;
-        
-        const bgColor = type === 'success' ? 'bg-green-500' : 
-                       type === 'error' ? 'bg-red-500' : 
-                       type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
-        
-        const icon = type === 'success' ? 'M5 13l4 4L19 7' :
-                    type === 'error' ? 'M6 18L18 6M6 6l12 12' :
-                    type === 'warning' ? 'M12 8v4m0 4h.01' :
-                    'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
-        
-        notification.innerHTML = `
-            <div class="${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
-                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/>
-                </svg>
-                <p class="flex-1">${message}</p>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Slide in
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-            notification.classList.add('translate-x-0');
-        }, 100);
-        
-        // Auto remove after 5 seconds
-        setTimeout(() => {
-            notification.classList.remove('translate-x-0');
-            notification.classList.add('translate-x-full');
-            setTimeout(() => notification.remove(), 300);
-        }, 5000);
-    }
-    
-    function handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + N: Add new room
-        if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
-            e.preventDefault();
-            if (!roomModal.classList.contains('hidden')) return;
-            openModal('add');
-        }
-        
-        // Escape: Close modals
-        if (e.key === 'Escape') {
-            if (!roomModal.classList.contains('hidden')) {
-                closeRoomModal();
-            }
-            if (!deleteModal.classList.contains('hidden')) {
-                closeDeleteModal();
-            }
-        }
-        
-        // Ctrl/Cmd + F: Focus search
-        if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-            e.preventDefault();
-            searchRooms.focus();
-        }
-        
-        // Ctrl/Cmd + R: Refresh (prevent default browser refresh)
-        if ((e.ctrlKey || e.metaKey) && e.key === 'r') {
-            e.preventDefault();
-            refreshData();
-        }
-    }
-    
-    // Utility function for debouncing
-    function debounce(func, wait) {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-        };
-    }
-    
-    // Auto-save form data to prevent data loss
-    function autoSaveForm() {
-        const formData = {
-            floor_id: floorSelect.value,
-            room_name: roomNameInput.value
-        };
-        
-        localStorage.setItem('room_form_draft', JSON.stringify(formData));
-    }
-    
-    function loadFormDraft() {
-        const draft = localStorage.getItem('room_form_draft');
-        if (draft) {
-            try {
-                const formData = JSON.parse(draft);
-                if (formData.floor_id) floorSelect.value = formData.floor_id;
-                if (formData.room_name) roomNameInput.value = formData.room_name;
-                updateCharCount();
-            } catch (e) {
-                console.error('Error loading form draft:', e);
-            }
-        }
-    }
-    
-    function clearFormDraft() {
-        localStorage.removeItem('room_form_draft');
-    }
-    
-    // Bind auto-save events
-    if (floorSelect && roomNameInput) {
-        floorSelect.addEventListener('change', autoSaveForm);
-        roomNameInput.addEventListener('input', debounce(autoSaveForm, 1000));
-        
-        // Load draft when opening add modal
-        const originalOpenModal = openModal;
-        openModal = function(mode, data = null) {
-            originalOpenModal(mode, data);
-            if (mode === 'add') {
-                loadFormDraft();
-            }
-        };
-        
-        // Clear draft on successful submit
-        roomForm.addEventListener('submit', () => {
-            setTimeout(clearFormDraft, 1000);
+    if (searchInput) {
+        searchInput.addEventListener('input', function() {
+            // Debounce search
+            clearTimeout(this.searchTimeout);
+            this.searchTimeout = setTimeout(filterRooms, 300);
         });
     }
+
+    // Handle escape key to close modals
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape') {
+            if (!roomModal.classList.contains('hidden')) {
+                closeModalFunc();
+            }
+            if (!deleteModal.classList.contains('hidden')) {
+                deleteModal.classList.add('hidden');
+            }
+        }
+    });
 });
 </script>

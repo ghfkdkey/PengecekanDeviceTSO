@@ -48,10 +48,10 @@
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div id="sidebar" class="bg-telkomsel-blue text-white transition-all duration-300 ease-in-out w-64 min-h-screen relative z-40">
-            <!-- Logo Section -->
-            <div class="flex items-center justify-between p-4 border-b border-white/20">
+           <!-- Logo Section -->
+           <div class="flex items-center justify-between p-4 border-b border-white/20">
                 <div class="flex items-center space-x-3">
-                    <div class="bg-white rounded-lg w-10 h-10 flex items-center justify-center">
+                    <div class="bg-white rounded-lg w-10 h-10 flex items-center justify-center flex-shrink-0">
                         <svg class="w-6 h-6 text-telkomsel-red" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12 2L2 7v10c0 5.55 3.84 9.74 9 10.92C16.16 26.74 20 22.55 20 17V7l-10-5z"/>
                         </svg>
@@ -61,8 +61,20 @@
                         <p class="text-xs text-white/80">Telkomsel</p>
                     </div>
                 </div>
-                <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Toggle sidebar">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <button id="sidebar-toggle" class="p-2 rounded-lg hover:bg-white/10 transition-colors flex-shrink-0" title="Toggle sidebar">
+                    <svg id="hamburger-open" class="w-5 h-5 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                    </svg>
+                    <svg id="hamburger-close" class="w-5 h-5 transition-transform duration-300 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Collapsed Sidebar Toggle (Only visible when collapsed) -->
+            <div id="collapsed-toggle" class="hidden p-4 border-b border-white/20 justify-center">
+                <button id="collapsed-sidebar-toggle" class="p-2 rounded-lg hover:bg-white/10 transition-colors" title="Expand sidebar">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
@@ -73,8 +85,8 @@
                 <ul class="space-y-2">
                     <!-- Dashboard -->
                     <li>
-                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('dashboard') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('dashboard') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('dashboard') ? 'bg-white/20' : '' }}" title="Dashboard">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 5a2 2 0 012-2h4a2 2 0 012 2v2H8V5z"/>
                             </svg>
@@ -84,8 +96,8 @@
 
                     <!-- Device Checking -->
                     <li>
-                        <a href="{{ route('device-check.page') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('device-check.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('device-check.page') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('device-check.*') ? 'bg-white/20' : '' }}" title="Pengecekan Device">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Pengecekan Device</span>
@@ -93,12 +105,12 @@
                     </li>
 
                     <!-- Divider -->
-                    <li class="border-t border-white/20 my-4"></li>
+                    <li class="nav-divider border-t border-white/20 my-4"></li>
 
                     <!-- Master Data Section -->
-                    <li>
+                    <li class="nav-section">
                         <div class="flex items-center space-x-3 px-3 py-2">
-                            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
                             </svg>
                             <span class="nav-text text-sm text-white/60 font-medium transition-opacity duration-300">MASTER DATA</span>
@@ -107,8 +119,8 @@
 
                     <!-- Floors -->
                     <li>
-                        <a href="{{ route('floors.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('floors.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('floors.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('floors.*') ? 'bg-white/20' : '' }}" title="Lantai">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Lantai</span>
@@ -117,8 +129,8 @@
 
                     <!-- Rooms -->
                     <li>
-                        <a href="{{ route('rooms.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('rooms.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('rooms.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('rooms.*') ? 'bg-white/20' : '' }}" title="Ruangan">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Ruangan</span>
@@ -127,8 +139,8 @@
 
                     <!-- Devices -->
                     <li>
-                        <a href="{{ route('devices.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('devices.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('devices.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('devices.*') ? 'bg-white/20' : '' }}" title="Device">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Device</span>
@@ -137,8 +149,8 @@
 
                     <!-- Checklist Items -->
                     <li>
-                        <a href="{{ route('checklist-items.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('checklist-items.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('checklist-items.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('checklist-items.*') ? 'bg-white/20' : '' }}" title="Checklist">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Checklist</span>
@@ -147,12 +159,12 @@
 
                     @if(auth()->user()->isAdmin())
                     <!-- Divider -->
-                    <li class="border-t border-white/20 my-4"></li>
+                    <li class="nav-divider border-t border-white/20 my-4"></li>
 
                     <!-- Admin Section -->
-                    <li>
+                    <li class="nav-section">
                         <div class="flex items-center space-x-3 px-3 py-2">
-                            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
                             </svg>
@@ -162,25 +174,21 @@
 
                     <!-- Users Management -->
                     <li>
-                        <a href="{{ route('users.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('users.*') ? 'bg-white/20' : '' }}">
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <a href="{{ route('users.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('users.*') ? 'bg-white/20' : '' }}" title="Kelola User">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
                             </svg>
                             <span class="nav-text transition-opacity duration-300">Kelola User</span>
                         </a>
                     </li>
-                      <li>
-                        <div class="flex items-center space-x-3 px-3 py-2">
-                            <svg class="w-4 h-4 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            </svg>
-                        </div>
-                    </li>
+                    
+                    <li class="nav-divider border-t border-white/20 my-4"></li>
 
                     <li>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-                            <button type="submit" class="flex items-center space-x-3 w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <button type="submit" class="flex items-center space-x-3 w-full text-left p-3 rounded-lg hover:bg-white/10 transition-colors" title="Logout">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/>
                                 </svg>
                                 <span class="nav-text transition-opacity duration-300"> Logout </span>
@@ -267,10 +275,14 @@
         // Sidebar toggle functionality
         const sidebar = document.getElementById('sidebar');
         const sidebarToggle = document.getElementById('sidebar-toggle');
+        const collapsedSidebarToggle = document.getElementById('collapsed-sidebar-toggle');
         const mobileSidebarToggle = document.getElementById('mobile-sidebar-toggle');
         const sidebarOverlay = document.getElementById('sidebar-overlay');
         const logoText = document.getElementById('logo-text');
         const navTexts = document.querySelectorAll('.nav-text');
+        const navDividers = document.querySelectorAll('.nav-divider');
+        const navSections = document.querySelectorAll('.nav-section');
+        const collapsedToggle = document.getElementById('collapsed-toggle');
 
         let sidebarCollapsed = false;
 
@@ -278,20 +290,42 @@
             sidebarCollapsed = !sidebarCollapsed;
             
             if (sidebarCollapsed) {
+                // Collapse sidebar
                 sidebar.classList.remove('w-64');
                 sidebar.classList.add('w-16');
+                
+                // Hide logo text and nav texts
                 logoText.classList.add('opacity-0');
                 navTexts.forEach(text => text.classList.add('opacity-0'));
                 
+                // Hide sections and dividers
+                navDividers.forEach(divider => divider.classList.add('hidden'));
+                navSections.forEach(section => section.classList.add('hidden'));
+                
+                // Show collapsed toggle after transition
                 setTimeout(() => {
                     logoText.classList.add('hidden');
                     navTexts.forEach(text => text.classList.add('hidden'));
+                    sidebarToggle.parentElement.classList.add('hidden');
+                    collapsedToggle.classList.remove('hidden');
+                    collapsedToggle.classList.add('flex');
                 }, 150);
+                
             } else {
+                // Expand sidebar
                 sidebar.classList.remove('w-16');
                 sidebar.classList.add('w-64');
+                
+                // Hide collapsed toggle
+                collapsedToggle.classList.remove('flex');
+                collapsedToggle.classList.add('hidden');
+                sidebarToggle.parentElement.classList.remove('hidden');
+                
+                // Show logo text and nav texts
                 logoText.classList.remove('hidden');
                 navTexts.forEach(text => text.classList.remove('hidden'));
+                navDividers.forEach(divider => divider.classList.remove('hidden'));
+                navSections.forEach(section => section.classList.remove('hidden'));
                 
                 setTimeout(() => {
                     logoText.classList.remove('opacity-0');
@@ -305,7 +339,9 @@
             sidebarOverlay.classList.toggle('hidden');
         }
 
+        // Event listeners
         sidebarToggle.addEventListener('click', toggleSidebar);
+        collapsedSidebarToggle.addEventListener('click', toggleSidebar);
         mobileSidebarToggle.addEventListener('click', toggleMobileSidebar);
         sidebarOverlay.addEventListener('click', toggleMobileSidebar);
 
@@ -326,6 +362,14 @@
                 sidebarOverlay.classList.add('hidden');
             } else {
                 sidebar.classList.add('-translate-x-full');
+                // Reset collapsed state on mobile
+                if (sidebarCollapsed) {
+                    sidebarCollapsed = false;
+                    sidebar.classList.remove('w-16');
+                    sidebar.classList.add('w-64');
+                    collapsedToggle.classList.add('hidden');
+                    sidebarToggle.parentElement.classList.remove('hidden');
+                }
             }
         }
 
@@ -352,15 +396,45 @@
         /* Collapsed sidebar styling */
         #sidebar.w-16 nav a {
             justify-content: center;
+            padding: 0.75rem;
         }
-        #sidebar.w-16 nav a > * + * {
-            margin-left: 0 !important; /* override Tailwind space-x-3 */
+        
+        #sidebar.w-16 nav a svg {
+            margin: 0 !important;
         }
-        #sidebar.w-16 #logo-text {
-            display: none !important;
+
+        #sidebar.w-16 nav a:hover::after {
+            content: attr(title);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 50;
+            margin-left: 0.5rem;
+            pointer-events: none;
         }
-        #sidebar.w-16 .nav-text {
-            display: none !important;
+
+        #sidebar.w-16 nav button:hover::after {
+            content: attr(title);
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 0.5rem;
+            border-radius: 0.375rem;
+            font-size: 0.875rem;
+            white-space: nowrap;
+            z-index: 50;
+            margin-left: 0.5rem;
+            pointer-events: none;
         }
 
         /* Mobile sidebar positioning */
@@ -378,6 +452,15 @@
             #sidebar:not(.-translate-x-full) {
                 transform: translateX(0);
             }
+        }
+
+        /* Smooth transitions */
+        #sidebar {
+            transition: width 0.3s ease-in-out;
+        }
+        
+        .nav-text, #logo-text {
+            transition: opacity 0.3s ease-in-out;
         }
     </style>
 

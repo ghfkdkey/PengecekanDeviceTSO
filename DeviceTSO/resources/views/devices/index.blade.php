@@ -179,19 +179,6 @@
                     <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Daftar Device</h3>
                     <p class="text-sm text-gray-600 mt-1">Total <span id="filtered-count">{{ $devices->count() }}</span> device ditemukan</p>
                 </div>
-                
-                <div class="flex items-center space-x-2">
-                    <button id="grid-view" class="p-2 rounded-lg text-telkomsel-red bg-telkomsel-red/10 border border-telkomsel-red/20">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/>
-                        </svg>
-                    </button>
-                    <button id="list-view" class="p-2 rounded-lg text-gray-600 hover:text-telkomsel-red hover:bg-gray-100">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"/>
-                        </svg>
-                    </button>
-                </div>
             </div>
         </div>
         

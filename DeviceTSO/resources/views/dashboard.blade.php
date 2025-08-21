@@ -194,7 +194,50 @@
         document.getElementById('failedDevices').textContent = stats.failed_devices || 0;
     }
 
-    // Update activities
+    // Fungsi untuk format time ago dengan timezone yang benar
+    function formatTimeAgo(dateString) {
+        try {
+            // Parse tanggal dengan timezone yang benar
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffInSeconds = Math.floor((now - date) / 1000);
+            
+            // Jika kurang dari 1 menit
+            if (diffInSeconds < 60) {
+                return 'baru saja';
+            }
+            
+            // Jika kurang dari 1 jam
+            if (diffInSeconds < 3600) {
+                const minutes = Math.floor(diffInSeconds / 60);
+                return `${minutes} menit yang lalu`;
+            }
+            
+            // Jika kurang dari 1 hari
+            if (diffInSeconds < 86400) {
+                const hours = Math.floor(diffInSeconds / 3600);
+                return `${hours} jam yang lalu`;
+            }
+            
+            // Jika kurang dari 1 minggu
+            if (diffInSeconds < 604800) {
+                const days = Math.floor(diffInSeconds / 86400);
+                return `${days} hari yang lalu`;
+            }
+            
+            // Jika lebih dari 1 minggu, tampilkan tanggal
+            return date.toLocaleDateString('id-ID', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        } catch (error) {
+            console.error('Error formatting date:', error);
+            return 'waktu tidak diketahui';
+        }
+    }
+
+    // Update activities dengan penanganan timezone yang lebih baik
     function updateActivities() {
         const container = document.getElementById('recentActivities');
         const activities = dashboardData.activities;
@@ -224,6 +267,42 @@
                 </div>
             `;
         }).join('');
+    }
+
+    // Fungsi untuk mendapatkan icon berdasarkan tipe aktivitas
+    function getActivityIcon(type) {
+        const icons = {
+            'device_check': `
+                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+            `,
+            'device_added': `
+                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                    </svg>
+                </div>
+            `,
+            'floor_added': `
+                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+            `,
+            'room_added': `
+                <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                    </svg>
+                </div>
+            `
+        };
+        
+        return icons[type] || icons['device_check'];
     }
 
     // Get activity icon based on type

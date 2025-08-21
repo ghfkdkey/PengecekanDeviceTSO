@@ -88,7 +88,7 @@
                 </h2>
             </div>
 
-            <form action="{{ route('checklist-items.store') }}" method="POST" class="p-6 space-y-6">
+            <form action="{{ route('checklist-items.store') }}" method="POST" class="p-6 space-y-6" id="checklistForm">
                 @csrf
 
                 <!-- Device Type Selection -->
@@ -105,7 +105,6 @@
                                 required
                             >
                                 <option value="">Pilih Jenis Perangkat</option>
-                                <option value="">Pilih Tipe Device</option>
                                 <option value="Computer" {{ old('device_type') == 'Computer' ? 'selected' : '' }}>Computer</option>
                                 <option value="Smartboard" {{ old('device_type') == 'Smartboard' ? 'selected' : '' }}>Smartboard</option>
                                 <option value="SmartTV" {{ old('device_type') == 'SmartTV' ? 'selected' : '' }}>SmartTV</option>
@@ -140,27 +139,46 @@
                     </div>
                 </div>
 
-                <!-- Question Input -->
+                <!-- Questions Container -->
                 <div>
-                    <label for="question" class="block text-sm font-medium text-gray-700 mb-2">
-                        Pertanyaan Checklist <span class="text-red-500">*</span>
-                    </label>
-                    <div class="space-y-2">
-                        <textarea 
-                            name="question" 
-                            id="question" 
-                            rows="4"
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
-                            placeholder="Contoh: Apakah kondisi fisik perangkat dalam keadaan baik (tidak retak, tidak berkarat)?"
-                            required
-                            maxlength="500"
-                        >{{ old('question') }}</textarea>
-                        <div class="flex justify-between items-center text-xs">
-                            <div class="text-gray-500">
-                                <span id="char-count">{{ strlen(old('question', '')) }}</span>/500 karakter
+                    <div class="flex items-center justify-between mb-4">
+                        <label class="block text-sm font-medium text-gray-700">
+                            Pertanyaan Checklist <span class="text-red-500">*</span>
+                        </label>
+                        <button type="button" id="addQuestionBtn" class="inline-flex items-center px-3 py-2 bg-green-600 hover:bg-green-700 text-white text-sm font-medium rounded-lg transition-colors duration-200">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                            </svg>
+                            Tambah Pertanyaan
+                        </button>
+                    </div>
+                    
+                    <div id="questionsContainer" class="space-y-4">
+                        <!-- Question 1 (Default) -->
+                        <div class="question-item bg-gray-50 border border-gray-200 rounded-lg p-4" data-question-id="1">
+                            <div class="flex items-start justify-between mb-3">
+                                <h4 class="text-sm font-medium text-gray-900">Pertanyaan #1</h4>
+                                <button type="button" class="remove-question-btn text-red-600 hover:text-red-800 transition-colors" style="display: none;">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                    </svg>
+                                </button>
                             </div>
-                            <div class="text-gray-500">
-                                Gunakan kalimat tanya yang jelas dan spesifik
+                            <textarea 
+                                name="questions[]" 
+                                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                                placeholder="Contoh: Apakah kondisi fisik perangkat dalam keadaan baik (tidak retak, tidak berkarat)?"
+                                required
+                                maxlength="500"
+                                rows="3"
+                            >{{ old('questions.0') }}</textarea>
+                            <div class="flex justify-between items-center text-xs mt-2">
+                                <div class="text-gray-500">
+                                    <span class="char-count">0</span>/500 karakter
+                                </div>
+                                <div class="text-gray-500">
+                                    Gunakan kalimat tanya yang jelas dan spesifik
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -192,99 +210,6 @@
                             </ul>
                         </div>
                     </div>
-                </div>
-
-                <!-- Priority Level -->
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-3">
-                        Tingkat Prioritas <span class="text-red-500">*</span>
-                    </label>
-                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-red-500">
-                            <input 
-                                type="radio" 
-                                name="priority" 
-                                value="high" 
-                                class="sr-only"
-                                {{ old('priority') == 'high' ? 'checked' : '' }}
-                            >
-                            <div class="priority-indicator w-4 h-4 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center">
-                                <div class="w-2 h-2 bg-red-500 rounded-full hidden priority-dot"></div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium text-gray-900">Tinggi</span>
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                        Critical
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pengecekan wajib dan mendesak</p>
-                            </div>
-                        </label>
-
-                        <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-red-500">
-                            <input 
-                                type="radio" 
-                                name="priority" 
-                                value="medium" 
-                                class="sr-only"
-                                {{ old('priority') == 'medium' || old('priority') == '' ? 'checked' : '' }}
-                            >
-                            <div class="priority-indicator w-4 h-4 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center">
-                                <div class="w-2 h-2 bg-yellow-500 rounded-full hidden priority-dot"></div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium text-gray-900">Sedang</span>
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                        Normal
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pengecekan rutin standar</p>
-                            </div>
-                        </label>
-
-                        <label class="relative flex items-center p-4 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-50 focus-within:ring-2 focus-within:ring-red-500">
-                            <input 
-                                type="radio" 
-                                name="priority" 
-                                value="low" 
-                                class="sr-only"
-                                {{ old('priority') == 'low' ? 'checked' : '' }}
-                            >
-                            <div class="priority-indicator w-4 h-4 border-2 border-gray-300 rounded-full mr-3 flex items-center justify-center">
-                                <div class="w-2 h-2 bg-green-500 rounded-full hidden priority-dot"></div>
-                            </div>
-                            <div class="flex-1">
-                                <div class="flex items-center">
-                                    <span class="text-sm font-medium text-gray-900">Rendah</span>
-                                    <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                        Optional
-                                    </span>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-1">Pengecekan tambahan</p>
-                            </div>
-                        </label>
-                    </div>
-                </div>
-
-                <!-- Additional Notes -->
-                <div>
-                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
-                        Catatan Tambahan
-                        <span class="text-gray-400 font-normal">(Opsional)</span>
-                    </label>
-                    <textarea 
-                        name="notes" 
-                        id="notes" 
-                        rows="3"
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
-                        placeholder="Tambahkan catatan atau instruksi khusus untuk pengecekan ini..."
-                        maxlength="255"
-                    >{{ old('notes') }}</textarea>
-                    <p class="mt-1 text-xs text-gray-500">
-                        <span id="notes-char-count">{{ strlen(old('notes', '')) }}</span>/255 karakter
-                    </p>
                 </div>
 
                 <!-- Action Buttons -->
@@ -320,35 +245,100 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-    // Character counter for question
-    const questionTextarea = document.getElementById('question');
-    const charCount = document.getElementById('char-count');
-    
-    questionTextarea.addEventListener('input', function() {
-        const length = this.value.length;
-        charCount.textContent = length;
-        
-        if (length > 450) {
-            charCount.classList.add('text-red-500');
-        } else {
-            charCount.classList.remove('text-red-500');
-        }
+    let questionCounter = 1;
+    const questionsContainer = document.getElementById('questionsContainer');
+    const addQuestionBtn = document.getElementById('addQuestionBtn');
+    const form = document.getElementById('checklistForm');
+
+    // Add new question
+    addQuestionBtn.addEventListener('click', function() {
+        questionCounter++;
+        const questionItem = createQuestionItem(questionCounter);
+        questionsContainer.appendChild(questionItem);
+        updateQuestionNumbers();
+        updateRemoveButtons();
     });
 
-    // Character counter for notes
-    const notesTextarea = document.getElementById('notes');
-    const notesCharCount = document.getElementById('notes-char-count');
-    
-    notesTextarea.addEventListener('input', function() {
-        const length = this.value.length;
-        notesCharCount.textContent = length;
+    // Create question item HTML
+    function createQuestionItem(id) {
+        const div = document.createElement('div');
+        div.className = 'question-item bg-gray-50 border border-gray-200 rounded-lg p-4';
+        div.setAttribute('data-question-id', id);
         
-        if (length > 230) {
-            notesCharCount.classList.add('text-red-500');
+        div.innerHTML = `
+            <div class="flex items-start justify-between mb-3">
+                <h4 class="text-sm font-medium text-gray-900">Pertanyaan #${id}</h4>
+                <button type="button" class="remove-question-btn text-red-600 hover:text-red-800 transition-colors">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                    </svg>
+                </button>
+            </div>
+            <textarea 
+                name="questions[]" 
+                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors resize-none"
+                placeholder="Contoh: Apakah kondisi fisik perangkat dalam keadaan baik (tidak retak, tidak berkarat)?"
+                required
+                maxlength="500"
+                rows="3"
+            ></textarea>
+            <div class="flex justify-between items-center text-xs mt-2">
+                <div class="text-gray-500">
+                    <span class="char-count">0</span>/500 karakter
+                </div>
+                <div class="text-gray-500">
+                    Gunakan kalimat tanya yang jelas dan spesifik
+                </div>
+            </div>
+        `;
+
+        // Add character counter functionality
+        const textarea = div.querySelector('textarea');
+        const charCount = div.querySelector('.char-count');
+        
+        textarea.addEventListener('input', function() {
+            const length = this.value.length;
+            charCount.textContent = length;
+            
+            if (length > 450) {
+                charCount.classList.add('text-red-500');
+            } else {
+                charCount.classList.remove('text-red-500');
+            }
+        });
+
+        // Add remove button functionality
+        const removeBtn = div.querySelector('.remove-question-btn');
+        removeBtn.addEventListener('click', function() {
+            div.remove();
+            updateQuestionNumbers();
+            updateRemoveButtons();
+        });
+
+        return div;
+    }
+
+    // Update question numbers
+    function updateQuestionNumbers() {
+        const questionItems = questionsContainer.querySelectorAll('.question-item');
+        questionItems.forEach((item, index) => {
+            const title = item.querySelector('h4');
+            title.textContent = `Pertanyaan #${index + 1}`;
+            item.setAttribute('data-question-id', index + 1);
+        });
+    }
+
+    // Update remove buttons visibility
+    function updateRemoveButtons() {
+        const questionItems = questionsContainer.querySelectorAll('.question-item');
+        const removeButtons = questionsContainer.querySelectorAll('.remove-question-btn');
+        
+        if (questionItems.length === 1) {
+            removeButtons.forEach(btn => btn.style.display = 'none');
         } else {
-            notesCharCount.classList.remove('text-red-500');
+            removeButtons.forEach(btn => btn.style.display = 'block');
         }
-    });
+    }
 
     // Device type handling
     const deviceTypeSelect = document.getElementById('device_type');
@@ -371,47 +361,22 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    // Priority radio buttons visual feedback
-    const priorityRadios = document.querySelectorAll('input[name="priority"]');
+    // Initialize character counter for first question
+    const firstTextarea = questionsContainer.querySelector('textarea');
+    const firstCharCount = questionsContainer.querySelector('.char-count');
     
-    priorityRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            // Reset all indicators
-            document.querySelectorAll('.priority-indicator').forEach(indicator => {
-                indicator.classList.remove('border-red-500', 'border-yellow-500', 'border-green-500');
-                indicator.classList.add('border-gray-300');
-                indicator.querySelector('.priority-dot').classList.add('hidden');
-            });
-            
-            // Highlight selected
-            const indicator = this.closest('label').querySelector('.priority-indicator');
-            const dot = indicator.querySelector('.priority-dot');
-            
-            if (this.value === 'high') {
-                indicator.classList.remove('border-gray-300');
-                indicator.classList.add('border-red-500');
-            } else if (this.value === 'medium') {
-                indicator.classList.remove('border-gray-300');
-                indicator.classList.add('border-yellow-500');
-            } else if (this.value === 'low') {
-                indicator.classList.remove('border-gray-300');
-                indicator.classList.add('border-green-500');
-            }
-            
-            dot.classList.remove('hidden');
-        });
+    firstTextarea.addEventListener('input', function() {
+        const length = this.value.length;
+        firstCharCount.textContent = length;
+        
+        if (length > 450) {
+            firstCharCount.classList.add('text-red-500');
+        } else {
+            firstCharCount.classList.remove('text-red-500');
+        }
     });
 
-    // Initialize priority selection if there's old input
-    const selectedPriority = document.querySelector('input[name="priority"]:checked');
-    if (selectedPriority) {
-        selectedPriority.dispatchEvent(new Event('change'));
-    }
-
-    // Form validation enhancement
-    const form = document.querySelector('form');
-    const submitButton = form.querySelector('button[type="submit"]');
-    
+    // Form validation
     form.addEventListener('submit', function(e) {
         let isValid = true;
         
@@ -425,51 +390,39 @@ document.addEventListener('DOMContentLoaded', function() {
             isValid = false;
         }
         
-        // Check question
-        if (!questionTextarea.value.trim()) {
-            alert('Pertanyaan checklist harus diisi.');
-            e.preventDefault();
-            isValid = false;
-        }
+        // Check questions
+        const questions = questionsContainer.querySelectorAll('textarea[name="questions[]"]');
+        let hasValidQuestion = false;
         
-        // Check priority
-        const selectedPriority = document.querySelector('input[name="priority"]:checked');
-        if (!selectedPriority) {
-            alert('Silakan pilih tingkat prioritas.');
+        questions.forEach((textarea, index) => {
+            if (textarea.value.trim()) {
+                hasValidQuestion = true;
+            }
+        });
+        
+        if (!hasValidQuestion) {
+            alert('Minimal satu pertanyaan checklist harus diisi.');
             e.preventDefault();
             isValid = false;
         }
         
         if (isValid) {
             // Show loading state
+            const submitButton = form.querySelector('button[type="submit"]');
             submitButton.disabled = true;
-            const buttonText = submitButton.querySelector('span');
-            buttonText.textContent = 'Menyimpan...';
-            
-            // Add spinner
-            const spinner = document.createElement('svg');
-            spinner.className = 'animate-spin -ml-1 mr-3 h-4 w-4 text-white';
-            spinner.innerHTML = `
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            const buttonText = submitButton.innerHTML;
+            submitButton.innerHTML = `
+                <svg class="animate-spin -ml-1 mr-3 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+                Menyimpan...
             `;
-            buttonText.parentNode.insertBefore(spinner, buttonText);
         }
     });
 
-    // Auto-resize textareas
-    function autoResize(textarea) {
-        textarea.style.height = 'auto';
-        textarea.style.height = textarea.scrollHeight + 'px';
-    }
-
-    questionTextarea.addEventListener('input', function() {
-        autoResize(this);
-    });
-
-    notesTextarea.addEventListener('input', function() {
-        autoResize(this);
-    });
+    // Initialize
+    updateRemoveButtons();
 });
 </script>
 @endpush

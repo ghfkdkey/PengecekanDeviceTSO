@@ -24,6 +24,22 @@ class ChecklistItemController extends Controller
     }
 
     /**
+     * API: Get all checklist items (for AJAX)
+     */
+    public function apiIndex()
+    {
+        try {
+            $checklistItems = ChecklistItem::orderBy('device_type')->orderBy('question')->get();
+            return response()->json($checklistItems);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Failed to load checklist items',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -36,19 +52,42 @@ class ChecklistItemController extends Controller
      */
     public function store(Request $request)
     {
-        $validated = $request->validate([
+        // Validate device type
+        $request->validate([
             'device_type' => 'required|string|max:50',
-            'question' => 'required|string|max:255'
+            'custom_device_type' => 'nullable|string|max:50',
+            'questions' => 'required|array|min:1',
+            'questions.*' => 'required|string|max:500'
         ]);
 
-        $checklistItem = ChecklistItem::create($validated);
+        // Determine device type (custom takes precedence)
+        $deviceType = $request->custom_device_type ?: $request->device_type;
 
-        if ($request->expectsJson()) {
-            return response()->json($checklistItem, 201);
+        // Create multiple checklist items
+        $createdItems = [];
+        foreach ($request->questions as $question) {
+            if (trim($question)) { // Only create if question is not empty
+                $checklistItem = ChecklistItem::create([
+                    'device_type' => $deviceType,
+                    'question' => trim($question)
+                ]);
+                $createdItems[] = $checklistItem;
+            }
         }
 
+        if ($request->expectsJson()) {
+            return response()->json([
+                'message' => count($createdItems) . ' checklist items created successfully.',
+                'items' => $createdItems
+            ], 201);
+        }
+
+        $message = count($createdItems) > 1 
+            ? count($createdItems) . ' checklist items created successfully.'
+            : 'Checklist item created successfully.';
+
         return redirect()->route('checklist-items.index')
-            ->with('success', 'Checklist item created successfully.');
+            ->with('success', $message);
     }
 
     /**
@@ -81,11 +120,18 @@ class ChecklistItemController extends Controller
     {
         $validated = $request->validate([
             'device_type' => 'required|string|max:50',
-            'question' => 'required|string|max:255'
+            'custom_device_type' => 'nullable|string|max:50',
+            'question' => 'required|string|max:500'
         ]);
 
+        // Determine device type (custom takes precedence)
+        $deviceType = $request->custom_device_type ?: $request->device_type;
+
         $checklistItem = ChecklistItem::findOrFail($id);
-        $checklistItem->update($validated);
+        $checklistItem->update([
+            'device_type' => $deviceType,
+            'question' => $validated['question']
+        ]);
 
         if ($request->expectsJson()) {
             return response()->json($checklistItem);

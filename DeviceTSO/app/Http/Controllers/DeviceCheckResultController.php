@@ -161,7 +161,7 @@ class DeviceCheckResultController extends Controller
             ->join('devices as d', 'd.device_id', '=', 'dcr.device_id')
             ->join('rooms as r', 'r.room_id', '=', 'd.room_id')
             ->join('floors as f', 'f.floor_id', '=', 'r.floor_id')
-            ->join('users as u', 'u.user_id', '=', 'dcr.user_id')
+            ->join('users as u', 'u.id', '=', 'dcr.user_id')
             ->select(
                 'dcr.device_id',
                 'dcr.user_id',
@@ -240,7 +240,7 @@ class DeviceCheckResultController extends Controller
             ->join('devices as d', 'd.device_id', '=', 'dcr.device_id')
             ->join('rooms as r', 'r.room_id', '=', 'd.room_id')
             ->join('floors as f', 'f.floor_id', '=', 'r.floor_id')
-            ->join('users as u', 'u.user_id', '=', 'dcr.user_id')
+            ->join('users as u', 'u.id', '=', 'dcr.user_id')
             ->select(
                 'dcr.device_id',
                 DB::raw('latest.latest_checked_at as checked_at'),
