@@ -4,15 +4,13 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\DeviceController;
 use App\Http\Controllers\FloorController;
 use App\Http\Controllers\RoomController;
+use App\Http\Controllers\AreaController;
+use App\Http\Controllers\RegionalController;
+use App\Http\Controllers\BuildingController;
 use App\Http\Controllers\ChecklistItemController;
 use App\Http\Controllers\DeviceCheckResultController;
 use Illuminate\Support\Facades\Route;
 
-
-// Test route untuk debugging
-Route::get('/test', function () {
-    return 'Laravel berhasil jalan di Vercel!';
-});
 
 // Redirect root to login
 Route::get('/', function () {
@@ -29,6 +27,10 @@ Route::middleware('auth')->group(function () {
     
     // Dashboard
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
+
+    Route::resource('areas', AreaController::class);
+    Route::resource('regionals', RegionalController::class);
+    Route::resource('buildings', BuildingController::class);
     
     // User Management Routes
     Route::resource('users', UserController::class);
@@ -131,14 +133,3 @@ Route::middleware('auth')->group(function () {
     Route::put('/checklist-items/{checklistItem}', [ChecklistItemController::class, 'update'])->name('checklist-items.update');
     Route::delete('/checklist-items/{checklistItem}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');
 });
-
-// Admin only routes (uncomment and modify as needed)
-/*
-Route::middleware(['auth', 'admin'])->group(function () {
-    Route::get('/users/create', [UserController::class, 'create'])->name('users.create');
-    Route::post('/users', [UserController::class, 'store'])->name('users.store');
-    Route::get('/users/{user}/edit', [UserController::class, 'edit'])->name('users.edit');
-    Route::put('/users/{user}', [UserController::class, 'update'])->name('users.update');
-    Route::delete('/users/{user}', [UserController::class, 'destroy'])->name('users.destroy');
-});
-*/

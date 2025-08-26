@@ -4,47 +4,6 @@
 @section('page-title', 'Manajemen Device')
 @section('page-subtitle', 'Kelola device untuk sistem pengecekan')
 
-@push('styles')
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-    
-    .font-telkomsel {
-        font-family: 'Telkomsel Batik Sans', sans-serif;
-    }
-    
-    .font-poppins {
-        font-family: 'Poppins', sans-serif;
-    }
-    
-    .text-telkomsel-red { color: #FF0025; }
-    .bg-telkomsel-red { background-color: #FF0025; }
-    .border-telkomsel-red { border-color: #FF0025; }
-    .text-telkomsel-dark-red { color: #B90024; }
-    .bg-telkomsel-dark-red { background-color: #B90024; }
-    .text-telkomsel-yellow { color: #FDA22B; }
-    .bg-telkomsel-yellow { background-color: #FDA22B; }
-    .text-telkomsel-blue { color: #001A41; }
-    .bg-telkomsel-blue { background-color: #001A41; }
-    .bg-telkomsel-gray { background-color: #DBDBDB; }
-    
-    .device-status-online { 
-        background-color: #10B981; 
-        animation: pulse-green 2s infinite;
-    }
-    .device-status-offline { 
-        background-color: #EF4444; 
-    }
-    .device-status-unknown { 
-        background-color: #F59E0B; 
-    }
-    
-    @keyframes pulse-green {
-        0%, 100% { opacity: 1; }
-        50% { opacity: 0.7; }
-    }
-</style>
-@endpush
-
 @section('content')
 <div class="space-y-6 font-poppins">
     <!-- Header Actions -->
@@ -88,7 +47,6 @@
                         id="search-devices" 
                         placeholder="Cari device..."
                         class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
-                        value="{{ request('search') }}"
                     >
                     <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
                         <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -99,17 +57,28 @@
             </div>
         </div>
         
-                 <div class="flex items-center space-x-3">
-             <button 
-                 id="add-device-btn"
-                 class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
-             >
-                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                 </svg>
-                 <span>Tambah Device</span>
-             </button>
-         </div>
+        <!-- Update the header actions section -->
+        <div class="flex items-center space-x-3">
+            <button 
+                id="export-excel-btn"
+                class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                </svg>
+                <span>Export Excel</span>
+            </button>
+
+            <button 
+                id="add-device-btn"
+                class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2"
+            >
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+                </svg>
+                <span>Tambah Device</span>
+            </button>
+        </div>
     </div>
 
     <!-- Statistics Cards -->
@@ -261,22 +230,45 @@
                             </div>
                             @endif
                         </div>
-                        
+
+                        <div class="space-y-3">
+                            <!-- Add condition status -->
+                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                                <span class="text-sm text-gray-600">Kondisi</span>
+                                <span class="px-2 py-1 text-xs rounded-full {{ $device->condition === 'baik' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                    {{ ucfirst($device->condition) }}
+                                </span>
+                            </div>
+                            
+                            <!-- Add merk -->
+                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                                <span class="text-sm text-gray-600">Merk</span>
+                                <span class="font-medium text-gray-900">{{ $device->merk }}</span>
+                            </div>
+                            
+                            <!-- Add PO/BAST info if exists -->
+                            @if($device->tahun_po || $device->no_po)
+                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                                <span class="text-sm text-gray-600">PO</span>
+                                <span class="text-sm text-gray-900">
+                                    {{ $device->no_po }} ({{ $device->tahun_po }})
+                                </span>
+                            </div>
+                            @endif
+                        </div>
                         <div class="mt-4 flex space-x-2">
                             <button 
                                 class="edit-device-image-btn flex-1 bg-telkomsel-blue text-white px-4 py-2 rounded-lg hover:bg-telkomsel-blue/80 transition-colors text-sm font-medium flex items-center justify-center space-x-2"
                                 data-device-id="{{ $device->device_id }}"
                                 data-device-name="{{ $device->device_name }}"
                                 data-current-image="{{ $device->image_path }}"
-                                title="Edit Device Image"
-                            >
+                                title="Edit Device Image">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
                                 </svg>
                                 <span>{{ $device->image_path ? 'Edit Gambar' : 'Tambah Gambar' }}</span>
                             </button>
                         </div>
-
                     </div>
                     @endforeach
                 </div>
@@ -300,269 +292,394 @@
 </div>
 
 <!-- Add/Edit Device Modal -->
-<div id="device-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95" id="modal-content">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h3 id="modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Device</h3>
-                <button id="close-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        
-        <form id="device-form" class="p-6 space-y-4">
-            @csrf
-            <input type="hidden" id="device-id" name="device_id">
-            <input type="hidden" id="form-method" name="_method" value="POST">
-            
-            <div>
-                <label for="room-select" class="block text-sm font-medium text-gray-700 mb-2">
-                    Ruangan <span class="text-red-500">*</span>
-                </label>
-                <select 
-                    id="room-select" 
-                    name="room_id" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
-                    required
-                >
-                    <option value="">Pilih Ruangan</option>
-                    @foreach($rooms as $room)
-                        <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
-                    @endforeach
-                </select>
-                <div id="room_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
-            </div>
-            
-            <div>
-                <label for="device-name" class="block text-sm font-medium text-gray-700 mb-2">
-                    Nama Device <span class="text-red-500">*</span>
-                </label>
-                <input 
-                    type="text" 
-                    id="device-name" 
-                    name="device_name" 
-                    placeholder="Contoh: PC-01, Projector-A, Router-Main"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
-                    required
-                    maxlength="100"
-                >
-                <div id="device_name-error" class="text-red-500 text-sm mt-1 hidden"></div>
-                <div class="text-gray-500 text-xs mt-1">
-                    <span id="device-char-count">0</span>/100 karakter
-                </div>
-            </div>
-            
-            <div>
-                <label for="device-type" class="block text-sm font-medium text-gray-700 mb-2">
-                    Tipe Device
-                </label>
-                <select 
-                    id="device-type" 
-                    name="device_type" 
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
-                >
-                    <option value="">Pilih Tipe Device</option>
-                    <option value="Computer">Computer</option>
-                    <option value="Smartboard">Smartboard</option>
-                    <option value="SmartTV">SmartTV</option>
-                    <option value="Digital_Signage">Digital Signage</option>
-                    <option value="VideoWall">VideoWall</option>
-                    <option value="Mini_PC">Mini PC</option>
-                    <option value="Polycom">Polycom</option>
-                    <option value="TV_Samsung_85">TV Samsung 85</option>
-                    <option value="other">Other</option>
-                </select>
-                <div id="device_type-error" class="text-red-500 text-sm mt-1 hidden"></div>
-            </div>
-            
-            <div>
-                <label for="serial-number" class="block text-sm font-medium text-gray-700 mb-2">
-                    Serial Number
-                </label>
-                <input 
-                    type="text" 
-                    id="serial-number" 
-                    name="serial_number" 
-                    placeholder="Opsional: Serial number atau kode unik"
-                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
-                    maxlength="100"
-                >
-                <div id="serial_number-error" class="text-red-500 text-sm mt-1 hidden"></div>
-                <div class="text-gray-500 text-xs mt-1">
-                    <span id="serial-char-count">0</span>/100 karakter
-                </div>
-            </div>
-            
-            <div>
-                <label for="device-image-form" class="block text-sm font-medium text-gray-700 mb-2">
-                    Gambar Device
-                </label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
-                    <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<div id="device-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95" id="modal-content">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 id="modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Device</h3>
+                    <button id="close-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        <div class="flex text-sm text-gray-600">
-                            <label for="device-image-form" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
-                                <span>Upload gambar</span>
-                                <input id="device-image-form" name="image" type="file" class="sr-only" accept="image/*">
-                            </label>
-                            <p class="pl-1">atau drag and drop</p>
-                        </div>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                    </button>
+                </div>
+            </div>
+            
+            <form id="device-form" class="p-6 space-y-4">
+                @csrf
+                <input type="hidden" id="device-id" name="device_id">
+                <input type="hidden" id="form-method" name="_method" value="POST">
+                
+                <div>
+                    <label for="room-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Ruangan <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="room-select" 
+                        name="room_id" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Ruangan</option>
+                        @foreach($rooms as $room)
+                            <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
+                        @endforeach
+                    </select>
+                    <div id="room_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+                
+                <div>
+                    <label for="device-name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Nama Device <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="device-name" 
+                        name="device_name" 
+                        placeholder="Contoh: PC-01, Projector-A, Router-Main"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                        maxlength="100"
+                    >
+                    <div id="device_name-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    <div class="text-gray-500 text-xs mt-1">
+                        <span id="device-char-count">0</span>/100 karakter
                     </div>
                 </div>
-                <div id="device_image_error" class="text-red-500 text-sm mt-1 hidden"></div>
-            </div>
-            
-            <div class="flex space-x-4 pt-4">
-                <button 
-                    type="button" 
-                    id="cancel-btn"
-                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                    Batal
-                </button>
-                <button 
-                    type="submit" 
-                    id="submit-btn"
-                    class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium disabled:opacity-50"
-                >
-                    <span id="submit-text">Simpan</span>
-                    <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
+                
+                <div>
+                    <label for="device-type" class="block text-sm font-medium text-gray-700 mb-2">
+                        Tipe Device
+                    </label>
+                    <select 
+                        id="device-type" 
+                        name="device_type" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                    >
+                        <option value="">Pilih Tipe Device</option>
+                        <option value="Computer">Computer</option>
+                        <option value="Smartboard">Smartboard</option>
+                        <option value="SmartTV">SmartTV</option>
+                        <option value="Digital_Signage">Digital Signage</option>
+                        <option value="VideoWall">VideoWall</option>
+                        <option value="Mini_PC">Mini PC</option>
+                        <option value="Polycom">Polycom</option>
+                        <option value="TV_Samsung_85">TV Samsung 85</option>
+                        <option value="other">Other</option>
+                    </select>
+                    <div id="device_type-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+                
+                <div>
+                    <label for="serial-number" class="block text-sm font-medium text-gray-700 mb-2">
+                        Serial Number
+                    </label>
+                    <input 
+                        type="text" 
+                        id="serial-number" 
+                        name="serial_number" 
+                        placeholder="Opsional: Serial number atau kode unik"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        maxlength="100"
+                    >
+                    <div id="serial_number-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    <div class="text-gray-500 text-xs mt-1">
+                        <span id="serial-char-count">0</span>/100 karakter
+                    </div>
+                </div>
+                
+                <div>
+                    <label for="device-image-form" class="block text-sm font-medium text-gray-700 mb-2">
+                        Gambar Device
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="device-image-form" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
+                                    <span>Upload gambar</span>
+                                    <input id="device-image-form" name="image" type="file" class="sr-only" accept="image/*">
+                                </label>
+                                <p class="pl-1">atau drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                        </div>
+                    </div>
+                    <div id="device_image_error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+                
+                <!-- New fields for category, merk, tahun, no po, kondisi, and notes -->
+                <div>
+                    <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
+                        Kategori <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="category" 
+                        name="category" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                    <div id="category-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <div>
+                    <label for="merk" class="block text-sm font-medium text-gray-700 mb-2">
+                        Merk <span class="text-red-500">*</span>
+                    </label>
+                    <input 
+                        type="text" 
+                        id="merk" 
+                        name="merk" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                    <div id="merk-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="tahun_po" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tahun PO
+                        </label>
+                        <input 
+                            type="number" 
+                            id="tahun_po" 
+                            name="tahun_po" 
+                            min="1900" 
+                            max="{{ date('Y') }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        >
+                        <div id="tahun_po-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    </div>
+
+                    <div>
+                        <label for="no_po" class="block text-sm font-medium text-gray-700 mb-2">
+                            No PO
+                        </label>
+                        <input 
+                            type="text" 
+                            id="no_po" 
+                            name="no_po" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        >
+                        <div id="no_po-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="tahun_bast" class="block text-sm font-medium text-gray-700 mb-2">
+                            Tahun BAST
+                        </label>
+                        <input 
+                            type="number" 
+                            id="tahun_bast" 
+                            name="tahun_bast" 
+                            min="1900" 
+                            max="{{ date('Y') }}"
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        >
+                        <div id="tahun_bast-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    </div>
+
+                    <div>
+                        <label for="no_bast" class="block text-sm font-medium text-gray-700 mb-2">
+                            No BAST
+                        </label>
+                        <input 
+                            type="text" 
+                            id="no_bast" 
+                            name="no_bast" 
+                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        >
+                        <div id="no_bast-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    </div>
+                </div>
+
+                <div>
+                    <label for="condition" class="block text-sm font-medium text-gray-700 mb-2">
+                        Kondisi <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="condition" 
+                        name="condition" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Kondisi</option>
+                        <option value="baik">Baik</option>
+                        <option value="rusak">Rusak</option>
+                    </select>
+                    <div id="condition-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <div>
+                    <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+                        Catatan
+                    </label>
+                    <textarea 
+                        id="notes" 
+                        name="notes" 
+                        rows="3"
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                    ></textarea>
+                    <div id="notes-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button 
+                        type="button" 
+                        id="cancel-btn"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        type="submit" 
+                        id="submit-btn"
+                        class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium disabled:opacity-50"
+                    >
+                        <span id="submit-text">Simpan</span>
+                        <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Image Upload Modal -->
-<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95">
-        <div class="p-6 border-b border-gray-200">
-            <div class="flex items-center justify-between">
-                <h3 id="image-modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Gambar Device</h3>
-                <button id="close-image-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-        </div>
-        
-        <form id="image-form" class="p-6 space-y-4">
-            @csrf
-            <input type="hidden" id="image-device-id" name="device_id">
-            <input type="hidden" id="image-form-method" name="_method" value="POST">
-            
-            <!-- Current Image Preview -->
-            <div id="current-image-preview" class="hidden">
-                <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini</label>
-                <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
-                    <img id="current-image" src="" alt="Current Image" class="w-full h-full object-cover">
-                </div>
-            </div>
-            
-            <!-- Image Upload -->
-            <div>
-                <label for="device-image" class="block text-sm font-medium text-gray-700 mb-2">
-                    Gambar Device <span class="text-red-500">*</span>
-                </label>
-                <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
-                    <div class="space-y-1 text-center">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                            <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+<div id="image-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">  
+    <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95">
+            <div class="p-6 border-b border-gray-200">
+                <div class="flex items-center justify-between">
+                    <h3 id="image-modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Gambar Device</h3>
+                    <button id="close-image-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
                         </svg>
-                        <div class="flex text-sm text-gray-600">
-                            <label for="device-image" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
-                                <span>Upload gambar</span>
-                                <input id="device-image" name="image" type="file" class="sr-only" accept="image/*" required>
-                            </label>
-                            <p class="pl-1">atau drag and drop</p>
-                        </div>
-                        <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
-                    </div>
-                </div>
-                <div id="image-error" class="text-red-500 text-sm mt-1 hidden"></div>
-                
-                <!-- Image Preview -->
-                <div id="image-preview-container" class="hidden mt-3">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
-                    <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
-                        <img id="image-preview" src="" alt="Preview" class="w-full h-full object-cover">
-                    </div>
+                    </button>
                 </div>
             </div>
             
-            <div class="flex space-x-4 pt-4">
-                <button 
-                    type="button" 
-                    id="cancel-image-btn"
-                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                    Batal
-                </button>
-                <button 
-                    type="submit" 
-                    id="submit-image-btn"
-                    class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium disabled:opacity-50"
-                >
-                    <span id="submit-image-text">Upload</span>
-                    <svg id="loading-image-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
-            </div>
-        </form>
+            <form id="image-form" class="p-6 space-y-4">
+                @csrf
+                <input type="hidden" id="image-device-id" name="device_id">
+                <input type="hidden" id="image-form-method" name="_method" value="POST">
+                
+                <!-- Current Image Preview -->
+                <div id="current-image-preview" class="hidden">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini</label>
+                    <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
+                        <img id="current-image" src="" alt="Current Image" class="w-full h-full object-cover">
+                    </div>
+                </div>
+                
+                <!-- Image Upload -->
+                <div>
+                    <label for="device-image" class="block text-sm font-medium text-gray-700 mb-2">
+                        Gambar Device <span class="text-red-500">*</span>
+                    </label>
+                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
+                        <div class="space-y-1 text-center">
+                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            <div class="flex text-sm text-gray-600">
+                                <label for="device-image" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
+                                    <span>Upload gambar</span>
+                                    <input id="device-image" name="image" type="file" class="sr-only" accept="image/*" required>
+                                </label>
+                                <p class="pl-1">atau drag and drop</p>
+                            </div>
+                            <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                        </div>
+                    </div>
+                    <div id="image-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    
+                    <!-- Image Preview -->
+                    <div id="image-preview-container" class="hidden mt-3">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
+                        <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
+                            <img id="image-preview" src="" alt="Preview" class="w-full h-full object-cover">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="flex space-x-4 pt-4">
+                    <button 
+                        type="button" 
+                        id="cancel-image-btn"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        type="submit" 
+                        id="submit-image-btn"
+                        class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium disabled:opacity-50"
+                    >
+                        <span id="submit-image-text">Upload</span>
+                        <svg id="loading-image-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 <!-- Delete Confirmation Modal -->
-<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
-    <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
-        <div class="p-6">
-            <div class="flex items-center space-x-3 mb-4">
-                <div class="bg-red-100 rounded-full p-3">
-                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
+<div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">
+    <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
+            <div class="p-6">
+                <div class="flex items-center space-x-3 mb-4">
+                    <div class="bg-red-100 rounded-full p-3">
+                        <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Hapus</h3>
+                        <p class="text-sm text-gray-600">Tindakan ini tidak dapat dibatalkan</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-900">Konfirmasi Hapus</h3>
-                    <p class="text-sm text-gray-600">Tindakan ini tidak dapat dibatalkan</p>
+                
+                <p class="text-gray-700 mb-6">
+                    Apakah Anda yakin ingin menghapus device "<span id="delete-device-name" class="font-semibold"></span>"?
+                </p>
+                
+                <div class="flex space-x-4">
+                    <button 
+                        type="button" 
+                        id="cancel-delete-btn"
+                        class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
+                    >
+                        Batal
+                    </button>
+                    <button 
+                        type="button" 
+                        id="confirm-delete-btn"
+                        class="flex-1 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
+                    >
+                        <span id="delete-text">Hapus</span>
+                        <svg id="delete-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                    </button>
                 </div>
-            </div>
-            
-            <p class="text-gray-700 mb-6">
-                Apakah Anda yakin ingin menghapus device "<span id="delete-device-name" class="font-semibold"></span>"?
-            </p>
-            
-            <div class="flex space-x-4">
-                <button 
-                    type="button" 
-                    id="cancel-delete-btn"
-                    class="flex-1 px-4 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-medium"
-                >
-                    Batal
-                </button>
-                <button 
-                    type="button" 
-                    id="confirm-delete-btn"
-                    class="flex-1 bg-red-600 text-white px-4 py-3 rounded-lg hover:bg-red-700 transition-colors font-medium"
-                >
-                    <span id="delete-text">Hapus</span>
-                    <svg id="delete-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                    </svg>
-                </button>
             </div>
         </div>
     </div>
@@ -572,6 +689,18 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Script loaded');
+    const deviceForm = document.getElementById('device-form');
+    if (deviceForm) {
+        console.log('Form found');
+        deviceForm.addEventListener('submit', function(e) {
+            console.log('Form submitted');
+            handleSubmit(e);
+        });
+    } else {
+        console.log('Form not found');
+    }
+
     // Elements
     const addDeviceBtn = document.getElementById('add-device-btn');
     const deviceModal = document.getElementById('device-modal');
@@ -579,7 +708,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageModal = document.getElementById('image-modal');
     const closeModal = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
-    const deviceForm = document.getElementById('device-form');
     const imageForm = document.getElementById('image-form');
     const modalContent = document.getElementById('modal-content');
     const modalTitle = document.getElementById('modal-title');
@@ -715,11 +843,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 e.preventDefault();
                 confirmDelete();
             });
-        }
-
-        // Form events
-        if (deviceForm) {
-            deviceForm.addEventListener('submit', handleSubmit);
         }
 
         if (imageForm) {
@@ -966,111 +1089,56 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 200);
     }
 
-    function handleSubmit(e) {
+    async function handleSubmit(e) {
         e.preventDefault();
+        console.log('Form submitted');
+        
+        if (!validateForm()) {
+            console.log('Form validation failed');
+            return;
+        }
+        console.log('Form validation passed');
 
         if (!validateForm()) return;
 
         const formData = new FormData(deviceForm);
-        const deviceId = deviceIdInput ? deviceIdInput.value : '';
+        const deviceId = document.getElementById('device-id').value;
         const isEdit = deviceId !== '';
-        const url = isEdit ? '/devices/' + deviceId : '/devices';
+        const url = isEdit ? `/devices/${deviceId}` : '/devices';
 
         setLoading(true);
 
-        // Handle image file separately
-        const imageFile = formData.get('image');
-        if (imageFile && imageFile.size > 0) {
-            // If there's an image, use FormData for multipart/form-data
-            if (isEdit) {
-                formData.append('_method', 'PUT');
-            }
-
-            fetch(url, {
+        try {
+            const response = await fetch(url, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                setLoading(false);
-
-                if (result.success) {
-                    showNotification(result.message || 'Device berhasil disimpan!', 'success');
-                    closeDeviceModal();
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    if (result.errors) {
-                        showValidationErrors(result.errors);
-                    } else {
-                        showNotification(result.message || 'Terjadi kesalahan!', 'error');
-                    }
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-                setLoading(false);
-                showNotification('Terjadi kesalahan pada server!', 'error');
             });
-        } else {
-            // No image, convert to JSON
-            const data = {};
-            for (let pair of formData.entries()) {
-                if (pair[0] !== 'image') { // Skip image field
-                    data[pair[0]] = pair[1];
+
+            const result = await response.json();
+
+            if (result.success) {
+                showNotification(result.message || 'Device berhasil disimpan!', 'success');
+                closeDeviceModal();
+                setTimeout(() => window.location.reload(), 1000);
+            } else {
+                if (result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        showError(`${key.replace('_', '-')}-error`, result.errors[key][0]);
+                    });
+                } else {
+                    showNotification(result.message || 'Terjadi kesalahan!', 'error');
                 }
             }
-
-            // Add CSRF token
-            const csrfToken = document.querySelector('meta[name="csrf-token"]');
-            const tokenInput = document.querySelector('input[name="_token"]');
-            data._token = csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : '');
-
-            if (isEdit) {
-                data._method = 'PUT';
-            }
-
-            fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(function(response) {
-                return response.json();
-            })
-            .then(function(result) {
-                setLoading(false);
-
-                if (result.success) {
-                    showNotification(result.message || 'Device berhasil disimpan!', 'success');
-                    closeDeviceModal();
-                    setTimeout(function() {
-                        location.reload();
-                    }, 1000);
-                } else {
-                    if (result.errors) {
-                        showValidationErrors(result.errors);
-                    } else {
-                        showNotification(result.message || 'Terjadi kesalahan!', 'error');
-                    }
-                }
-            })
-            .catch(function(error) {
-                console.error('Error:', error);
-                setLoading(false);
-                showNotification('Terjadi kesalahan pada server!', 'error');
-            });
+        } catch (error) {
+            console.error('Error:', error);
+            showNotification('Terjadi kesalahan pada server!', 'error');
+        } finally {
+            setLoading(false);
         }
     }
 
@@ -1229,48 +1297,41 @@ document.addEventListener('DOMContentLoaded', function() {
         let isValid = true;
 
         // Validate room selection
-        if (roomSelect && !roomSelect.value) {
+        if (!document.getElementById('room-select').value) {
             showError('room_id-error', 'Pilih ruangan terlebih dahulu');
             isValid = false;
         }
 
         // Validate device name
-        if (deviceNameInput) {
-            const deviceName = deviceNameInput.value.trim();
-            if (!deviceName) {
-                showError('device_name-error', 'Nama device tidak boleh kosong');
-                isValid = false;
-            } else if (deviceName.length < 3) {
-                showError('device_name-error', 'Nama device minimal 3 karakter');
-                isValid = false;
-            } else if (deviceName.length > 100) {
-                showError('device_name-error', 'Nama device maksimal 100 karakter');
-                isValid = false;
-            }
+        const deviceName = document.getElementById('device-name').value.trim();
+        if (!deviceName) {
+            showError('device_name-error', 'Nama device harus diisi');
+            isValid = false;
         }
 
-        // Validate serial number length
-        if (serialNumberInput) {
-            const serialNumber = serialNumberInput.value.trim();
-            if (serialNumber && serialNumber.length > 100) {
-                showError('serial_number-error', 'Serial number maksimal 100 karakter');
-                isValid = false;
-            }
+        // Validate device type
+        if (!document.getElementById('device-type').value) {
+            showError('device_type-error', 'Tipe device harus dipilih');
+            isValid = false;
+        }
+
+        // Add validation for new required fields
+        if (!document.getElementById('category').value.trim()) {
+            showError('category-error', 'Kategori harus diisi');
+            isValid = false;
+        }
+
+        if (!document.getElementById('merk').value.trim()) {
+            showError('merk-error', 'Merk harus diisi');
+            isValid = false;
+        }
+
+        if (!document.getElementById('condition').value) {
+            showError('condition-error', 'Kondisi harus dipilih');
+            isValid = false;
         }
 
         return isValid;
-    }
-
-    function showValidationErrors(errors) {
-        for (const field in errors) {
-            if (errors.hasOwnProperty(field)) {
-                const messages = errors[field];
-                const errorElement = document.getElementById(field + '-error');
-                if (errorElement && messages.length > 0) {
-                    showError(field + '-error', messages[0]);
-                }
-            }
-        }
     }
 
     function showError(elementId, message) {
@@ -1560,8 +1621,14 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
+    const exportExcelBtn = document.getElementById('export-excel-btn');
 
-    // Utility function for debouncing
+    if (exportExcelBtn) {
+        exportExcelBtn.addEventListener('click', function() {
+            window.location.href = '/devices/export-excel';
+        });
+    }
+
     function debounce(func, wait) {
         let timeout;
         return function executedFunction() {

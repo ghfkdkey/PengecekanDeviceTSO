@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Floor;
+use App\Models\Building;
 use Illuminate\Http\Request;
 
 class FloorController extends Controller
@@ -13,12 +14,13 @@ class FloorController extends Controller
     public function index(Request $request)
     {
         if ($request->ajax()) {
-            $floors = Floor::orderBy('floor_name')->get();
+            $floors = Floor::with('building')->orderBy('floor_name')->get();
             return response()->json($floors);
         }
 
-        $floors = Floor::orderBy('floor_name')->get();
-        return view('floors.index', compact('floors'));
+        $floors = Floor::with('building')->orderBy('floor_name')->get();
+        $buildings = Building::orderBy('building_name')->get();
+        return view('floors.index', compact('floors', 'buildings'));
     }
 
     /**
@@ -27,11 +29,16 @@ class FloorController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'floor_name' => 'required|string|max:50|unique:floors,floor_name'
+            'floor_name' => 'required|string|max:50|unique:floors,floor_name',
+            'building_id' => 'required|exists:buildings,building_id'
+        ], [
+            'building_id.required' => 'Gedung harus dipilih',
+            'building_id.exists' => 'Gedung tidak valid'
         ]);
 
         $floor = Floor::create([
             'floor_name' => $request->floor_name,
+            'building_id' => $request->building_id,
             'user_id' => auth()->id()
         ]);
 
@@ -39,7 +46,7 @@ class FloorController extends Controller
             return response()->json([
                 'success' => true,
                 'message' => 'Lantai berhasil ditambahkan!',
-                'floor' => $floor
+                'floor' => $floor->load('building')
             ]);
         }
 

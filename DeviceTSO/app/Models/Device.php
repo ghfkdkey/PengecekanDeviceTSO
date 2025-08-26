@@ -13,13 +13,21 @@ class Device extends Model
     
     // Tambahkan 'image_path' ke dalam fillable array
     protected $fillable = [
-        'room_id', 
-        'device_name', 
-        'device_type', 
+        'room_id',
+        'device_name',
+        'device_type',
         'serial_number',
         'image_path',
-        'user_id'
-    ];
+        'user_id',
+        'category',
+        'notes',
+        'merk',
+        'tahun_po',
+        'no_po',
+        'no_bast',
+        'tahun_bast',
+        'condition'
+    ];    
 
     public function creator()
     {

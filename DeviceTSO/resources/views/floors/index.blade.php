@@ -30,7 +30,7 @@
         <div class="mt-4 sm:mt-0">
             <button 
                 id="add-floor-btn"
-                class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
+                class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2"
             >
                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
@@ -104,7 +104,7 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-900 text-lg">{{ $floor->floor_name }}</h4>
+                                    <h4 class="font-semibold text-gray-900 text-lg">{{ $floor->floor_name }}{{ $floor->building->building_name ?? 'N/A' }}</h4>
                                     <p class="text-sm text-gray-600">ID: #{{ $floor->floor_id }}</p>
                                 </div>
                             </div>
@@ -114,6 +114,7 @@
                                     class="edit-floor-btn text-gray-600 hover:text-telkomsel-red p-2 rounded-lg hover:bg-gray-100 transition-colors"
                                     data-floor-id="{{ $floor->floor_id }}"
                                     data-floor-name="{{ $floor->floor_name }}"
+                                    data-building-id="{{ $floor->building_id }}"
                                     title="Edit Lantai"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -189,7 +190,25 @@
             @csrf
             <input type="hidden" id="floor-id" name="floor_id">
             <input type="hidden" id="form-method" name="_method" value="POST">
-            
+
+            <div>
+                <label for="building-select" class="block text-sm font-medium text-gray-700 mb-2">
+                    Pilih Gedung <span class="text-red-500">*</span>
+                </label>
+                <select 
+                    id="building-select" 
+                    name="building_id"
+                    class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                    required
+                >
+                    <option value="">Pilih Gedung</option>
+                    @foreach($buildings as $building)
+                        <option value="{{ $building->building_id }}">{{ $building->building_name }}</option>
+                    @endforeach
+                </select>
+                <div id="building-error" class="text-red-500 text-sm mt-1 hidden"></div>
+            </div>
+
             <div>
                 <label for="floor-name" class="block text-sm font-medium text-gray-700 mb-2">
                     Nama Lantai <span class="text-red-500">*</span>
@@ -198,13 +217,12 @@
                     type="text" 
                     id="floor-name" 
                     name="floor_name" 
-                    placeholder="Contoh: Lantai 1, Ground Floor, Basement"
                     class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
                     required
                 >
                 <div id="floor-name-error" class="text-red-500 text-sm mt-1 hidden"></div>
             </div>
-            
+
             <div class="flex space-x-4 pt-4">
                 <button 
                     type="button" 
@@ -219,7 +237,7 @@
                     class="flex-1 bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-4 py-3 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all font-medium"
                 >
                     <span id="submit-text">Simpan</span>
-                    <svg id="loading-spinner" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white hidden inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <svg id="loading-spinner" class="animate-spin h-5 w-5 text-white hidden" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
@@ -280,327 +298,122 @@ document.addEventListener('DOMContentLoaded', function() {
     // Elements
     const addFloorBtn = document.getElementById('add-floor-btn');
     const floorModal = document.getElementById('floor-modal');
-    const deleteModal = document.getElementById('delete-modal');
-    const closeModal = document.getElementById('close-modal');
+    const modalContent = document.getElementById('modal-content');
+    const closeModalBtn = document.getElementById('close-modal');
     const cancelBtn = document.getElementById('cancel-btn');
     const floorForm = document.getElementById('floor-form');
-    const modalContent = document.getElementById('modal-content');
-    const searchInput = document.getElementById('search-floors');
-
+    const buildingSelect = document.getElementById('building-select');
+    const floorNameInput = document.getElementById('floor-name');
+    const submitBtn = document.getElementById('submit-btn');
+    
     // Modal functions
     function openModal(isEdit = false, floorData = null) {
         const modalTitle = document.getElementById('modal-title');
         const floorId = document.getElementById('floor-id');
-        const floorName = document.getElementById('floor-name');
         const formMethod = document.getElementById('form-method');
         const submitText = document.getElementById('submit-text');
 
         if (isEdit && floorData) {
             modalTitle.textContent = 'Edit Lantai';
             floorId.value = floorData.id;
-            floorName.value = floorData.name;
+            floorNameInput.value = floorData.name;
+            buildingSelect.value = floorData.buildingId;
             formMethod.value = 'PUT';
             submitText.textContent = 'Update';
         } else {
             modalTitle.textContent = 'Tambah Lantai';
-            floorId.value = '';
-            floorName.value = '';
+            floorForm.reset();
             formMethod.value = 'POST';
             submitText.textContent = 'Simpan';
         }
 
         floorModal.classList.remove('hidden');
-        setTimeout(() => {
-            modalContent.classList.remove('scale-95');
-            modalContent.classList.add('scale-100');
-        }, 10);
-        floorName.focus();
+        modalContent.classList.remove('scale-95');
+        modalContent.classList.add('scale-100');
+        buildingSelect.focus();
     }
 
-    function closeModalFunc() {
+    function closeModal() {
         modalContent.classList.remove('scale-100');
         modalContent.classList.add('scale-95');
         setTimeout(() => {
             floorModal.classList.add('hidden');
-            document.getElementById('floor-name-error').classList.add('hidden');
+            clearErrors();
             floorForm.reset();
         }, 300);
     }
 
+    function clearErrors() {
+        const errorElements = document.querySelectorAll('.text-red-500');
+        errorElements.forEach(el => {
+            if (el.id.includes('-error')) {
+                el.classList.add('hidden');
+                el.textContent = '';
+            }
+        });
+    }
+
     // Event listeners
     addFloorBtn.addEventListener('click', () => openModal());
-    closeModal.addEventListener('click', closeModalFunc);
-    cancelBtn.addEventListener('click', closeModalFunc);
+    closeModalBtn.addEventListener('click', closeModal);
+    cancelBtn.addEventListener('click', closeModal);
 
     // Close modal when clicking outside
     floorModal.addEventListener('click', function(e) {
         if (e.target === floorModal) {
-            closeModalFunc();
-        }
-    });
-
-    // Edit floor buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.edit-floor-btn')) {
-            const btn = e.target.closest('.edit-floor-btn');
-            const floorData = {
-                id: btn.dataset.floorId,
-                name: btn.dataset.floorName
-            };
-            openModal(true, floorData);
-        }
-    });
-
-    // Delete floor buttons
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.delete-floor-btn')) {
-            const btn = e.target.closest('.delete-floor-btn');
-            const floorId = btn.dataset.floorId;
-            const floorName = btn.dataset.floorName;
-            
-            document.getElementById('delete-floor-name').textContent = floorName;
-            document.getElementById('confirm-delete-btn').dataset.floorId = floorId;
-            deleteModal.classList.remove('hidden');
-        }
-    });
-
-    // Cancel delete
-    document.getElementById('cancel-delete-btn').addEventListener('click', function() {
-        deleteModal.classList.add('hidden');
-    });
-
-    // Confirm delete
-    document.getElementById('confirm-delete-btn').addEventListener('click', function() {
-        const floorId = this.dataset.floorId;
-        const deleteText = document.getElementById('delete-text');
-        const deleteSpinner = document.getElementById('delete-spinner');
-        
-        // Show loading state
-        deleteText.classList.add('hidden');
-        deleteSpinner.classList.remove('hidden');
-        this.disabled = true;
-        
-        // Create form for delete request
-        const deleteForm = document.createElement('form');
-        deleteForm.method = 'POST';
-        deleteForm.action = `/floors/${floorId}`;
-        deleteForm.style.display = 'none';
-        
-        // Add CSRF token
-        const csrfToken = document.createElement('input');
-        csrfToken.type = 'hidden';
-        csrfToken.name = '_token';
-        csrfToken.value = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                         document.querySelector('input[name="_token"]')?.value;
-        
-        // Add method override
-        const methodInput = document.createElement('input');
-        methodInput.type = 'hidden';
-        methodInput.name = '_method';
-        methodInput.value = 'DELETE';
-        
-        deleteForm.appendChild(csrfToken);
-        deleteForm.appendChild(methodInput);
-        document.body.appendChild(deleteForm);
-        
-        // Submit the form
-        deleteForm.submit();
-    });
-
-    // Close delete modal when clicking outside
-    deleteModal.addEventListener('click', function(e) {
-        if (e.target === deleteModal) {
-            deleteModal.classList.add('hidden');
+            closeModal();
         }
     });
 
     // Form submission
-    floorForm.addEventListener('submit', function(e) {
+    floorForm.addEventListener('submit', async function(e) {
         e.preventDefault();
-        
-        const submitBtn = document.getElementById('submit-btn');
-        const submitText = document.getElementById('submit-text');
-        const loadingSpinner = document.getElementById('loading-spinner');
-        const floorNameError = document.getElementById('floor-name-error');
-        
-        // Hide previous errors
-        floorNameError.classList.add('hidden');
-        
-        // Show loading state
-        submitText.classList.add('hidden');
-        loadingSpinner.classList.remove('hidden');
-        submitBtn.disabled = true;
-        
-        // Get form data
+        clearErrors();
+
         const formData = new FormData(this);
         const floorId = document.getElementById('floor-id').value;
-        const method = document.getElementById('form-method').value;
+        const method = formData.get('_method');
         
-        // Determine URL and method
-        let url = '/floors';
-        let fetchMethod = 'POST';
-        
-        if (method === 'PUT' && floorId) {
-            url = `/floors/${floorId}`;
-            fetchMethod = 'POST'; // Laravel uses POST with _method override for PUT
-        }
-        
-        // Add CSRF token if not present
-        if (!formData.has('_token')) {
-            const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || 
-                             document.querySelector('input[name="_token"]')?.value;
-            if (csrfToken) {
-                formData.append('_token', csrfToken);
-            }
-        }
-        
-        // Submit form
-        fetch(url, {
-            method: fetchMethod,
-            body: formData,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.json().then(data => {
-                    throw data;
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            if (data.success) {
-                // Show success message (you can implement toast/notification here)
-                console.log('Success:', data.message);
-                
-                // Reload page to show updated data
+        submitBtn.disabled = true;
+        document.getElementById('submit-text').classList.add('hidden');
+        document.getElementById('loading-spinner').classList.remove('hidden');
+
+        try {
+            const url = floorId ? `/floors/${floorId}` : '/floors';
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                }
+            });
+
+            const result = await response.json();
+
+            if (response.ok) {
                 window.location.reload();
             } else {
-                throw data;
+                if (result.errors) {
+                    Object.keys(result.errors).forEach(key => {
+                        const errorDiv = document.getElementById(`${key.replace('_', '-')}-error`);
+                        if (errorDiv) {
+                            errorDiv.textContent = result.errors[key][0];
+                            errorDiv.classList.remove('hidden');
+                        }
+                    });
+                }
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error:', error);
-            
-            // Show validation errors
-            if (error.errors && error.errors.floor_name) {
-                floorNameError.textContent = error.errors.floor_name[0];
-                floorNameError.classList.remove('hidden');
-            } else {
-                // Show general error
-                floorNameError.textContent = error.message || 'Terjadi kesalahan saat menyimpan data.';
-                floorNameError.classList.remove('hidden');
-            }
-            
-            // Reset loading state
-            submitText.classList.remove('hidden');
-            loadingSpinner.classList.add('hidden');
+            alert('Terjadi kesalahan saat menyimpan data');
+        } finally {
             submitBtn.disabled = false;
-        });
-    });
-
-    // Search functionality
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase();
-        const floorCards = document.querySelectorAll('.floor-card');
-        const floorsGrid = document.getElementById('floors-grid');
-        const emptyState = document.getElementById('empty-state');
-        let visibleCount = 0;
-        
-        floorCards.forEach(card => {
-            const floorName = card.querySelector('h4').textContent.toLowerCase();
-            const floorId = card.querySelector('p').textContent.toLowerCase();
-            
-            if (floorName.includes(searchTerm) || floorId.includes(searchTerm)) {
-                card.style.display = 'block';
-                visibleCount++;
-            } else {
-                card.style.display = 'none';
-            }
-        });
-        
-        // Show/hide empty state based on search results
-        if (visibleCount === 0 && floorCards.length > 0) {
-            if (floorsGrid) floorsGrid.style.display = 'none';
-            
-            // Create search empty state if it doesn't exist
-            let searchEmptyState = document.getElementById('search-empty-state');
-            if (!searchEmptyState) {
-                searchEmptyState = document.createElement('div');
-                searchEmptyState.id = 'search-empty-state';
-                searchEmptyState.className = 'text-center py-12';
-                searchEmptyState.innerHTML = `
-                    <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                    </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>
-                    <p class="text-gray-600">Tidak ditemukan lantai yang sesuai dengan pencarian Anda.</p>
-                `;
-                document.getElementById('floors-container').appendChild(searchEmptyState);
-            }
-            searchEmptyState.style.display = 'block';
-        } else {
-            if (floorsGrid) floorsGrid.style.display = 'grid';
-            const searchEmptyState = document.getElementById('search-empty-state');
-            if (searchEmptyState) {
-                searchEmptyState.style.display = 'none';
-            }
+            document.getElementById('submit-text').classList.remove('hidden');
+            document.getElementById('loading-spinner').classList.add('hidden');
         }
-    });
-
-    // Handle escape key to close modals
-    document.addEventListener('keydown', function(e) {
-        if (e.key === 'Escape') {
-            if (!floorModal.classList.contains('hidden')) {
-                closeModalFunc();
-            }
-            if (!deleteModal.classList.contains('hidden')) {
-                deleteModal.classList.add('hidden');
-            }
-        }
-    });
-
-    // Auto-focus search on Ctrl+K or Cmd+K
-    document.addEventListener('keydown', function(e) {
-        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
-            e.preventDefault();
-            searchInput.focus();
-        }
-    });
-
-    // Real-time validation for floor name
-    document.getElementById('floor-name').addEventListener('input', function() {
-        const floorNameError = document.getElementById('floor-name-error');
-        const value = this.value.trim();
-        
-        if (value.length > 0 && value.length < 2) {
-            floorNameError.textContent = 'Nama lantai minimal 2 karakter.';
-            floorNameError.classList.remove('hidden');
-        } else if (value.length > 50) {
-            floorNameError.textContent = 'Nama lantai maksimal 50 karakter.';
-            floorNameError.classList.remove('hidden');
-        } else {
-            floorNameError.classList.add('hidden');
-        }
-    });
-
-    // Add smooth animations for cards
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) {
-                entry.target.style.opacity = '1';
-                entry.target.style.transform = 'translateY(0)';
-            }
-        });
-    });
-
-    document.querySelectorAll('.floor-card').forEach(card => {
-        card.style.opacity = '0';
-        card.style.transform = 'translateY(20px)';
-        card.style.transition = 'opacity 0.3s ease, transform 0.3s ease';
-        observer.observe(card);
     });
 });
 </script>
+@endpush

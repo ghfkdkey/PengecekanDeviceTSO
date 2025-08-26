@@ -117,6 +117,37 @@
                         </div>
                     </li>
 
+                    <!-- Area -->
+                    <li>
+                        <a href="{{ route('areas.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('areas.*') ? 'bg-white/20' : '' }}" title="Area">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l9-7-9-7-9 7 9 7z"/>
+                            </svg>
+                            <span class="nav-text transition-opacity duration-300">Area</span>
+                        </a>
+                    </li>
+
+                    <!-- Regional -->
+                    <li>
+                        <a href="{{ route('regionals.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('regionals.*') ? 'bg-white/20' : '' }}" title="Regional">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+                            </svg>
+                            <span class="nav-text transition-opacity duration-300">Regional</span>
+                        </a>
+                    </li>
+
+                    <!-- Gedung -->
+                    <li>
+                        <a href="{{ route('buildings.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('buildings.*') ? 'bg-white/20' : '' }}" title="Gedung">
+                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18V3H3v18zM9 21V9h6v12"/>
+                            </svg>
+                            <span class="nav-text transition-opacity duration-300">Gedung</span>
+                        </a>
+                    </li>
+
                     <!-- Floors -->
                     <li>
                         <a href="{{ route('floors.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('floors.*') ? 'bg-white/20' : '' }}" title="Lantai">
@@ -156,6 +187,7 @@
                             <span class="nav-text transition-opacity duration-300">Checklist</span>
                         </a>
                     </li>
+
 
                     @if(auth()->user()->isAdmin())
                     <!-- Divider -->
