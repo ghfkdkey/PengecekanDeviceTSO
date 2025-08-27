@@ -9,32 +9,40 @@ use Illuminate\Support\Facades\Log;
 
 class RegionalController extends Controller
 {
-    /**
-     * Display a listing of regionals
-     */
-    public function index(Request $request)
+
+    public function __construct()
     {
-        try {
-            // Get all areas for dropdown
-            $areas = Area::orderBy('area_name')->get();
-            
-            // Build query for regionals
-            $query = Regional::with(['area', 'buildings']);
-            
-            // Filter by area if specified
-            if ($request->has('area') && !empty($request->area)) {
-                $query->where('area_id', $request->area);
-            }
-            
-            // Get regionals with relationships
-            $regionals = $query->orderBy('regional_name')->get();
-            
-            return view('regionals.index', compact('regionals', 'areas'));
-            
-        } catch (\Exception $e) {
-            Log::error('Error in RegionalController@index: ' . $e->getMessage());
-            return back()->with('error', 'Terjadi kesalahan saat memuat data regional');
+        $this->middleware('auth');
+    }
+
+    public function index()
+    {
+        $user = auth()->user();
+        
+        // Get areas based on user role
+        if ($user->isAdmin()) {
+            // Admin can see all areas and their regionals
+            $areas = Area::all();
+            $regionals = Regional::with(['area', 'creator'])->get();
+        } else if ($user->isGA()) {
+            // PIC GA can only see their assigned regional's area
+            $areas = Area::whereHas('regionals', function($query) use ($user) {
+                $query->where('regional_id', $user->regional_id);
+            })->get();
+            $regionals = Regional::with(['area', 'creator'])
+                ->where('regional_id', $user->regional_id)
+                ->get();
+        } else {
+            // PIC Operational can only see their assigned regional's area
+            $areas = Area::whereHas('regionals', function($query) use ($user) {
+                $query->where('regional_id', $user->regional_id);
+            })->get();
+            $regionals = Regional::with(['area', 'creator'])
+                ->where('regional_id', $user->regional_id)
+                ->get();
         }
+
+        return view('regionals.index', compact('regionals', 'areas'));
     }
 
     /**
@@ -42,6 +50,10 @@ class RegionalController extends Controller
      */
     public function store(Request $request)
     {
+        if (!$this->checkPermission('ManageArea')) {
+            return $this->unauthorized($request);
+        }
+
         try {
             $validated = $request->validate([
                 'regional_name' => 'required|string|max:100|unique:regionals,regional_name',
@@ -129,6 +141,10 @@ class RegionalController extends Controller
      */
     public function update(Request $request, $id)
     {
+        if (!$this->checkPermission('manage_regional')) {
+            return $this->unauthorized();
+        }
+
         try {
             $regional = Regional::findOrFail($id);
             
@@ -198,6 +214,10 @@ class RegionalController extends Controller
      */
     public function destroy(Request $request, $id)
     {
+        if (!$this->checkPermission('manage_regional')) {
+            return $this->unauthorized();
+        }
+
         try {
             $regional = Regional::findOrFail($id);
             
@@ -304,6 +324,40 @@ class RegionalController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memuat statistik'
+            ], 500);
+        }
+    }
+
+    public function apiIndex()
+    {
+        try {
+            $user = auth()->user();
+            
+            if ($user->isAdmin()) {
+                // Admin can see all regionals
+                $regionals = Regional::select('regional_id', 'regional_name')
+                                ->orderBy('regional_name')
+                                ->get();
+            } else if ($user->isGA()) {
+                // PIC GA can only see their assigned regional
+                $regionals = Regional::select('regional_id', 'regional_name')
+                                ->where('regional_id', $user->regional_id)
+                                ->orderBy('regional_name')
+                                ->get();
+            } else {
+                // PIC Operational can only see their assigned regional
+                $regionals = Regional::select('regional_id', 'regional_name')
+                                ->where('regional_id', $user->regional_id)
+                                ->orderBy('regional_name')
+                                ->get();
+            }
+
+            return response()->json($regionals);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Failed to load regionals: ' . $e->getMessage()
             ], 500);
         }
     }

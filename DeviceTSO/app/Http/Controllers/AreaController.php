@@ -9,14 +9,26 @@ use Illuminate\Support\Facades\Validator;
 
 class AreaController extends Controller
 {
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index()
     {
+        if (!$this->checkPermission('ManageArea')) {
+            return $this->unauthorized(request());
+        }
+
         $areas = Area::with(['user', 'regionals'])->latest()->get();
         return view('areas.index', compact('areas'));
     }
 
     public function store(Request $request)
     {
+        if (!$this->checkPermission('ManageArea')) {
+            return $this->unauthorized($request);
+        }
         $validator = Validator::make($request->all(), [
             'area_name' => 'required|string|max:100|unique:areas,area_name',
         ], [

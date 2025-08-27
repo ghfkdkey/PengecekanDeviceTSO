@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'User Management')
+@section('title', 'Kelola User')
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
@@ -11,10 +11,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
-                            User Management
+                            Kelola User
                         </h1>
                         <p class="mt-2 text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
-                            Manage system users and their permissions
+                            Mengelola user dan hak akses
                         </p>
                     </div>
                     <div class="flex space-x-3">
@@ -22,7 +22,7 @@
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
                             </svg>
-                            Add User
+                            Tambah User
                         </button>
                         <button onclick="exportData()" class="inline-flex items-center px-4 py-2 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
                             <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -91,9 +91,9 @@
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     <div>
-                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Search</label>
+                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Pencarian</label>
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search username, full name..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                            <input type="text" id="searchInput" placeholder="Cari username, nama lengkap..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -104,7 +104,7 @@
                     <div>
                         <label for="roleFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Role</label>
                         <select id="roleFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
-                            <option value="">All Roles</option>
+                            <option value="">Semua Roles</option>
                             <option value="admin">Admin</option>
                             <option value="PIC General Affair (GA)">PIC General Affair (GA)</option>
                             <option value="PIC Operasional">PIC Operasional</option>
@@ -113,8 +113,8 @@
                     <div>
                         <label for="sortBy" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Sort By</label>
                         <select id="sortBy" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
-                            <option value="created_at">Newest First</option>
-                            <option value="full_name">Name A-Z</option>
+                            <option value="created_at">Terbaru</option>
+                            <option value="full_name">Nama A-Z</option>
                             <option value="username">Username A-Z</option>
                             <option value="role">Role</option>
                         </select>
@@ -149,7 +149,7 @@
                                 Role
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
-                                Created Date
+                                Tanggal Dibuat
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">
                                 Actions
@@ -181,7 +181,7 @@
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;" id="modalTitle">
-                    Add New User
+                    Tambahkan User Baru
                 </h3>
                 <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -193,15 +193,15 @@
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label for="username" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Username</label>
-                        <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter username">
+                        <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Masukkan username">
                     </div>
                     <div>
                         <label for="email" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Email</label>
-                        <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter email">
+                        <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Masukkan email">
                     </div>
                     <div>
-                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Full Name</label>
-                        <input type="text" id="full_name" name="full_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter full name">
+                        <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Nama Lengkap</label>
+                        <input type="text" id="full_name" name="full_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Masukkan nama lengkap">
                     </div>
                     <div>
                         <label for="role" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Role</label>
@@ -216,9 +216,17 @@
                         <label for="password" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">
                             Password <span id="passwordRequired">(Required)</span>
                         </label>
-                        <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter password">
+                        <input type="password" id="password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Masukkan password">
                         <p class="text-xs text-gray-500 mt-1" id="passwordHelp">Minimum 6 characters</p>
                     </div>
+                </div>
+                <div id="regional-select-container" class="hidden">
+                    <label for="regional" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">
+                        Regional Assignment <span class="text-red-500">*</span>
+                    </label>
+                    <select id="regional" name="regional_id" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                        <option value="">Select Regional</option>
+                    </select>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
                     <button type="button" onclick="closeAddModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
@@ -279,7 +287,6 @@ document.addEventListener('DOMContentLoaded', function() {
 // Load users from API
 async function loadUsers() {
     try {
-        console.log('Loading users...');
         const response = await fetch('/api/users', {
             headers: {
                 'Accept': 'application/json',
@@ -287,28 +294,57 @@ async function loadUsers() {
             }
         });
         
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+        if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+        
+        const data = await response.json();
+        users = data.users;
+        currentUserRole = data.currentUserRole;
+        currentUserRegional = data.currentUserRegional;
+        
+        // Filter users based on role
+        if (currentUserRole === 'PIC General Affair (GA)') {
+            // PIC GA can only see PIC Operational in their regional
+            users = users.filter(user => 
+                user.id === data.currentUserId || 
+                (user.role === 'PIC Operasional' && user.regional_id === currentUserRegional)
+            );
         }
         
-        users = await response.json();
-        console.log('Users loaded:', users);
         filteredUsers = [...users];
         updateStats();
         renderTable();
         updatePagination();
     } catch (error) {
         console.error('Error loading users:', error);
-        showNotification('Error loading data: ' + error.message, 'error');
+        showNotification('Error loading users: ' + error.message, 'error');
+    }
+}
+
+// Load regionals from API
+async function loadRegionals() {
+    try {
+        const response = await fetch('/api/regionals', {
+            headers: {
+                'Accept': 'application/json'
+            }
+        });
         
-        // Show empty state
-        document.getElementById('usersTableBody').innerHTML = `
-            <tr>
-                <td colspan="5" class="px-6 py-4 text-center text-red-500" style="font-family: 'Poppins', sans-serif;">
-                    Error loading users: ${error.message}
-                </td>
-            </tr>
-        `;
+        if (!response.ok) throw new Error('Failed to load regionals');
+        
+        const regionals = await response.json();
+        const regionalSelect = document.getElementById('regional');
+        regionalSelect.innerHTML = '<option value="">Select Regional</option>';
+        
+        regionals.forEach(regional => {
+            regionalSelect.innerHTML += `
+                <option value="${regional.regional_id}">
+                    ${regional.regional_name}
+                </option>
+            `;
+        });
+    } catch (error) {
+        console.error('Error loading regionals:', error);
+        showNotification('Error loading regionals', 'error');
     }
 }
 
@@ -323,6 +359,21 @@ function setupEventListeners() {
     
     // Form submission
     document.getElementById('userForm').addEventListener('submit', handleFormSubmit);
+    
+    // Role change handler
+    document.getElementById('role').addEventListener('change', function() {
+        const regionalContainer = document.getElementById('regional-select-container');
+        const regionalSelect = document.getElementById('regional');
+        
+        if (this.value === 'PIC General Affair (GA)' || this.value === 'PIC Operasional') {
+            regionalContainer.classList.remove('hidden');
+            regionalSelect.required = true;
+            loadRegionals();
+        } else {
+            regionalContainer.classList.add('hidden');
+            regionalSelect.required = false;
+        }
+    });
 }
 
 // Filter users
@@ -386,6 +437,11 @@ function renderTable() {
             <tr>
                 <td colspan="5" class="px-6 py-4 text-center text-gray-500" style="font-family: 'Poppins', sans-serif;">
                     No users found
+                </td>
+                <td class="px-6 py-4 whitespace-nowrap">
+                    <div class="text-sm text-gray-900" style="font-family: 'Poppins', sans-serif;">
+                        ${user.regional ? user.regional.regional_name : 'N/A'}
+                    </div>
                 </td>
             </tr>
         `;
@@ -461,11 +517,32 @@ function renderTable() {
 
 // Get role badge HTML
 function getRoleBadge(role) {
-    const badges = {
-        'admin': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Admin</span>',
-        'user': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">User</span>'
-    };
-    return badges[role] || '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unknown</span>';
+    switch (role) {
+        case 'admin':
+            return `
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                    Admin
+                </span>
+            `;
+        case 'PIC General Affair (GA)':
+            return `
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                    PIC General Affair (GA)
+                </span>
+            `;
+        case 'PIC Operasional':
+            return `
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                    PIC Operasional
+                </span>
+            `;
+        default:
+            return `
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                    ${role}
+                </span>
+            `;
+    }
 }
 
 // Get avatar initials
@@ -546,7 +623,7 @@ function updatePagination() {
 // Modal functions
 function openAddModal() {
     editingId = null;
-    document.getElementById('modalTitle').textContent = 'Add New User';
+    document.getElementById('modalTitle').textContent = 'Tambahkan User Baru';
     document.getElementById('userForm').reset();
     document.getElementById('passwordRequired').textContent = '(Required)';
     document.getElementById('passwordHelp').textContent = 'Minimum 6 characters';
@@ -574,6 +651,23 @@ function editUser(id) {
     document.getElementById('full_name').value = user.full_name || '';
     document.getElementById('role').value = user.role || '';
     document.getElementById('password').value = '';
+    
+    // Handle regional selection
+    const regionalContainer = document.getElementById('regional-select-container');
+    const regionalSelect = document.getElementById('regional');
+    
+    if (user.role === 'PIC General Affair (GA)' || user.role === 'PIC Operasional') {
+        regionalContainer.classList.remove('hidden');
+        regionalSelect.required = true;
+        loadRegionals().then(() => {
+            if (user.regional_id) {
+                regionalSelect.value = user.regional_id;
+            }
+        });
+    } else {
+        regionalContainer.classList.add('hidden');
+        regionalSelect.required = false;
+    }
     
     document.getElementById('addModal').classList.remove('hidden');
 }
@@ -608,6 +702,10 @@ function viewDetail(id) {
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
                 <p class="text-sm text-gray-900">${formatDate(user.updated_at)}</p>
+            </div>
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Regional Assignment</label>
+                <p class="text-sm text-gray-900">${user.regional ? user.regional.regional_name : 'N/A'}</p>
             </div>
         </div>
     `;

@@ -14,7 +14,8 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->string('password_hash', 255);
             $table->string('full_name', 100);
-            $table->enum('role', ['admin', 'PIC General Affair (GA)', 'PIC Operasional'])->default('admin');
+            $table->enum('role', ['admin', 'PIC General Affair (GA)', 'PIC Operasional']);
+            $table->unsignedBigInteger('regional_id')->nullable();
             $table->rememberToken();
             $table->timestamps();
         });
@@ -23,5 +24,6 @@ return new class extends Migration
     public function down(): void
     {
         Schema::dropIfExists('users');
+        
     }
 };
