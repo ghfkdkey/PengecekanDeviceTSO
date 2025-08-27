@@ -9,8 +9,16 @@ use Illuminate\Http\Request;
 
 class BuildingController extends Controller {
 
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request)
     {
+        if (!$this->checkPermission('ManageArea')) {
+            return $this->unauthorized(request());
+        }
         $query = Building::query();
 
         if ($request->filled('regional')) {
@@ -35,6 +43,10 @@ class BuildingController extends Controller {
 
     public function store(Request $request)
     {
+        if (!$this->checkPermission('ManageArea')) {
+            return $this->unauthorized($request);
+        }
+
         try {
             $validated = $request->validate([
                 'building_code' => 'required|string|max:50|unique:buildings,building_code',

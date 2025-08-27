@@ -272,8 +272,8 @@
                     <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Building</h3>
-                    <p class="text-gray-600 mb-4">Mulai dengan menambahkan building pertama untuk sistem Anda.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Gedung</h3>
+                    <p class="text-gray-600 mb-4">Mulai dengan menambahkan gedung pertama untuk sistem Anda.</p>
                     <button 
                         class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200"
                         onclick="document.getElementById('add-building-btn').click()"
