@@ -27,4 +27,9 @@ class Building extends Model {
     {
         return $this->floors()->count() ?? 0;
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

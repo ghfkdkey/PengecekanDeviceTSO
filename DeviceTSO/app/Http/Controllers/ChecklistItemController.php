@@ -141,19 +141,60 @@ class ChecklistItemController extends Controller
             ->with('success', 'Checklist item updated successfully.');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        $checklistItem = ChecklistItem::findOrFail($id);
-        $checklistItem->delete();
+        try {
+            $item = ChecklistItem::findOrFail($id);
+            $item->delete();
 
-        if (request()->expectsJson()) {
-            return response()->json(['message' => 'Checklist item deleted successfully.']);
+            if (request()->ajax() || request()->expectsJson()) {
+                return response()->json([
+                    'success' => true, 
+                    'message' => 'Checklist item berhasil dihapus'
+                ]);
+            }
+
+            return redirect()->route('checklist-items.index')
+                ->with('success', 'Checklist item berhasil dihapus');
+        } catch (\Exception $e) {
+            if (request()->ajax() || request()->expectsJson()) {
+                return response()->json([
+                    'success' => false, 
+                    'message' => 'Gagal menghapus checklist item: ' . $e->getMessage()
+                ], 500);
+            }
+            return redirect()->back()
+                ->with('error', 'Gagal menghapus checklist item: ' . $e->getMessage());
         }
+    }
 
-        return redirect()->route('checklist-items.index')
-            ->with('success', 'Checklist item deleted successfully.');
+    /**
+     * API: Get a specific checklist item
+     */
+    public function apiShow($id)
+    {
+        $item = ChecklistItem::with('checkResults')->findOrFail($id);
+        return response()->json([
+            'checklist_id' => $id,
+            'device_type' => $item->device_type,
+            'question' => $item->question,
+            'check_results_count' => $item->checkResults->count()
+        ]);
+    }
+
+    /**
+     * API: Update a specific checklist item
+     */
+    public function apiUpdate(Request $request, $id)
+    {
+        $request->validate([
+            'device_type' => 'required|string|max:50',
+            'question' => 'required|string|max:500'
+        ]);
+
+        $item = ChecklistItem::findOrFail($id);
+        $item->update($request->only(['device_type', 'question']));
+
+        return response()->json($item);
     }
 }

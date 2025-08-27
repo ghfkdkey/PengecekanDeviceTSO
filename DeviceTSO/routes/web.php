@@ -29,7 +29,11 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', [UserController::class, 'dashboard'])->name('dashboard');
 
     Route::resource('areas', AreaController::class);
-    Route::resource('regionals', RegionalController::class);
+    
+    // Update regional routes to explicitly define the delete method
+    Route::delete('/regionals/{id}', [RegionalController::class, 'destroy'])->name('regionals.destroy');
+    Route::resource('regionals', RegionalController::class)->except(['destroy']);
+    
     Route::resource('buildings', BuildingController::class);
     
     // User Management Routes
@@ -41,15 +45,13 @@ Route::middleware('auth')->group(function () {
     // Room Management
     Route::resource('rooms', RoomController::class);
     
-    // Device Management - Main routes
+    // Device Management
+    Route::get('/devices/export-excel', [DeviceController::class, 'exportExcel'])->name('devices.export-excel');
     Route::resource('devices', DeviceController::class);
     
     // Device Image Upload - Specific route for image upload
     Route::post('/devices/upload-image', [DeviceController::class, 'uploadImage'])->name('devices.upload-image');
-    Route::get('/devices/image/{id}', [DeviceController::class, 'getImage'])->name('devices.get-image');
-    
-    // Checklist Items Management
-    Route::resource('checklist-items', ChecklistItemController::class);
+    Route::get('/devices/image/{id}', [DeviceController::class, 'getImage'])->name('devices.get-image');    
 
     // Device Check Results - Web views
     Route::get('/device-check-results', [DeviceCheckResultController::class, 'webIndex'])->name('device-check-results.index');
@@ -107,6 +109,10 @@ Route::middleware('auth')->group(function () {
 
         Route::get('/floors', [FloorController::class, 'apiIndex'])->name('floors.api-index');
         Route::get('/rooms', [RoomController::class, 'apiIndex'])->name('rooms.api-index');
+        
+        // Checklist Items API
+        Route::get('/checklist-items/{id}', [ChecklistItemController::class, 'apiShow']);
+        Route::put('/checklist-items/{id}', [ChecklistItemController::class, 'apiUpdate']); // perbaiki path
     });
 
 });
@@ -131,5 +137,14 @@ Route::middleware('auth')->group(function () {
     // Checklist Items CRUD operations
     Route::post('/checklist-items', [ChecklistItemController::class, 'store'])->name('checklist-items.store');
     Route::put('/checklist-items/{checklistItem}', [ChecklistItemController::class, 'update'])->name('checklist-items.update');
-    Route::delete('/checklist-items/{checklistItem}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');
+    Route::delete('/checklist-items//checklist-items/{id}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');
 });
+
+// Checklist Items manual CRUD routes
+Route::get('/checklist-items', [ChecklistItemController::class, 'index'])->name('checklist-items.index');
+Route::get('/checklist-items/create', [ChecklistItemController::class, 'create'])->name('checklist-items.create');
+Route::post('/checklist-items', [ChecklistItemController::class, 'store'])->name('checklist-items.store');
+Route::get('/checklist-items/{id}', [ChecklistItemController::class, 'show'])->name('checklist-items.show');
+Route::get('/checklist-items/{id}/edit', [ChecklistItemController::class, 'edit'])->name('checklist-items.edit');
+Route::put('/checklist-items/{id}', [ChecklistItemController::class, 'update'])->name('checklist-items.update');
+Route::delete('/checklist-items/{id}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');

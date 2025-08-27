@@ -17,30 +17,39 @@ class DeviceController extends Controller
      */
     public function index(Request $request)
     {
-        // Get all devices with room relationship
-        $devices = Device::with(['room.floor'])->get();
+        // Mulai query builder dengan eager loading relasi yang dibutuhkan
+        $query = Device::with(['room.floor']);
+
+        // Terapkan filter berdasarkan input dari request
+        if ($request->filled('room')) {
+            $query->where('room_id', $request->room);
+        }
+
+        if ($request->filled('type')) {
+            $query->where('device_type', $request->type);
+        }
+
+        if ($request->filled('search')) {
+            $searchTerm = $request->search;
+            $query->where(function($q) use ($searchTerm) {
+                $q->where('device_name', 'like', "%{$searchTerm}%")
+                ->orWhere('serial_number', 'like', "%{$searchTerm}%");
+            });
+        }
+
+        // Eksekusi query untuk mendapatkan device yang sudah difilter
+        $devices = $query->get();
         
-        // Get all rooms for filter dropdown
+        // Data untuk dropdown filter tidak perlu difilter
         $rooms = Room::with('floor')->orderBy('room_name')->get();
         
-        // Get unique device types for filter
         $deviceTypes = Device::whereNotNull('device_type')
             ->distinct()
             ->pluck('device_type')
             ->filter()
             ->sort();
         
-        // If this is an AJAX request, return JSON data
-        if ($request->ajax() || $request->wantsJson()) {
-            return response()->json([
-                'success' => true,
-                'data' => $devices,
-                'rooms' => $rooms,
-                'device_types' => $deviceTypes
-            ]);
-        }
-        
-        // Return view for regular page load
+        // Kembalikan view dengan data yang sudah difilter dan data untuk filter
         return view('devices.index', compact('devices', 'rooms', 'deviceTypes'));
     }
 
@@ -347,140 +356,57 @@ class DeviceController extends Controller
         }
     }
 
-    /**
-     * Export devices to CSV
-     */
-    public function exportCsv(Request $request)
-    {
-        try {
-            $devices = Device::with(['room.floor'])->get();
-
-            $filename = 'devices_' . date('Y-m-d_H-i-s') . '.csv';
-            $headers = [
-                'Content-Type' => 'text/csv',
-                'Content-Disposition' => 'attachment; filename="' . $filename . '"',
-            ];
-
-            $callback = function () use ($devices) {
-                $file = fopen('php://output', 'w');
-                
-                // Add BOM for UTF-8
-                fwrite($file, "\xEF\xBB\xBF");
-                
-                fputcsv($file, [
-                    'ID Device',
-                    'Nama Device',
-                    'Tipe Device',
-                    'Kategori',
-                    'Merk',
-                    'Serial Number',
-                    'Ruangan',
-                    'Lantai',
-                    'Kondisi',
-                    'Tahun PO',
-                    'No PO',
-                    'No BAST',
-                    'Tahun BAST',
-                    'Notes',
-                    'Dibuat Pada',
-                    'Diperbarui Pada'
-                ]);
-                
-                foreach ($devices as $device) {
-                    fputcsv($file, [
-                        $device->device_id,
-                        $device->device_name,
-                        $device->device_type ?? '',
-                        $device->category ?? '',
-                        $device->merk ?? '',
-                        $device->serial_number ?? '',
-                        $device->room->room_name ?? '',
-                        $device->room->floor->floor_name ?? '',
-                        ucfirst($device->condition ?? 'baik'),
-                        $device->tahun_po ?? '',
-                        $device->no_po ?? '',
-                        $device->no_bast ?? '',
-                        $device->tahun_bast ?? '',
-                        $device->notes ?? '',
-                        $device->created_at->format('Y-m-d H:i:s'),
-                        $device->updated_at->format('Y-m-d H:i:s'),
-                    ]);
-                }
-
-                fclose($file);
-            };
-
-            return response()->stream($callback, 200, $headers);
-
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengekspor data device.'
-            ], 500);
-        }
-    }
-
-    /**
-     * Export devices to Excel
-     */
     public function exportExcel(Request $request)
     {
         try {
-            $devices = Device::with(['room.floor'])->get();
+            // SOLUSI: Lakukan Eager Loading untuk semua relasi bertingkat
+            $devices = Device::with([
+                'room.floor.building.regional.area'
+            ])->get();
+
+            if ($devices->isEmpty()) {
+                // Sebaiknya redirect dengan pesan error jika tidak ada data
+                return back()->with('error', 'Tidak ada data device untuk diekspor.');
+            }
 
             $spreadsheet = new Spreadsheet();
             $sheet = $spreadsheet->getActiveSheet();
             $sheet->setTitle('Data Devices');
 
-            // Set headers
+            // Set Headers
             $headers = [
-                'A1' => 'ID Device',
-                'B1' => 'Nama Device', 
-                'C1' => 'Tipe Device',
-                'D1' => 'Kategori',
-                'E1' => 'Merk',
-                'F1' => 'Serial Number',
-                'G1' => 'Ruangan',
-                'H1' => 'Lantai',
-                'I1' => 'Kondisi',
-                'J1' => 'Tahun PO',
-                'K1' => 'No PO',
-                'L1' => 'No BAST',
-                'M1' => 'Tahun BAST',
-                'N1' => 'Notes',
-                'O1' => 'Dibuat Pada',
-                'P1' => 'Diperbarui Pada'
+                'Kode Gedung', 'Area', 'Regional', 'Nama Gedung', 'Lantai', 'Ruangan',
+                'Kategori', 'Tipe Device', 'Merk', 'Nama Device', 'Serial Number',
+                'Catatan', 'No PO', 'No BAST', 'Tahun BAST', 'Kondisi'
             ];
+            $sheet->fromArray($headers, NULL, 'A1');
 
-            foreach ($headers as $cell => $header) {
-                $sheet->setCellValue($cell, $header);
-            }
-
-            // Style headers
+            // Style Headers
             $sheet->getStyle('A1:P1')->getFont()->setBold(true);
             $sheet->getStyle('A1:P1')->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('E5E7EB');
 
-            // Add data
+            // Add Data
             $row = 2;
             foreach ($devices as $device) {
-                $sheet->setCellValue('A' . $row, $device->device_id);
-                $sheet->setCellValue('B' . $row, $device->device_name);
-                $sheet->setCellValue('C' . $row, $device->device_type ?? '');
-                $sheet->setCellValue('D' . $row, $device->category ?? '');
-                $sheet->setCellValue('E' . $row, $device->merk ?? '');
-                $sheet->setCellValue('F' . $row, $device->serial_number ?? '');
-                $sheet->setCellValue('G' . $row, $device->room->room_name ?? '');
-                $sheet->setCellValue('H' . $row, $device->room->floor->floor_name ?? '');
-                $sheet->setCellValue('I' . $row, ucfirst($device->condition ?? 'baik'));
-                $sheet->setCellValue('J' . $row, $device->tahun_po ?? '');
-                $sheet->setCellValue('K' . $row, $device->no_po ?? '');
-                $sheet->setCellValue('L' . $row, $device->no_bast ?? '');
-                $sheet->setCellValue('M' . $row, $device->tahun_bast ?? '');
-                $sheet->setCellValue('N' . $row, $device->notes ?? '');
-                $sheet->setCellValue('O' . $row, $device->created_at->format('Y-m-d H:i:s'));
-                $sheet->setCellValue('P' . $row, $device->updated_at->format('Y-m-d H:i:s'));
+                // Gunakan null coalescing operator (??) untuk keamanan jika relasi kosong
+                $sheet->setCellValue('A' . $row, $device->room->floor->building->building_code ?? 'N/A');
+                $sheet->setCellValue('B' . $row, $device->room->floor->building->regional->area->area_name ?? 'N/A');
+                $sheet->setCellValue('C' . $row, $device->room->floor->building->regional->regional_name ?? 'N/A');
+                $sheet->setCellValue('D' . $row, $device->room->floor->building->building_name ?? 'N/A');
+                $sheet->setCellValue('E' . $row, $device->room->floor->floor_name ?? 'N/A');
+                $sheet->setCellValue('F' . $row, $device->room->room_name ?? 'N/A');
+                $sheet->setCellValue('G' . $row, $device->category ?? 'N/A');
+                $sheet->setCellValue('H' . $row, $device->device_type ?? 'N/A');
+                $sheet->setCellValue('I' . $row, $device->merk ?? 'N/A');
+                $sheet->setCellValue('J' . $row, $device->device_name ?? 'N/A');
+                $sheet->setCellValue('K' . $row, $device->serial_number ?? 'N/A');
+                $sheet->setCellValue('L' . $row, $device->notes ?? 'N/A');
+                $sheet->setCellValue('M' . $row, $device->no_po ?? 'N/A');
+                $sheet->setCellValue('N' . $row, $device->no_bast ?? 'N/A');
+                $sheet->setCellValue('O' . $row, $device->tahun_bast ?? 'N/A');
+                $sheet->setCellValue('P' . $row, $device->condition ? ucfirst($device->condition) : 'N/A');
                 $row++;
             }
 
@@ -489,25 +415,17 @@ class DeviceController extends Controller
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
 
-            // Add borders
-            $sheet->getStyle('A1:P' . ($row - 1))->getBorders()->getAllBorders()
-                ->setBorderStyle(\PhpOffice\PhpSpreadsheet\Style\Border::BORDER_THIN);
-
             $filename = 'devices_' . date('Y-m-d_H-i-s') . '.xlsx';
-            
             $writer = new Xlsx($spreadsheet);
             
             return response()->streamDownload(function() use ($writer) {
                 $writer->save('php://output');
-            }, $filename, [
-                'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-            ]);
+            }, $filename);
 
         } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Gagal mengekspor data device ke Excel: ' . $e->getMessage()
-            ], 500);
+            \Log::error('Excel export error: ' . $e->getMessage() . ' in file ' . $e->getFile() . ' on line ' . $e->getLine());
+            // Redirect dengan pesan error agar user tahu
+            return back()->with('error', 'Gagal mengekspor data: Terjadi kesalahan internal.');
         }
     }
 

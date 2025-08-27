@@ -23,7 +23,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Devices -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
@@ -39,32 +39,47 @@
             </div>
         </div>
 
-        <!-- Total Floors -->
+        <!-- Pending Devices -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
-                <div class="bg-purple-100 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                <div class="bg-yellow-100 rounded-lg p-3">
+                    <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Lantai</p>
-                    <p class="text-2xl font-bold text-gray-900" id="totalFloors">-</p>
+                    <p class="text-sm font-medium text-gray-600">Device Pending</p>
+                    <p class="text-2xl font-bold text-yellow-600" id="pendingDevicesCount">-</p>
                 </div>
             </div>
         </div>
 
-        <!-- Total Rooms -->
+        <!-- Passed Devices -->
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
-                <div class="bg-indigo-100 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                <div class="bg-green-100 rounded-lg p-3">
+                    <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Total Ruangan</p>
-                    <p class="text-2xl font-bold text-gray-900" id="totalRooms">-</p>
+                    <p class="text-sm font-medium text-gray-600">Device Passed</p>
+                    <p class="text-2xl font-bold text-green-600" id="passedDevices">-</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Failed Devices -->
+        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
+            <div class="flex items-center">
+                <div class="bg-red-100 rounded-lg p-3">
+                    <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Device Failed</p>
+                    <p class="text-2xl font-bold text-red-600" id="failedDevices">-</p>
                 </div>
             </div>
         </div>
@@ -86,14 +101,14 @@
         </div>
 
         <!-- Quick Actions & Device Status -->
-        <div class="space-y-6">
+        <div class="space-y-8">
             <!-- Quick Actions -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
                     <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Aksi Cepat</h3>
                 </div>
                 <div class="p-6 space-y-4">
-                    <a href="{{ route('check.index') }}" class="w-full bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white rounded-lg p-4 flex items-center space-x-3 hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all">
+                    <a href="{{ route('device-check.page') }}" class="w-full bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white rounded-lg p-4 flex items-center space-x-3 hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all">
                         <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
@@ -185,13 +200,12 @@
     function updateStats() {
         const stats = dashboardData.stats;
         document.getElementById('totalDevices').textContent = stats.total_devices || 0;
-        document.getElementById('totalFloors').textContent = stats.total_floors || 0;
-        document.getElementById('totalRooms').textContent = stats.total_rooms || 0;
-        
-        // Update device status using the same logic as device-check-results
-        document.getElementById('pendingDevices').textContent = stats.pending_devices || 0;
+        document.getElementById('pendingDevicesCount').textContent = stats.pending_devices || 0;
         document.getElementById('passedDevices').textContent = stats.passed_devices || 0;
         document.getElementById('failedDevices').textContent = stats.failed_devices || 0;
+        
+        // Update device status in side panel
+        document.getElementById('pendingDevices').textContent = stats.pending_devices || 0;
     }
 
     // Fungsi untuk format time ago dengan timezone yang benar
@@ -299,47 +313,33 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
                     </svg>
                 </div>
-            `
-        };
-        
-        return icons[type] || icons['device_check'];
-    }
-
-    // Get activity icon based on type
-    function getActivityIcon(type) {
-        const icons = {
-            'device_check': `
-                <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                    <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                    </svg>
-                </div>
             `,
-            'device_added': `
-                <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                    <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                    </svg>
-                </div>
-            `,
-            'floor_added': `
-                <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center">
-                    <svg class="w-4 h-4 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                    </svg>
-                </div>
-            `,
-            'room_added': `
+            'building_added': `
                 <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center">
                     <svg class="w-4 h-4 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                    </svg>
+                </div>
+            `,
+            'regional_added': `
+                <div class="w-8 h-8 bg-pink-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-pink-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                    </svg>
+                </div>
+            `,
+            'area_added': `
+                <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center">
+                    <svg class="w-4 h-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             `,
             'default': `
                 <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center">
                     <svg class="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
                     </svg>
                 </div>
             `

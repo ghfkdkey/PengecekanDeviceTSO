@@ -55,10 +55,7 @@ class RegionalController extends Controller
                 'area_id.exists' => 'Area yang dipilih tidak valid',
             ]);
             
-            // SOLUSI: Tambahkan ID pengguna yang sedang login ke data yang divalidasi
             $validated['user_id'] = auth()->id(); 
-
-            // Sekarang data yang dikirim sudah lengkap
             $regional = Regional::create($validated);
             
             if ($request->wantsJson()) {

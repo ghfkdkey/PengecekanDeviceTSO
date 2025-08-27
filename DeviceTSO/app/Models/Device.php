@@ -11,7 +11,6 @@ class Device extends Model
 
     protected $primaryKey = 'device_id';
     
-    // Tambahkan 'image_path' ke dalam fillable array
     protected $fillable = [
         'room_id',
         'device_name',
@@ -43,8 +42,7 @@ class Device extends Model
     {
         return $this->hasMany(DeviceCheckResult::class, 'device_id', 'device_id');
     }
-
-    // Optional: Accessor untuk mendapatkan URL gambar lengkap
+    
     public function getImageUrlAttribute()
     {
         if ($this->image_path) {

@@ -38,44 +38,49 @@
 
     <!-- Main Content -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Stats Cards -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
-                <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"></path>
-                        </svg>
-                    </div>
-                    <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Users</p>
-                        <p class="text-2xl font-bold text-blue-600" id="totalUsers" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
-                    </div>
-                </div>
-            </div>
+        <!-- Statistics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- Total Admin -->
             <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-red-100">
                         <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/>
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Admins</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Admin</p>
                         <p class="text-2xl font-bold text-red-600" id="adminCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
                     </div>
                 </div>
             </div>
+
+            <!-- Total PIC GA -->
+            <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-yellow-100">
+                        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                        </svg>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total PIC GA</p>
+                        <p class="text-2xl font-bold text-yellow-600" id="gaCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total PIC Operasional -->
             <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div class="flex items-center">
                     <div class="p-3 rounded-full bg-green-100">
                         <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Regular Users</p>
-                        <p class="text-2xl font-bold text-green-600" id="userCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total PIC Operasional</p>
+                        <p class="text-2xl font-bold text-green-600" id="operationalCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
                     </div>
                 </div>
             </div>
@@ -101,7 +106,8 @@
                         <select id="roleFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <option value="">All Roles</option>
                             <option value="admin">Admin</option>
-                            <option value="user">User</option>
+                            <option value="PIC General Affair (GA)">PIC General Affair (GA)</option>
+                            <option value="PIC Operasional">PIC Operasional</option>
                         </select>
                     </div>
                     <div>
@@ -190,6 +196,10 @@
                         <input type="text" id="username" name="username" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter username">
                     </div>
                     <div>
+                        <label for="email" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Email</label>
+                        <input type="email" id="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter email">
+                    </div>
+                    <div>
                         <label for="full_name" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Full Name</label>
                         <input type="text" id="full_name" name="full_name" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Enter full name">
                     </div>
@@ -198,7 +208,8 @@
                         <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <option value="">Select Role</option>
                             <option value="admin">Admin</option>
-                            <option value="user">User</option>
+                            <option value="PIC General Affair (GA)">PIC General Affair (GA)</option>
+                            <option value="PIC Operasional">PIC Operasional</option>
                         </select>
                     </div>
                     <div>
@@ -352,13 +363,13 @@ function filterUsers() {
 
 // Update statistics
 function updateStats() {
-    const total = users.length;
-    const admins = users.filter(u => u.role === 'admin').length;
-    const regularUsers = users.filter(u => u.role === 'user').length;
-    
-    document.getElementById('totalUsers').textContent = total;
-    document.getElementById('adminCount').textContent = admins;
-    document.getElementById('userCount').textContent = regularUsers;
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    const gaCount = users.filter(u => u.role === 'PIC General Affair (GA)').length;
+    const operationalCount = users.filter(u => u.role === 'PIC Operasional').length;
+
+    document.getElementById('adminCount').textContent = adminCount;
+    document.getElementById('gaCount').textContent = gaCount;
+    document.getElementById('operationalCount').textContent = operationalCount;
 }
 
 // Render table
@@ -559,6 +570,7 @@ function editUser(id) {
     
     // Populate form
     document.getElementById('username').value = user.username || '';
+    document.getElementById('email').value = user.email || '';
     document.getElementById('full_name').value = user.full_name || '';
     document.getElementById('role').value = user.role || '';
     document.getElementById('password').value = '';
@@ -582,12 +594,12 @@ function viewDetail(id) {
                 <p class="text-sm text-gray-900">${user.username || 'N/A'}</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
-                ${getRoleBadge(user.role)}
+                <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                <p class="text-sm text-gray-900">${user.email || 'N/A'}</p>
             </div>
             <div>
-                <label class="block text-sm font-medium text-gray-700 mb-1">User ID</label>
-                <p class="text-sm text-gray-900">${user.id || 'N/A'}</p>
+                <label class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                <p class="text-sm text-gray-900">${user.role || 'N/A'}</p>
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Created Date</label>

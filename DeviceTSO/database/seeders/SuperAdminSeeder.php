@@ -13,10 +13,11 @@ class SuperAdminSeeder extends Seeder
         User::updateOrCreate(
             ['username' => 'superadmin'],
             [
-                'password_hash' => Hash::make('Tsel123'),
-                'full_name' => 'Super Administrator',
-                'role' => 'admin',
-                'remember_token' => null
+                'password_hash'   => Hash::make('Tsel123'),
+                'full_name'       => 'Super Administrator',
+                'email'           => 'admin@email.com',
+                'role'            => 'admin',
+                'remember_token'  => null,
             ]
         );
     }

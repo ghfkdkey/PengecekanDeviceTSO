@@ -466,7 +466,7 @@ document.addEventListener('DOMContentLoaded', function() {
             headers: {
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                 'X-Requested-With': 'XMLHttpRequest',
-                'Content-Type': 'application/json'
+                'Accept': 'application/json'
             }
         })
         .then(response => response.json())

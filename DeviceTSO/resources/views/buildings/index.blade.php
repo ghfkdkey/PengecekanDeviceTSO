@@ -1,7 +1,7 @@
 @extends('layouts.app')
 
-@section('title', 'Manajemen Building')
-@section('page-title', 'Manajemen Building')
+@section('title', 'Manajemen Gedung')
+@section('page-title', 'Manajemen Gedung')
 @section('page-subtitle', 'Kelola data building untuk sistem pengecekan device')
 
 @push('styles')
@@ -278,7 +278,7 @@
                         class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200"
                         onclick="document.getElementById('add-building-btn').click()"
                     >
-                        Tambah Building Pertama
+                        Tambah Gedung Pertama
                     </button>
                 </div>
             @endif
@@ -291,7 +291,7 @@
     <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95" id="modal-content">
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
-                <h3 id="modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Building</h3>
+                <h3 id="modal-title" class="text-lg font-telkomsel font-semibold text-gray-900">Tambah Gedung</h3>
                 <button id="close-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -541,7 +541,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function openAddModal() {
         resetForm();
-        document.getElementById('modal-title').textContent = 'Tambah Building';
+        document.getElementById('modal-title').textContent = 'Tambah Gedung';
         document.getElementById('submit-text').textContent = 'Simpan';
         document.getElementById('form-method').value = 'POST';
         document.getElementById('building-id').value = '';

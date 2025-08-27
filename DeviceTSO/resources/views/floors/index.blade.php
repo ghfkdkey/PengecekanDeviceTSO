@@ -104,8 +104,9 @@
                                     </svg>
                                 </div>
                                 <div>
-                                    <h4 class="font-semibold text-gray-900 text-lg">{{ $floor->floor_name }}{{ $floor->building->building_name ?? 'N/A' }}</h4>
-                                    <p class="text-sm text-gray-600">ID: #{{ $floor->floor_id }}</p>
+                                    <h4 class="font-semibold text-gray-900 text-lg">{{ $floor->floor_name }}</h4>
+                                    <p class="text-sm text-gray-600">{{ $floor->building->building_name ?? 'N/A' }}</p>
+                                    <p class="text-sm text-gray-500">ID: #{{ $floor->floor_id }}</p>
                                 </div>
                             </div>
                             
@@ -412,6 +413,89 @@ document.addEventListener('DOMContentLoaded', function() {
             submitBtn.disabled = false;
             document.getElementById('submit-text').classList.remove('hidden');
             document.getElementById('loading-spinner').classList.add('hidden');
+        }
+    });
+
+    // Edit floor buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.edit-floor-btn')) {
+            const btn = e.target.closest('.edit-floor-btn');
+            const floorData = {
+                id: btn.dataset.floorId,
+                name: btn.dataset.floorName,
+                buildingId: btn.dataset.buildingId
+            };
+            openModal(true, floorData);
+        }
+    });
+
+    // Delete floor buttons
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.delete-floor-btn')) {
+            const btn = e.target.closest('.delete-floor-btn');
+            const floorId = btn.dataset.floorId;
+            const floorName = btn.dataset.floorName;
+            
+            // Set data untuk modal konfirmasi delete
+            document.getElementById('delete-floor-name').textContent = floorName;
+            document.getElementById('confirm-delete-btn').setAttribute('data-floor-id', floorId);
+            
+            // Tampilkan modal konfirmasi
+            document.getElementById('delete-modal').classList.remove('hidden');
+        }
+    });
+
+    // Cancel delete
+    document.getElementById('cancel-delete-btn').addEventListener('click', function() {
+        document.getElementById('delete-modal').classList.add('hidden');
+    });
+
+    // Confirm delete
+    document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
+        const floorId = this.getAttribute('data-floor-id');
+        const deleteText = document.getElementById('delete-text');
+        const deleteSpinner = document.getElementById('delete-spinner');
+
+        // Show loading state
+        this.disabled = true;
+        deleteText.classList.add('hidden');
+        deleteSpinner.classList.remove('hidden');
+
+        try {
+            const response = await fetch(`/floors/${floorId}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
+                }
+            });
+
+            const result = await response.json();
+
+            if (result.success) {
+                window.location.reload();
+            } else {
+                alert(result.message || 'Gagal menghapus lantai');
+                // Reset loading state
+                this.disabled = false;
+                deleteText.classList.remove('hidden');
+                deleteSpinner.classList.add('hidden');
+            }
+        } catch (error) {
+            console.error('Error:', error);
+            alert('Terjadi kesalahan saat menghapus lantai');
+            // Reset loading state
+            this.disabled = false;
+            deleteText.classList.remove('hidden');
+            deleteSpinner.classList.add('hidden');
+        }
+    });
+
+    // Close delete modal when clicking outside
+    document.getElementById('delete-modal').addEventListener('click', function(e) {
+        if (e.target === this) {
+            this.classList.add('hidden');
         }
     });
 });

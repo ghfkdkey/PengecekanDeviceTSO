@@ -15,7 +15,12 @@ class Area extends Model {
         return $this->belongsTo(User::class);
     }
 
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
     public function regionals() {
-        return $this->hasMany(Regional::class, 'area_id');
+        return $this->hasMany(Regional::class, 'area_id', 'area_id');
     }
 }

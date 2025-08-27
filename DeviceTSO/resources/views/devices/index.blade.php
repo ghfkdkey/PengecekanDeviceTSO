@@ -82,7 +82,7 @@
     </div>
 
     <!-- Statistics Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
                 <div class="bg-blue-100 rounded-lg p-3">
@@ -119,22 +119,8 @@
                     </svg>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Ruangan Terpakai</p>
+                    <p class="text-sm font-medium text-gray-600">Ruangan dengan Device</p>
                     <p class="text-2xl font-bold text-gray-900">{{ $devices->groupBy('room_id')->count() }}</p>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
-            <div class="flex items-center">
-                <div class="bg-telkomsel-red/20 rounded-lg p-3">
-                    <svg class="w-6 h-6 text-telkomsel-red" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z"/>
-                    </svg>
-                </div>
-                <div class="ml-4">
-                    <p class="text-sm font-medium text-gray-600">Tipe Device</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $deviceTypes->count() }}</p>
                 </div>
             </div>
         </div>
@@ -195,6 +181,14 @@
                                     data-device-type="{{ $device->device_type }}"
                                     data-serial-number="{{ $device->serial_number }}"
                                     data-room-id="{{ $device->room_id }}"
+                                    data-category="{{ $device->category }}"
+                                    data-merk="{{ $device->merk }}"
+                                    data-tahun-po="{{ $device->tahun_po }}"
+                                    data-no-po="{{ $device->no_po }}"
+                                    data-tahun-bast="{{ $device->tahun_bast }}"
+                                    data-no-bast="{{ $device->no_bast }}"
+                                    data-condition="{{ $device->condition }}"
+                                    data-notes="{{ $device->notes }}"
                                     title="Edit Device"
                                 >
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -688,19 +682,6 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('Script loaded');
-    const deviceForm = document.getElementById('device-form');
-    if (deviceForm) {
-        console.log('Form found');
-        deviceForm.addEventListener('submit', function(e) {
-            console.log('Form submitted');
-            handleSubmit(e);
-        });
-    } else {
-        console.log('Form not found');
-    }
-
     // Elements
     const addDeviceBtn = document.getElementById('add-device-btn');
     const deviceModal = document.getElementById('device-modal');
@@ -731,6 +712,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deviceTypeSelect = document.getElementById('device-type');
     const deviceIdInput = document.getElementById('device-id');
     const formMethod = document.getElementById('form-method');
+    const deviceForm = document.getElementById('device-form');
 
     // Image modal elements
     const closeImageModal = document.getElementById('close-image-modal');
@@ -893,6 +875,12 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Keyboard shortcuts
         document.addEventListener('keydown', handleKeyboardShortcuts);
+
+        // Form submit event
+        if (deviceForm) {
+            deviceForm.addEventListener('submit', handleSubmit);
+            console.log('Form submit handler attached');
+        }
     }
 
     function bindDeviceCardEvents() {
@@ -908,13 +896,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 const deviceType = this.getAttribute('data-device-type');
                 const serialNumber = this.getAttribute('data-serial-number');
                 const roomId = this.getAttribute('data-room-id');
+                const category = this.getAttribute('data-category');
+                const merk = this.getAttribute('data-merk');
+                const tahunPo = this.getAttribute('data-tahun-po');
+                const noPo = this.getAttribute('data-no-po');
+                const tahunBast = this.getAttribute('data-tahun-bast');
+                const noBast = this.getAttribute('data-no-bast');
+                const condition = this.getAttribute('data-condition');
+                const notes = this.getAttribute('data-notes');
                 
                 openModal('edit', { 
-                    deviceId: deviceId, 
-                    deviceName: deviceName, 
-                    deviceType: deviceType, 
-                    serialNumber: serialNumber, 
-                    roomId: roomId 
+                    deviceId,
+                    deviceName, 
+                    deviceType, 
+                    serialNumber, 
+                    roomId,
+                    category,
+                    merk,
+                    tahunPo,
+                    noPo,
+                    tahunBast,
+                    noBast,
+                    condition,
+                    notes
                 });
             });
         });
@@ -968,11 +972,39 @@ document.addEventListener('DOMContentLoaded', function() {
         clearErrors();
 
         if (isEdit && data) {
+            // Set values for existing fields
             if (deviceIdInput) deviceIdInput.value = data.deviceId || '';
             if (deviceNameInput) deviceNameInput.value = data.deviceName || '';
             if (deviceTypeSelect) deviceTypeSelect.value = data.deviceType || '';
             if (serialNumberInput) serialNumberInput.value = data.serialNumber || '';
             if (roomSelect) roomSelect.value = data.roomId || '';
+            
+            // Set values for new fields
+            if (document.getElementById('category')) {
+                document.getElementById('category').value = data.category || '';
+            }
+            if (document.getElementById('merk')) {
+                document.getElementById('merk').value = data.merk || '';
+            }
+            if (document.getElementById('tahun_po')) {
+                document.getElementById('tahun_po').value = data.tahunPo || '';
+            }
+            if (document.getElementById('no_po')) {
+                document.getElementById('no_po').value = data.noPo || '';
+            }
+            if (document.getElementById('tahun_bast')) {
+                document.getElementById('tahun_bast').value = data.tahunBast || '';
+            }
+            if (document.getElementById('no_bast')) {
+                document.getElementById('no_bast').value = data.noBast || '';
+            }
+            if (document.getElementById('condition')) {
+                document.getElementById('condition').value = data.condition || '';
+            }
+            if (document.getElementById('notes')) {
+                document.getElementById('notes').value = data.notes || '';
+            }
+
             if (formMethod) formMethod.value = 'PUT';
         } else {
             if (deviceIdInput) deviceIdInput.value = '';
@@ -1624,8 +1656,44 @@ document.addEventListener('DOMContentLoaded', function() {
     const exportExcelBtn = document.getElementById('export-excel-btn');
 
     if (exportExcelBtn) {
-        exportExcelBtn.addEventListener('click', function() {
-            window.location.href = '/devices/export-excel';
+        exportExcelBtn.addEventListener('click', async function(e) {
+            e.preventDefault();
+            try {
+                const response = await fetch('/devices/export-excel', {
+                    headers: {
+                        'X-Requested-With': 'XMLHttpRequest',
+                        'Accept': 'application/json'
+                    }
+                });
+                
+                if (response.ok) {
+                    // Check if response is JSON (error) or blob (file)
+                    const contentType = response.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const result = await response.json();
+                        showNotification(result.message || 'Gagal mengekspor data', 'error');
+                    } else {
+                        // Handle successful file download
+                        const blob = await response.blob();
+                        const filename = response.headers.get('content-disposition')?.split('filename=')[1] || 'devices.xlsx';
+                        
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        a.download = filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        window.URL.revokeObjectURL(url);
+                    }
+                } else {
+                    const error = await response.json();
+                    showNotification(error.message || 'Gagal mengekspor data', 'error');
+                }
+            } catch (error) {
+                console.error('Export error:', error);
+                showNotification('Terjadi kesalahan saat mengekspor data', 'error');
+            }
         });
     }
 
@@ -1644,6 +1712,5 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Make resetFilters available globally
     window.resetFilters = resetFilters;
-});
 </script>
 @endpush

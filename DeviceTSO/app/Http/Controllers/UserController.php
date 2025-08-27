@@ -164,21 +164,20 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * API: Store new user
-     */
     public function apiStore(Request $request)
     {
         try {
             $validated = $request->validate([
                 'username' => 'required|string|max:50|unique:users,username',
+                'email' => 'required|email|unique:users,email',
                 'full_name' => 'required|string|max:100',
                 'password' => 'required|string|min:6',
-                'role' => 'required|string|max:20',
+                'role' => 'required|in:admin,PIC General Affair (GA),PIC Operasional',
             ]);
 
             $user = User::create([
                 'username' => $validated['username'],
+                'email' => $validated['email'],
                 'full_name' => $validated['full_name'],
                 'password_hash' => Hash::make($validated['password']),
                 'role' => $validated['role'],
@@ -198,9 +197,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * API: Update user
-     */
     public function apiUpdate(Request $request, $id)
     {
         try {
@@ -208,13 +204,15 @@ class UserController extends Controller
             
             $validated = $request->validate([
                 'username' => ['required', 'string', 'max:50', Rule::unique('users')->ignore($id)],
+                'email' => ['required', 'email', Rule::unique('users')->ignore($id)],
                 'full_name' => 'required|string|max:100',
                 'password' => 'nullable|string|min:6',
-                'role' => 'required|string|max:20',
+                'role' => 'required|in:admin,PIC General Affair (GA),PIC Operasional',
             ]);
 
             $updateData = [
                 'username' => $validated['username'],
+                'email' => $validated['email'],
                 'full_name' => $validated['full_name'],
                 'role' => $validated['role'],
             ];
@@ -239,9 +237,6 @@ class UserController extends Controller
         }
     }
 
-    /**
-     * API: Delete user
-     */
     public function apiDestroy($id)
     {
         try {

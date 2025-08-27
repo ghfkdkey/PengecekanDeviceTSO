@@ -20,6 +20,7 @@ class User extends Authenticatable
      */
     protected $fillable = [
         'username',
+        'email',
         'password_hash',
         'full_name',
         'role',
@@ -40,6 +41,21 @@ class User extends Authenticatable
      *
      * @return array<string, string>
      */
+
+    public function isAdmin()
+    {
+        return $this->role === 'admin';
+    }
+
+    public function isGA()
+    {
+        return $this->role === 'PIC General Affair (GA)';
+    }
+
+    public function isOperational()
+    {
+        return $this->role === 'PIC Operasional';
+    }
     protected function casts(): array
     {
         return [
@@ -69,14 +85,6 @@ class User extends Authenticatable
     public function deviceCheckResults()
     {
         return $this->hasMany(DeviceCheckResult::class, 'user_id', 'id');
-    }
-
-    /**
-     * Check if user is admin
-     */
-    public function isAdmin()
-    {
-        return $this->role === 'admin';
     }
 
     /**
