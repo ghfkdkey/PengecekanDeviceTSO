@@ -141,10 +141,30 @@ class ChecklistItemController extends Controller
             ->with('success', 'Checklist item updated successfully.');
     }
 
-    public function destroy($id)
+    /**
+     * Delete the specified checklist item (only if no check results exist)
+     */
+    public function delete($id)
     {
         try {
             $item = ChecklistItem::findOrFail($id);
+            
+            // Check if item has any check results
+            $resultCount = $item->checkResults()->count();
+            
+            if ($resultCount > 0) {
+                if (request()->ajax() || request()->expectsJson()) {
+                    return response()->json([
+                        'success' => false, 
+                        'message' => 'Tidak dapat menghapus checklist item yang sudah memiliki hasil pengecekan'
+                    ], 403);
+                }
+                
+                return redirect()->back()
+                    ->with('error', 'Tidak dapat menghapus checklist item yang sudah memiliki hasil pengecekan');
+            }
+            
+            // Delete the item (no check results exist)
             $item->delete();
 
             if (request()->ajax() || request()->expectsJson()) {

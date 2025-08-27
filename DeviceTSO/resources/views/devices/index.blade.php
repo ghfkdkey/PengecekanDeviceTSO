@@ -9,6 +9,40 @@
     <!-- Header Actions -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div class="flex-1 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:space-x-4">
+            <!-- Building Filter -->
+            <div class="lg:max-w-xs">
+                <select 
+                    id="building-filter" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red bg-white"
+                >
+                    <option value="">Semua Gedung</option>
+                    @isset($buildings)
+                        @foreach($buildings as $building)
+                            <option value="{{ $building->building_id }}" {{ request('building') == $building->building_id ? 'selected' : '' }}>
+                                {{ $building->building_name }}
+                            </option>
+                        @endforeach
+                    @endisset
+                </select>
+            </div>
+
+            <!-- Floor Filter -->
+            <div class="lg:max-w-xs">
+                <select 
+                    id="floor-filter" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red bg-white"
+                >
+                    <option value="">Semua Lantai</option>
+                    @isset($floors)
+                        @foreach($floors as $floor)
+                            <option value="{{ $floor->floor_id }}" data-building-id="{{ $floor->building_id }}" {{ request('floor') == $floor->floor_id ? 'selected' : '' }}>
+                                {{ $floor->floor_name }} - {{ $floor->building->building_name ?? '' }}
+                            </option>
+                        @endforeach
+                    @endisset
+                </select>
+            </div>
+
             <!-- Room Filter -->
             <div class="lg:max-w-xs">
                 <select 
@@ -38,32 +72,15 @@
                     @endforeach
                 </select>
             </div>
-            
-            <!-- Search Bar -->
-            <div class="lg:max-w-md flex-1">
-                <div class="relative">
-                    <input 
-                        type="text" 
-                        id="search-devices" 
-                        placeholder="Cari device..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
-                    >
-                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
         </div>
         
         <!-- Update the header actions section -->
-        <div class="flex items-center space-x-3">
+        <div class="flex items-center space-x-2">
             <button 
                 id="export-excel-btn"
                 class="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg transition-all duration-200 flex items-center space-x-2"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-2 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
                 </svg>
                 <span>Export Excel</span>
@@ -73,7 +90,7 @@
                 id="add-device-btn"
                 class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2"
             >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-2 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
                 </svg>
                 <span>Tambah Device</span>
@@ -144,6 +161,8 @@
                     <div class="device-card bg-gray-50 rounded-lg p-6 hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-telkomsel-red/30" 
                          data-device-id="{{ $device->device_id }}" 
                          data-room-id="{{ $device->room_id }}"
+                         data-floor-id="{{ $device->room->floor->floor_id ?? '' }}"
+                         data-building-id="{{ $device->room->floor->building->building_id ?? '' }}"
                          data-device-type="{{ strtolower($device->device_type ?? '') }}"
                          data-room-name="{{ $device->room->room_name ?? '' }}">
                         
@@ -212,6 +231,14 @@
                             <div class="flex items-center justify-between py-2 border-t border-gray-200">
                                 <span class="text-sm text-gray-600">Ruangan</span>
                                 <span class="font-semibold text-telkomsel-blue text-sm">{{ $device->room->room_name ?? 'N/A' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                                <span class="text-sm text-gray-600">Lantai</span>
+                                <span class="font-semibold text-gray-900 text-sm">{{ $device->room->floor->floor_name ?? 'N/A' }}</span>
+                            </div>
+                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
+                                <span class="text-sm text-gray-600">Gedung</span>
+                                <span class="font-semibold text-gray-900 text-sm">{{ $device->room->floor->building->building_name ?? 'N/A' }}</span>
                             </div>
                             <div class="flex items-center justify-between py-2 border-t border-gray-200">
                                 <span class="text-sm text-gray-600">Tipe</span>
@@ -696,6 +723,8 @@
     const submitText = document.getElementById('submit-text');
     const loadingSpinner = document.getElementById('loading-spinner');
     const roomFilter = document.getElementById('room-filter');
+    const buildingFilter = document.getElementById('building-filter');
+    const floorFilter = document.getElementById('floor-filter');
     const typeFilter = document.getElementById('type-filter');
     const searchDevices = document.getElementById('search-devices');
     const gridViewBtn = document.getElementById('grid-view');
@@ -746,6 +775,11 @@
     function init() {
         bindEvents();
         updateCharCounts();
+        initFiltersFromURL();
+        // Apply building-floor dependency initially
+        if (typeof handleBuildingChange === 'function') {
+            handleBuildingChange();
+        }
         filterDevices();
     }
 
@@ -845,9 +879,9 @@
         }
 
         // Filter and search events
-        if (roomFilter) {
-            roomFilter.addEventListener('change', filterDevices);
-        }
+        if (roomFilter) roomFilter.addEventListener('change', filterDevices);
+        if (buildingFilter) buildingFilter.addEventListener('change', handleBuildingChange);
+        if (floorFilter) floorFilter.addEventListener('change', filterDevices);
 
         if (typeFilter) {
             typeFilter.addEventListener('change', filterDevices);
@@ -1424,6 +1458,8 @@
 
     function filterDevices() {
         const roomValue = roomFilter ? roomFilter.value : '';
+        const buildingValue = buildingFilter ? buildingFilter.value : '';
+        const floorValue = floorFilter ? floorFilter.value : '';
         const typeValue = typeFilter ? typeFilter.value : '';
         const searchValue = searchDevices ? searchDevices.value.toLowerCase().trim() : '';
         const deviceCards = document.querySelectorAll('.device-card');
@@ -1432,6 +1468,8 @@
 
         deviceCards.forEach(function(card) {
             const roomId = card.getAttribute('data-room-id');
+            const floorId = card.getAttribute('data-floor-id');
+            const buildingId = card.getAttribute('data-building-id');
             const roomName = card.getAttribute('data-room-name').toLowerCase();
             const deviceType = card.getAttribute('data-device-type');
             const deviceNameElement = card.querySelector('h4');
@@ -1442,6 +1480,16 @@
 
             // Filter by room
             if (roomValue && roomId !== roomValue) {
+                shouldShow = false;
+            }
+
+            // Filter by floor
+            if (floorValue && floorId !== floorValue) {
+                shouldShow = false;
+            }
+
+            // Filter by building
+            if (buildingValue && buildingId !== buildingValue) {
                 shouldShow = false;
             }
 
@@ -1483,6 +1531,27 @@
         }
     }
 
+    function handleBuildingChange() {
+        const buildingValue = buildingFilter ? buildingFilter.value : '';
+        if (floorFilter) {
+            const options = floorFilter.querySelectorAll('option');
+            options.forEach(function(opt) {
+                if (!opt.value) return;
+                const belongsTo = opt.getAttribute('data-building-id');
+                opt.style.display = (!buildingValue || belongsTo === buildingValue) ? '' : 'none';
+            });
+            const currentFloor = floorFilter.value;
+            if (currentFloor) {
+                const currentOpt = floorFilter.querySelector('option[value="' + currentFloor + '"]');
+                if (currentOpt && currentOpt.style.display === 'none') {
+                    floorFilter.value = '';
+                }
+            }
+        }
+        if (roomFilter) roomFilter.value = '';
+        filterDevices();
+    }
+
     function showEmptySearchState() {
         const emptyHtml = '<div id="empty-state" class="text-center py-12">' +
             '<svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
@@ -1501,8 +1570,29 @@
     function resetFilters() {
         if (searchDevices) searchDevices.value = '';
         if (roomFilter) roomFilter.value = '';
+        if (floorFilter) floorFilter.value = '';
+        if (buildingFilter) buildingFilter.value = '';
         if (typeFilter) typeFilter.value = '';
         filterDevices();
+    }
+
+    function initFiltersFromURL() {
+        const params = new URLSearchParams(window.location.search || '');
+        if (buildingFilter) {
+            buildingFilter.value = params.get('building') || '';
+        }
+        if (floorFilter) {
+            floorFilter.value = params.get('floor') || '';
+        }
+        if (roomFilter) {
+            roomFilter.value = params.get('room') || '';
+        }
+        if (typeFilter) {
+            typeFilter.value = params.get('type') || '';
+        }
+        if (searchDevices) {
+            searchDevices.value = params.get('search') || '';
+        }
     }
 
     function toggleView(viewType) {

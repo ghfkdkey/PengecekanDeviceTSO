@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Device;
 use App\Models\Room;
+use App\Models\Floor;
+use App\Models\Building;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -18,11 +20,25 @@ class DeviceController extends Controller
     public function index(Request $request)
     {
         // Mulai query builder dengan eager loading relasi yang dibutuhkan
-        $query = Device::with(['room.floor']);
+        $query = Device::with(['room.floor.building']);
 
         // Terapkan filter berdasarkan input dari request
         if ($request->filled('room')) {
             $query->where('room_id', $request->room);
+        }
+
+        // Filter berdasarkan floor
+        if ($request->filled('floor')) {
+            $query->whereHas('room', function ($q) use ($request) {
+                $q->where('floor_id', $request->floor);
+            });
+        }
+
+        // Filter berdasarkan building
+        if ($request->filled('building')) {
+            $query->whereHas('room.floor', function ($q) use ($request) {
+                $q->where('building_id', $request->building);
+            });
         }
 
         if ($request->filled('type')) {
@@ -41,7 +57,9 @@ class DeviceController extends Controller
         $devices = $query->get();
         
         // Data untuk dropdown filter tidak perlu difilter
-        $rooms = Room::with('floor')->orderBy('room_name')->get();
+        $rooms = Room::with(['floor.building'])->orderBy('room_name')->get();
+        $floors = Floor::with('building')->orderBy('floor_name')->get();
+        $buildings = Building::orderBy('building_name')->get();
         
         $deviceTypes = Device::whereNotNull('device_type')
             ->distinct()
@@ -50,7 +68,7 @@ class DeviceController extends Controller
             ->sort();
         
         // Kembalikan view dengan data yang sudah difilter dan data untuk filter
-        return view('devices.index', compact('devices', 'rooms', 'deviceTypes'));
+        return view('devices.index', compact('devices', 'rooms', 'floors', 'buildings', 'deviceTypes'));
     }
 
     /**
