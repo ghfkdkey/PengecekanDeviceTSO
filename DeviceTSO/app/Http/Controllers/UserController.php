@@ -14,7 +14,7 @@ class UserController extends Controller
     {
         $user = auth()->user();
         
-        // Data yang bisa diakses berdasarkan role
+        // Data yang bisa diakses berdasarkan role  
         $data = [
             'user' => $user,
             'accessible_regionals' => $user->getAccessibleRegionals(),
@@ -192,6 +192,10 @@ class UserController extends Controller
         $credentials = $request->validate([
             'username' => 'required|string',
             'password' => 'required|string',
+            'g-recaptcha-response' => 'required|captcha',
+        ],[
+            'g-recaptcha-response.required' => 'Mohon centang "I\'m not a robot"',
+            'g-recaptcha-response.captcha' => 'Verifikasi captcha gagal, coba lagi.',
         ]);
 
         $user = User::where('username', $credentials['username'])->first();
@@ -201,7 +205,7 @@ class UserController extends Controller
             
             // Redirect berdasarkan role
             if ($user->isOperational()) {
-                return redirect()->intended('/device-check');
+                return redirect()->intended('/dashboard');
             }
             
             return redirect()->intended('/dashboard');
@@ -292,7 +296,7 @@ class UserController extends Controller
                 'regional_id' => 'required_unless:role,admin|exists:regionals,regional_id'
             ]);
 
-            if (!$user->canCreateRole($validated['role'], $validated['regional_id'])) {
+            if (!$user->canCreateRole($validated['role'], $validated['regional_id'] ?? null)) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Anda tidak memiliki izin untuk membuat user dengan role tersebut'
@@ -305,7 +309,7 @@ class UserController extends Controller
                 'full_name' => $validated['full_name'],
                 'password_hash' => Hash::make($validated['password']),
                 'role' => $validated['role'],
-                'regional_id' => $validated['role'] === 'admin' ? null : $validated['regional_id']
+                'regional_id' => $validated['role'] === 'admin' ? null : ($validated['regional_id'] ?? null)
             ]);
 
             return response()->json([
@@ -348,7 +352,7 @@ class UserController extends Controller
                 'email' => $validated['email'],
                 'full_name' => $validated['full_name'],
                 'role' => $validated['role'],
-                'regional_id' => $validated['role'] === 'admin' ? null : $validated['regional_id']
+                'regional_id' => $validated['role'] === 'admin' ? null : ($validated['regional_id'] ?? null)
             ];
 
             if (!empty($validated['password'])) {
@@ -369,6 +373,7 @@ class UserController extends Controller
             ], 500);
         }
     }
+
     
     public function apiDestroy($id)
     {

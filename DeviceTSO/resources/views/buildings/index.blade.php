@@ -86,30 +86,41 @@
             <div class="max-w-md mb-4 lg:mb-0">
                 <select 
                     id="filter-area"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                    {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
                 >
                     <option value="">Semua Area</option>
                     @foreach($areas as $area)
-                        <option value="{{ $area->area_id }}" {{ request('area') == $area->area_id ? 'selected' : '' }}>
+                        <option value="{{ $area->area_id }}" 
+                                {{ (request('area') == $area->area_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedAreaId'] == $area->area_id)) ? 'selected' : '' }}>
                             {{ $area->area_name }}
                         </option>
                     @endforeach
                 </select>
+                @if($filterRestrictions['isRestricted'])
+                    <p class="text-xs text-gray-500 mt-1">Filter terkunci sesuai regional Anda</p>
+                @endif
             </div>
             
             <!-- Filter by Regional -->
             <div class="max-w-md">
                 <select 
                     id="filter-regional"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+                    {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
                 >
                     <option value="">Semua Regional</option>
                     @foreach($regionals as $regional)
-                        <option value="{{ $regional->regional_id }}" data-area-id="{{ $regional->area_id }}" {{ request('regional') == $regional->regional_id ? 'selected' : '' }}>
+                        <option value="{{ $regional->regional_id }}" 
+                                data-area-id="{{ $regional->area_id }}" 
+                                {{ (request('regional') == $regional->regional_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedRegionalId'] == $regional->regional_id)) ? 'selected' : '' }}>
                             {{ $regional->regional_name }}
                         </option>
                     @endforeach
                 </select>
+                @if($filterRestrictions['isRestricted'])
+                    <p class="text-xs text-gray-500 mt-1">Filter terkunci sesuai regional Anda</p>
+                @endif
             </div>
         </div>
         
@@ -442,6 +453,8 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const filterRestrictions = @json($filterRestrictions);
+    
     // Modal elements
     const buildingModal = document.getElementById('building-modal');
     const deleteModal = document.getElementById('delete-modal');
@@ -466,10 +479,21 @@ document.addEventListener('DOMContentLoaded', function() {
     bindEventListeners();
     
     function initializeFilters() {
-        // Set initial regional options based on selected area
-        updateRegionalOptions();
+        if (filterRestrictions.isRestricted) {
+            // For restricted users, set their assigned area and regional
+            if (filterRestrictions.assignedAreaId) {
+                filterArea.value = filterRestrictions.assignedAreaId;
+            }
+            if (filterRestrictions.assignedRegionalId) {
+                filterRegional.value = filterRestrictions.assignedRegionalId;
+            }
+            
+            // Disable filter changes for restricted users
+            filterArea.disabled = true;
+            filterRegional.disabled = true;
+        }
         
-        // Apply initial filters if any
+        updateRegionalOptions();
         applyFilters();
     }
     
@@ -487,10 +511,11 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Area selection change
         areaSelect.addEventListener('change', handleAreaChange);
-        filterArea.addEventListener('change', handleFilterAreaChange);
         
-        // Regional filter change
-        filterRegional.addEventListener('change', applyFilters);
+        if (filterRestrictions.canChangeFilters) {
+            filterArea.addEventListener('change', handleFilterAreaChange);
+            filterRegional.addEventListener('change', applyFilters);
+        }
         
         // Search functionality
         searchInput.addEventListener('input', debounce(applyFilters, 300));
@@ -541,6 +566,22 @@ document.addEventListener('DOMContentLoaded', function() {
     
     function openAddModal() {
         resetForm();
+        
+        if (filterRestrictions.isRestricted) {
+            if (filterRestrictions.assignedAreaId) {
+                areaSelect.value = filterRestrictions.assignedAreaId;
+                updateRegionalOptions(filterRestrictions.assignedAreaId);
+                areaSelect.disabled = true;
+            }
+            
+            setTimeout(() => {
+                if (filterRestrictions.assignedRegionalId) {
+                    regionalSelect.value = filterRestrictions.assignedRegionalId;
+                    regionalSelect.disabled = true;
+                }
+            }, 100);
+        }
+        
         document.getElementById('modal-title').textContent = 'Tambah Gedung';
         document.getElementById('submit-text').textContent = 'Simpan';
         document.getElementById('form-method').value = 'POST';
@@ -624,7 +665,12 @@ document.addEventListener('DOMContentLoaded', function() {
     function resetForm() {
         buildingForm.reset();
         clearErrors();
-        regionalSelect.disabled = true;
+        
+        if (!filterRestrictions.isRestricted) {
+            regionalSelect.disabled = true;
+            areaSelect.disabled = false;
+        }
+        
         regionalSelect.innerHTML = '<option value="">Pilih Regional</option>';
         
         // Reset loading states

@@ -14,7 +14,7 @@
                             Pengecekan Device
                         </h1>
                         <p class="mt-2 text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
-                            Monitor and manage device inspection results
+                            Memantau dan mengelola hasil pengecekan device
                         </p>
                     </div>
                     <div class="flex space-x-3">
@@ -279,6 +279,9 @@ document.addEventListener('DOMContentLoaded', function() {
 async function loadCheckResults() {
     try {
         const response = await fetch('/api/device-check-sessions');
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
         checkResults = await response.json();
         filteredResults = [...checkResults];
         updateStats();
@@ -286,7 +289,7 @@ async function loadCheckResults() {
         updatePagination();
     } catch (error) {
         console.error('Error loading check results:', error);
-        showNotification('Error loading data', 'error');
+        showNotification('Error loading data: ' + error.message, 'error');
     }
 }
 

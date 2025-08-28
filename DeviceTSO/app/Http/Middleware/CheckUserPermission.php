@@ -57,7 +57,7 @@ class CheckUserPermission
             case 'pic_ga':
                 return '/dashboard';
             case 'pic_operational':
-                return '/device-check';
+                return '/dashboard';
             default:
                 return '/dashboard';
         }

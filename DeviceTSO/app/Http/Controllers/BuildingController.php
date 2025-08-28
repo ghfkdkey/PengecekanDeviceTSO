@@ -6,19 +6,26 @@ use App\Models\Building;
 use App\Models\Area;
 use App\Models\Regional;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 
-class BuildingController extends Controller {
-
+class BuildingController extends Controller 
+{
     public function __construct()
     {
         $this->middleware('auth');
+        // Hapus debug dari constructor, pindah ke method yang membutuhkan
     }
 
     public function index(Request $request)
     {
-        if (!$this->checkPermission('ManageArea')) {
-            return $this->unauthorized(request());
+        // Debug untuk troubleshooting - hapus setelah masalah teratasi
+        // dd(auth()->user()->debugPermissions());
+        
+        // Ganti 'ManageArea' dengan 'ManageBuilding' sesuai debug output
+        if (!$this->checkPermission('ManageBuilding')) {
+            return $this->unauthorized($request);
         }
+
         $query = Building::query();
 
         if ($request->filled('regional')) {
@@ -30,7 +37,7 @@ class BuildingController extends Controller {
         }
 
         $buildings = $query->with('regional.area')
-                        ->withCount('floors')  // Add this line
+                        ->withCount('floors')
                         ->get();
 
         $areas = Area::orderBy('area_name')->get();
@@ -43,7 +50,8 @@ class BuildingController extends Controller {
 
     public function store(Request $request)
     {
-        if (!$this->checkPermission('ManageArea')) {
+        // Ganti 'ManageArea' dengan 'ManageBuilding'
+        if (!$this->checkPermission('ManageBuilding')) {
             return $this->unauthorized($request);
         }
 
@@ -59,12 +67,9 @@ class BuildingController extends Controller {
                 'regional_id.required' => 'Regional harus dipilih.',
             ]);
 
-            // Tambahkan user_id dari user yang sedang login secara otomatis
             $validated['user_id'] = auth()->id();
-
             $building = Building::create($validated);
 
-            // Kirim respons JSON yang konsisten
             return response()->json([
                 'success' => true,
                 'message' => 'Gedung berhasil ditambahkan!',
@@ -72,7 +77,6 @@ class BuildingController extends Controller {
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            // Tangani error validasi
             return response()->json([
                 'success' => false,
                 'message' => 'Data tidak valid.',
@@ -80,7 +84,6 @@ class BuildingController extends Controller {
             ], 422);
 
         } catch (\Exception $e) {
-            // Tangani error server lainnya
             Log::error('Error creating building: ' . $e->getMessage());
             return response()->json([
                 'success' => false,
@@ -89,18 +92,64 @@ class BuildingController extends Controller {
         }
     }
 
-    public function show($id) {
+    public function show($id) 
+    {
+        if (!$this->checkPermission('ManageBuilding')) {
+            return $this->unauthorized(request());
+        }
         return Building::with('regional', 'floors')->findOrFail($id);
     }
 
-    public function update(Request $request, $id) {
+    public function update(Request $request, $id) 
+    {
+        if (!$this->checkPermission('ManageBuilding')) {
+            return $this->unauthorized($request);
+        }
+        
         $building = Building::findOrFail($id);
         $building->update($request->only('building_name', 'building_code'));
         return $building;
     }
 
-    public function destroy($id) {
+    public function destroy($id) 
+    {
+        if (!$this->checkPermission('ManageBuilding')) {
+            return $this->unauthorized(request());
+        }
+        
         Building::destroy($id);
         return response()->json(['message' => 'Building deleted']);
+    }
+
+    /**
+     * Check if current user has permission
+     */
+    protected function checkPermission($permission)
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+
+        $methodName = 'can' . ucfirst($permission);
+        
+        if (method_exists($user, $methodName)) {
+            return $user->$methodName();
+        }
+
+        return false;
+    }
+
+    /**
+     * Return unauthorized response
+     */
+    protected function unauthorized($request)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk mengakses ini'
+            ], 403);
+        }
+
+        return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengakses halaman tersebut');
     }
 }

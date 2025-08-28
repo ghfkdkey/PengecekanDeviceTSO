@@ -206,4 +206,18 @@ class User extends Authenticatable
 
         return false;
     }
+
+    // Debug method untuk troubleshooting
+    public function debugPermissions()
+    {
+        return [
+            'user_id' => $this->id,
+            'role' => $this->role,
+            'regional_id' => $this->regional_id,
+            'isAdmin' => $this->isAdmin(),
+            'isGA' => $this->isGA(),
+            'isOperational' => $this->isOperational(),
+            'canManageBuilding' => $this->canManageBuilding(),
+        ];
+    }
 }

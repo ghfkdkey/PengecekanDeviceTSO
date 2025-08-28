@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" class="transition-colors duration-300">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -25,6 +25,7 @@
     </style>
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     fontFamily: {
@@ -44,7 +45,7 @@
     </script>
     @stack('styles')
 </head>
-<body class="bg-gray-50 font-poppins">
+<body class="bg-gray-50 dark:bg-gray-900 font-poppins transition-colors duration-300">
     <div class="flex h-screen overflow-hidden">
         <!-- Sidebar -->
         <div id="sidebar" class="bg-telkomsel-blue text-white transition-all duration-300 ease-in-out w-64 min-h-screen relative z-40">
@@ -106,114 +107,112 @@
 
                     <!-- Divider -->
                     <li class="nav-divider border-t border-white/20 my-4"></li>
-
-                    <!-- Master Data Section -->
-                    <li class="nav-section">
-                        <div class="flex items-center space-x-3 px-3 py-2">
-                            <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
-                            </svg>
-                            <span class="nav-text text-sm text-white/60 font-medium transition-opacity duration-300">MASTER DATA</span>
-                        </div>
-                    </li>
-
-                    <!-- Area -->
-                    <li>
-                        <a href="{{ route('areas.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('areas.*') ? 'bg-white/20' : '' }}" title="Area">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l9-7-9-7-9 7 9 7z"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Area</span>
-                        </a>
-                    </li>
-
-                    <!-- Regional -->
-                    <li>
-                        <a href="{{ route('regionals.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('regionals.*') ? 'bg-white/20' : '' }}" title="Regional">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <circle cx="12" cy="12" r="10" stroke-width="2"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Regional</span>
-                        </a>
-                    </li>
-
-                    <!-- Gedung -->
-                    <li>
-                        <a href="{{ route('buildings.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('buildings.*') ? 'bg-white/20' : '' }}" title="Gedung">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18V3H3v18zM9 21V9h6v12"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Gedung</span>
-                        </a>
-                    </li>
-
-                    <!-- Floors -->
-                    <li>
-                        <a href="{{ route('floors.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('floors.*') ? 'bg-white/20' : '' }}" title="Lantai">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Lantai</span>
-                        </a>
-                    </li>
-
-                    <!-- Rooms -->
-                    <li>
-                        <a href="{{ route('rooms.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('rooms.*') ? 'bg-white/20' : '' }}" title="Ruangan">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Ruangan</span>
-                        </a>
-                    </li>
-
-                    <!-- Devices -->
-                    <li>
-                        <a href="{{ route('devices.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('devices.*') ? 'bg-white/20' : '' }}" title="Device">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Device</span>
-                        </a>
-                    </li>
-
-                    <!-- Checklist Items -->
-                    <li>
-                        <a href="{{ route('checklist-items.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('checklist-items.*') ? 'bg-white/20' : '' }}" title="Checklist">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Checklist</span>
-                        </a>
-                    </li>
-
-
                     @if(auth()->user()->isAdmin())
-                    <!-- Divider -->
-                    <li class="nav-divider border-t border-white/20 my-4"></li>
+                        <!-- Master Data Section -->
+                        <li class="nav-section">
+                            <div class="flex items-center space-x-3 px-3 py-2">
+                                <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                                </svg>
+                                <span class="nav-text text-sm text-white/60 font-medium transition-opacity duration-300">MASTER DATA</span>
+                            </div>
+                        </li>
+                        <!-- Area -->
+                        <li>
+                            <a href="{{ route('areas.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('areas.*') ? 'bg-white/20' : '' }}" title="Area">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 20l9-7-9-7-9 7 9 7z"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Area</span>
+                            </a>
+                        </li>
 
-                    <!-- Admin Section -->
-                    <li class="nav-section">
-                        <div class="flex items-center space-x-3 px-3 py-2">
-                            <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                            </svg>
-                            <span class="nav-text text-sm text-white/60 font-medium transition-opacity duration-300">ADMIN</span>
-                        </div>
-                    </li>
+                        <!-- Regional -->
+                        <li>
+                            <a href="{{ route('regionals.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('regionals.*') ? 'bg-white/20' : '' }}" title="Regional">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle cx="12" cy="12" r="10" stroke-width="2"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Regional</span>
+                            </a>
+                        </li>
+                    @endif
+                    @if(auth()->user()->isAdmin() || auth()->user()->isGA())
+                        <!-- Gedung -->
+                        <li>
+                            <a href="{{ route('buildings.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('buildings.*') ? 'bg-white/20' : '' }}" title="Gedung">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 21h18V3H3v18zM9 21V9h6v12"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Gedung</span>
+                            </a>
+                        </li>
 
-                    <!-- Users Management -->
-                    <li>
-                        <a href="{{ route('users.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('users.*') ? 'bg-white/20' : '' }}" title="Kelola User">
-                            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                            </svg>
-                            <span class="nav-text transition-opacity duration-300">Kelola User</span>
-                        </a>
-                    </li>
-                    
+                        <!-- Floors -->
+                        <li>
+                            <a href="{{ route('floors.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('floors.*') ? 'bg-white/20' : '' }}" title="Lantai">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Lantai</span>
+                            </a>
+                        </li>
+
+                        <!-- Rooms -->
+                        <li>
+                            <a href="{{ route('rooms.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('rooms.*') ? 'bg-white/20' : '' }}" title="Ruangan">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 14v3m4-3v3m4-3v3M3 21h18M3 10h18M3 7l9-4 9 4M4 10v11M20 10v11"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Ruangan</span>
+                            </a>
+                        </li>
+
+                        <!-- Devices -->
+                        <li>
+                            <a href="{{ route('devices.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('devices.*') ? 'bg-white/20' : '' }}" title="Device">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Device</span>
+                            </a>
+                        </li>
+
+                        <!-- Checklist Items -->
+                        <li>
+                            <a href="{{ route('checklist-items.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('checklist-items.*') ? 'bg-white/20' : '' }}" title="Checklist">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Checklist</span>
+                            </a>
+                        </li>
+
+                        <!-- Divider -->
+                        <li class="nav-divider border-t border-white/20 my-4"></li>
+
+                        <!-- Admin Section -->
+                        <li class="nav-section">
+                            <div class="flex items-center space-x-3 px-3 py-2">
+                                <svg class="w-4 h-4 text-white/60 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                </svg>
+                                <span class="nav-text text-sm text-white/60 font-medium transition-opacity duration-300">ADMIN</span>
+                            </div>
+                        </li>
+
+                        <!-- Users Management -->
+                        <li>
+                            <a href="{{ route('users.index') }}" class="flex items-center space-x-3 p-3 rounded-lg hover:bg-white/10 transition-colors {{ request()->routeIs('users.*') ? 'bg-white/20' : '' }}" title="Kelola User">
+                                <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
+                                </svg>
+                                <span class="nav-text transition-opacity duration-300">Kelola User</span>
+                            </a>
+                        </li>
+                    @endif
                     <li class="nav-divider border-t border-white/20 my-4"></li>
 
                     <li>
@@ -227,8 +226,6 @@
                             </button>
                         </form>
                     </li>
-
-                    @endif
                 </ul>
             </nav>
         </div>
@@ -236,25 +233,56 @@
         <!-- Main Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Top Header -->
-            <header class="bg-white shadow-sm border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+            <header class="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700 px-6 py-4 flex items-center justify-between">
                 <div class="flex items-center space-x-4">
                     <!-- Mobile Sidebar Toggle -->
-                    <button id="mobile-sidebar-toggle" class="md:hidden p-2 rounded-lg text-gray-600 hover:bg-gray-100">
+                    <button id="mobile-sidebar-toggle" class="md:hidden p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700">
                         <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
                         </svg>
                     </button>
-                    
-                    
+
                     <!-- Page Title -->
                     <div>
-                        <h1 class="text-2xl font-telkomsel font-bold text-telkomsel-blue">@yield('page-title', 'Dashboard')</h1>
-                        <p class="text-sm text-gray-600">@yield('page-subtitle', 'Sistem Pengecekan Device Telkomsel')</p>
+                        <h1 class="text-2xl font-telkomsel font-bold text-telkomsel-blue dark:text-white">@yield('page-title', 'Dashboard')</h1>
+                        <p class="text-sm text-gray-600 dark:text-gray-300">@yield('page-subtitle', 'Sistem Pengecekan Device Telkomsel')</p>
                     </div>
                 </div>
 
                 <!-- User Profile -->
                 <div class="flex items-center space-x-4">
+
+                    <!-- Dark Mode Toggle -->
+                    <button id="darkModeToggle"
+                        type="button"
+                        aria-pressed="false"
+                        class="relative inline-flex h-8 w-14 items-center rounded-full 
+                            bg-gray-200 dark:bg-gray-700 transition-colors 
+                            focus:outline-none focus:ring-2 focus:ring-offset-2 
+                            focus:ring-gray-400 dark:focus:ring-gray-600 dark:focus:ring-offset-gray-900">
+
+                        <span class="sr-only">Toggle dark mode</span>
+
+                        <!-- Icon Sun (left) -->
+                        <span class="absolute left-1 flex items-center justify-center h-6 w-6 text-yellow-500 transition-opacity dark:opacity-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M12 18a6 6 0 1 0 0-12 6 6 0 0 0 0 12Zm0-16a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0V3a1 1 0 0 1 1-1Zm0 18a1 1 0 0 1 1 1v1a1 1 0 1 1-2 0v-1a1 1 0 0 1 1-1Zm8-8a1 1 0 0 1 1 1h1a1 1 0 1 1 0 2h-1a1 1 0 1 1-2 0 1 1 0 0 1 1-1Zm-18 0a1 1 0 0 1 1-1H4a1 1 0 1 1 0 2H3a1 1 0 0 1-1-1Zm14.95-6.364a1 1 0 0 1 1.414 0l.707.707a1 1 0 1 1-1.414 1.415l-.707-.708a1 1 0 0 1 0-1.414ZM5.636 18.364a1 1 0 0 1 0-1.414l.707-.708a1 1 0 1 1 1.414 1.415l-.707.707a1 1 0 0 1-1.414 0ZM5.636 5.636a1 1 0 0 1 1.414 0l.707.707A1 1 0 1 1 6.343 7.758l-.707-.707a1 1 0 0 1 0-1.415Zm12.728 12.728a1 1 0 0 1-1.414 0l-.707-.707a1 1 0 0 1 1.414-1.415l.707.708a1 1 0 0 1 0 1.414Z"/>
+                            </svg>
+                        </span>
+
+                        <!-- Icon Moon (right) -->
+                        <span class="absolute right-1 flex items-center justify-center h-6 w-6 text-gray-200 opacity-0 transition-opacity dark:opacity-100">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 1 0 21 12.79Z"/>
+                            </svg>
+                        </span>
+
+                        <!-- Knob -->
+                        <span class="pointer-events-none inline-block h-6 w-6 transform rounded-full 
+                                    bg-white dark:bg-gray-900 shadow transition-transform 
+                                    translate-x-1 dark:translate-x-7"></span>
+                    </button>
+
                     <!-- User Menu -->
                     <div class="relative group">
                         <button class="flex items-center space-x-3 p-2 rounded-lg">
@@ -262,8 +290,13 @@
                                 {{ strtoupper(substr(auth()->user()->full_name ?? auth()->user()->username ?? 'U', 0, 1)) }}
                             </div>
                             <div class="text-left hidden sm:block">
-                                <p class="text-sm font-medium text-gray-900">{{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
-                                <p class="text-xs text-gray-500 capitalize">{{ auth()->user()->role ?? 'user' }}</p>
+                                <p class="text-sm font-medium text-gray-900 dark:text-white">{{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ auth()->user()->role ?? 'user' }}</p>
+
+                                <!-- Show Regional Name for PIC GA and PIC Operational -->
+                                @if (auth()->user()->isGA() || auth()->user()->isOperational())
+                                    <p class="text-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->regional->regional_name ?? 'Regional N/A' }}</p>
+                                @endif
                             </div>
                         </button>
                     </div>
@@ -271,7 +304,7 @@
             </header>
 
             <!-- Main Content Area -->
-            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 p-6">
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-50 dark:bg-gray-900 p-6">
                 @yield('content')
             </main>
         </div>
@@ -282,7 +315,7 @@
 
     <!-- Success/Error Messages -->
     @if(session('success'))
-        <div class="fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+        <div class="fixed top-4 right-4 bg-green-500 dark:bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
             <div class="flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
@@ -293,7 +326,7 @@
     @endif
 
     @if(session('error'))
-        <div class="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
+        <div class="fixed top-4 right-4 bg-red-500 dark:bg-red-600 text-white px-6 py-3 rounded-lg shadow-lg z-50 animate-fade-in">
             <div class="flex items-center">
                 <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
@@ -315,6 +348,8 @@
         const navDividers = document.querySelectorAll('.nav-divider');
         const navSections = document.querySelectorAll('.nav-section');
         const collapsedToggle = document.getElementById('collapsed-toggle');
+        const darkModeToggle = document.getElementById('darkModeToggle');
+        const html = document.documentElement;
 
         let sidebarCollapsed = false;
 
@@ -407,6 +442,30 @@
 
         window.addEventListener('resize', handleResize);
         handleResize(); // Initial call
+
+        const currentTheme = localStorage.getItem('theme') || 'light';
+        if (currentTheme === 'dark') {
+            html.classList.add('dark');
+        }
+
+        // Toggle dark mode
+        darkModeToggle.addEventListener('click', function() {
+            html.classList.toggle('dark');
+            
+            // Save preference to localStorage
+            if (html.classList.contains('dark')) {
+                localStorage.setItem('theme', 'dark');
+            } else {
+                localStorage.setItem('theme', 'light');
+            }
+        });
+
+        // Initialize theme on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('theme') === 'dark') {
+                html.classList.add('dark');
+            }
+        });
     </script>
 
     <style>

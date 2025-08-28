@@ -19,59 +19,57 @@ class DashboardController extends Controller
     public function stats()
     {
         try {
-            // Get counts from database
-            $totalDevices = Device::count();
-            $totalFloors = Floor::count();
-            $totalRooms = Room::count();
+            $totalDevices   = Device::count();
+            $totalFloors    = Floor::count();
+            $totalRooms     = Room::count();
             $totalBuildings = Building::count();
             $totalRegionals = Regional::count();
-            $totalAreas = Area::count();
-            
-            // Get device check sessions (latest per device) - same logic as device-check-results
-            $deviceSessions = DeviceCheckResult::selectRaw('
-                device_id,
-                checked_at,
-                SUM(CASE WHEN status = "passed" THEN 1 ELSE 0 END) as passed_count,
-                SUM(CASE WHEN status = "failed" THEN 1 ELSE 0 END) as failed_count,
-                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending_count
-            ')
-            ->groupBy('device_id', 'checked_at')
-            ->orderBy('checked_at', 'desc')
-            ->get();
-            
-            // Calculate stats per device session (same logic as device-check-results)
-            $passedDevices = 0;
-            $failedDevices = 0;
-            $pendingDevices = 0;
-            
-            foreach ($deviceSessions as $session) {
-                $failed = $session->failed_count || 0;
-                $pending = $session->pending_count || 0;
-                
-                if ($failed > 0) {
-                    $failedDevices += 1;
-                } elseif ($pending > 0) {
-                    $pendingDevices += 1;
-                } else {
-                    $passedDevices += 1;
-                }
-            }
-            
+            $totalAreas     = Area::count();
+
+            $totals = DB::table(DB::raw("
+                (
+                    SELECT
+                        dcr.device_id,
+                        SUM(CASE WHEN dcr.status = 'failed'  THEN 1 ELSE 0 END) AS failed_count,
+                        SUM(CASE WHEN dcr.status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
+                        SUM(CASE WHEN dcr.status = 'passed'  THEN 1 ELSE 0 END) AS passed_count
+                    FROM device_check_results dcr
+                    JOIN (
+                        SELECT device_id, MAX(checked_at) AS latest_checked_at
+                        FROM device_check_results
+                        GROUP BY device_id
+                    ) latest
+                        ON latest.device_id = dcr.device_id
+                    AND latest.latest_checked_at = dcr.checked_at
+                    GROUP BY dcr.device_id
+                ) x
+            "))
+            ->selectRaw("
+                SUM(CASE WHEN x.failed_count  > 0 THEN 1 ELSE 0 END)                                      AS failed_devices,
+                SUM(CASE WHEN x.failed_count  = 0 AND x.pending_count > 0 THEN 1 ELSE 0 END)              AS pending_devices,
+                SUM(CASE WHEN x.failed_count  = 0 AND x.pending_count = 0 THEN 1 ELSE 0 END)              AS passed_devices
+            ")
+            ->first();
+
+            $failedDevices  = (int) ($totals->failed_devices  ?? 0);
+            $pendingDevices = (int) ($totals->pending_devices ?? 0);
+            $passedDevices  = (int) ($totals->passed_devices  ?? 0);
+
             return response()->json([
-                'total_devices' => $totalDevices,
-                'total_floors' => $totalFloors,
-                'total_rooms' => $totalRooms,
+                'total_devices'   => $totalDevices,
+                'total_floors'    => $totalFloors,
+                'total_rooms'     => $totalRooms,
                 'total_buildings' => $totalBuildings,
                 'total_regionals' => $totalRegionals,
-                'total_areas' => $totalAreas,
+                'total_areas'     => $totalAreas,
                 'pending_devices' => $pendingDevices,
-                'passed_devices' => $passedDevices,
-                'failed_devices' => $failedDevices,
+                'passed_devices'  => $passedDevices,
+                'failed_devices'  => $failedDevices,
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Failed to load dashboard statistics',
-                'message' => $e->getMessage()
+                'error'   => 'Failed to load dashboard statistics',
+                'message' => $e->getMessage(),
             ], 500);
         }
     }
@@ -80,22 +78,19 @@ class DashboardController extends Controller
     {
         try {
             $limit = $request->get('limit', 10);
-            
-            // Get recent device check activities dengan timezone yang benar
             $checkActivities = DeviceCheckResult::with(['device.room.floor', 'user'])
                 ->where('checked_at', '>=', now()->subDays(7))
                 ->orderBy('checked_at', 'desc')
                 ->limit($limit)
                 ->get()
                 ->map(function ($result) {
-                    // Pastikan timezone sesuai dengan aplikasi (Asia/Jakarta)
                     $checkedAt = Carbon::parse($result->checked_at)->setTimezone(config('app.timezone', 'Asia/Jakarta'));
                     
                     return [
                         'type' => 'device_check',
                         'description' => "{$result->user->full_name} mengecek {$result->device->device_name} di {$result->device->room->room_name}",
                         'user_name' => $result->user->full_name,
-                        'created_at' => $checkedAt->toISOString(), // Format ISO untuk JavaScript
+                        'created_at' => $checkedAt->toISOString(),
                         'status' => $result->status
                     ];
                 });
