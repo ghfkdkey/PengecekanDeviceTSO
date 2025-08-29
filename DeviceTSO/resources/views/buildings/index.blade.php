@@ -63,78 +63,81 @@
     @endif
 
     <!-- Header Actions -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-        <div class="flex-1 flex flex-col lg:flex-row lg:items-center lg:space-x-4">
-            <!-- Search Bar -->
-            <div class="max-w-md mb-4 lg:mb-0">
-                <div class="relative">
-                    <input 
-                        type="text" 
-                        id="search-buildings" 
-                        placeholder="Cari building..."
-                        class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
-                    >
-                    <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
-                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Filter by Area -->
-            <div class="max-w-md mb-4 lg:mb-0">
-                <select 
-                    id="filter-area"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                    {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
-                >
-                    <option value="">Semua Area</option>
-                    @foreach($areas as $area)
-                        <option value="{{ $area->area_id }}" 
-                                {{ (request('area') == $area->area_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedAreaId'] == $area->area_id)) ? 'selected' : '' }}>
-                            {{ $area->area_name }}
-                        </option>
-                    @endforeach
-                </select>
-                @if($filterRestrictions['isRestricted'])
-                    <p class="text-xs text-gray-500 mt-1">Filter terkunci sesuai regional Anda</p>
-                @endif
-            </div>
-            
-            <!-- Filter by Regional -->
-            <div class="max-w-md">
-                <select 
-                    id="filter-regional"
-                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-                    {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
-                >
-                    <option value="">Semua Regional</option>
-                    @foreach($regionals as $regional)
-                        <option value="{{ $regional->regional_id }}" 
-                                data-area-id="{{ $regional->area_id }}" 
-                                {{ (request('regional') == $regional->regional_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedRegionalId'] == $regional->regional_id)) ? 'selected' : '' }}>
-                            {{ $regional->regional_name }}
-                        </option>
-                    @endforeach
-                </select>
-                @if($filterRestrictions['isRestricted'])
-                    <p class="text-xs text-gray-500 mt-1">Filter terkunci sesuai regional Anda</p>
-                @endif
-            </div>
+    <div class="flex flex-row items-center justify-between gap-3">
+      <!-- Kiri: kontrol (search + filters) -->
+      <div class="flex flex-row items-center gap-3 flex-1">
+    
+        <!-- Search Bar -->
+        <div class="relative w-72">
+          <input
+            type="text"
+            id="search-buildings"
+            placeholder="Cari building..."
+            class="h-10 w-full pl-10 pr-4 rounded-lg border border-gray-300 focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red"
+          />
+          <div class="absolute left-3 top-1/2 -translate-y-1/2">
+            <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
+            </svg>
+          </div>
         </div>
-        
-        <div class="mt-4 sm:mt-0">
-            <button 
-                id="add-building-btn"
-                class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200 flex items-center space-x-2 shadow-lg hover:shadow-xl transform hover:scale-105"
-            >
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
-                </svg>
-                <span>Tambah Gedung</span>
-            </button>
+    
+        <!-- Filter by Area -->
+        <div class="flex flex-col justify-center">
+          <select
+            id="filter-area"
+            class="h-10 min-w-44 rounded-lg border border-gray-300 px-4 focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+            {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
+          >
+            <option value="">Semua Area</option>
+            @foreach($areas as $area)
+              <option value="{{ $area->area_id }}"
+                {{ (request('area') == $area->area_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedAreaId'] == $area->area_id)) ? 'selected' : '' }}>
+                {{ $area->area_name }}
+              </option>
+            @endforeach
+          </select>
+          @if($filterRestrictions['isRestricted'])
+            <p class="mt-1 text-xs text-gray-500">Filter terkunci sesuai regional Anda</p>
+          @endif
         </div>
+    
+        <!-- Filter by Regional -->
+        <div class="flex flex-col justify-center">
+          <select
+            id="filter-regional"
+            class="h-10 min-w-48 rounded-lg border border-gray-300 px-4 focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
+            {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}>
+            <option value="">Semua Regional</option>
+            @foreach($regionals as $regional)
+              <option value="{{ $regional->regional_id }}" data-area-id="{{ $regional->area_id }}"
+                {{ (request('regional') == $regional->regional_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedRegionalId'] == $regional->regional_id)) ? 'selected' : '' }}>
+                {{ $regional->regional_name }}
+              </option>
+            @endforeach
+          </select>
+          @if($filterRestrictions['isRestricted'])
+            <p class="mt-1 text-xs text-gray-500">Filter terkunci sesuai regional Anda</p>
+          @endif
+        </div>
+    
+      </div>
+    
+      <!-- Kanan: tombol -->
+      <div>
+        <button
+          id="add-building-btn"
+          class="h-10 rounded-lg bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red px-6 text-white shadow-lg transition-all duration-200 hover:from-telkomsel-dark-red hover:to-telkomsel-red hover:shadow-xl"
+        >
+          <span class="inline-flex items-center gap-2">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/>
+            </svg>
+            Tambah Gedung
+          </span>
+        </button>
+      </div>
     </div>
 
     <!-- Statistics Cards -->

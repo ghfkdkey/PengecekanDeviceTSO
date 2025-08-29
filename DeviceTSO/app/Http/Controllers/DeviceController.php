@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Device;
+use App\Models\Floor;
 use App\Models\Room;
+use App\Models\Building;
+use App\Traits\RegionalFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -12,19 +15,59 @@ use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
 class DeviceController extends Controller
 {
-    /**
-     * Display a listing of the devices
-     */
+    use RegionalFilter;
+
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
     public function index(Request $request)
     {
-        // Mulai query builder dengan eager loading relasi yang dibutuhkan
-        $query = Device::with(['room.floor']);
-
-        // Terapkan filter berdasarkan input dari request
-        if ($request->filled('room')) {
-            $query->where('room_id', $request->room);
+        if (!$this->checkPermission('ManageBuilding')) { // atau ManageDevice jika ada
+            return $this->unauthorized($request);
         }
 
+        // Dapatkan parameter filter yang sudah disesuaikan dengan hak akses user
+        $filteredParams = $this->getFilteredRequestParams($request);
+        
+        // Validasi akses regional/area jika ada yang dikirim via request
+        if (!$this->validateRegionalAccess($request->get('regional'), $request->get('area'))) {
+            return $this->unauthorized($request);
+        }
+
+        // Mulai query builder dengan eager loading relasi yang dibutuhkan
+        $query = Device::with(['room.floor.building.regional.area']);
+
+        // Apply regional filter untuk devices melalui relasi room.floor.building
+        $query->whereHas('room.floor.building', function ($q) {
+            $this->applyRegionalFilter($q, 'regional_id');
+        });
+
+        // Terapkan filter berdasarkan input dari request (hanya admin yang bisa custom filter)
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('room')) {
+                $query->where('room_id', $request->room);
+            } elseif ($request->filled('floor')) {
+                $query->whereHas('room', function ($q) use ($request) {
+                    $q->where('floor_id', $request->floor);
+                });
+            } elseif ($request->filled('building')) {
+                $query->whereHas('room.floor', function ($q) use ($request) {
+                    $q->where('building_id', $request->building);
+                });
+            } elseif ($request->filled('regional')) {
+                $query->whereHas('room.floor.building', function ($q) use ($request) {
+                    $q->where('regional_id', $request->regional);
+                });
+            } elseif ($request->filled('area')) {
+                $query->whereHas('room.floor.building.regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
+        }
+
+        // Filter berdasarkan type dan search (berlaku untuk semua role)
         if ($request->filled('type')) {
             $query->where('device_type', $request->type);
         }
@@ -40,17 +83,102 @@ class DeviceController extends Controller
         // Eksekusi query untuk mendapatkan device yang sudah difilter
         $devices = $query->get();
         
-        // Data untuk dropdown filter tidak perlu difilter
-        $rooms = Room::with('floor')->orderBy('room_name')->get();
+        // Query rooms dengan filter regional
+        $roomsQuery = Room::with('floor.building.regional');
+        $roomsQuery->whereHas('floor.building', function ($q) {
+            $this->applyRegionalFilter($q, 'regional_id');
+        });
         
-        $deviceTypes = Device::whereNotNull('device_type')
+        // Apply additional room filters (hanya jika user admin)
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('floor')) {
+                $roomsQuery->where('floor_id', $request->floor);
+            } elseif ($request->filled('building')) {
+                $roomsQuery->whereHas('floor', function ($q) use ($request) {
+                    $q->where('building_id', $request->building);
+                });
+            } elseif ($request->filled('regional')) {
+                $roomsQuery->whereHas('floor.building', function ($q) use ($request) {
+                    $q->where('regional_id', $request->regional);
+                });
+            } elseif ($request->filled('area')) {
+                $roomsQuery->whereHas('floor.building.regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
+        }
+        
+        $rooms = $roomsQuery->orderBy('room_name')->get();
+
+        // Query floors dengan filter regional
+        $floorsQuery = Floor::with('building.regional');
+        $floorsQuery->whereHas('building', function ($q) {
+            $this->applyRegionalFilter($q, 'regional_id');
+        });
+        
+        // Apply additional floor filters (hanya jika user admin)
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('building')) {
+                $floorsQuery->where('building_id', $request->building);
+            } elseif ($request->filled('regional')) {
+                $floorsQuery->whereHas('building', function ($q) use ($request) {
+                    $q->where('regional_id', $request->regional);
+                });
+            } elseif ($request->filled('area')) {
+                $floorsQuery->whereHas('building.regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
+        }
+        
+        $floors = $floorsQuery->orderBy('floor_name')->get();
+
+        // Query buildings dengan filter regional
+        $buildingsQuery = Building::query();
+        $buildingsQuery = $this->applyRegionalFilter($buildingsQuery, 'regional_id');
+        
+        // Apply additional building filters (hanya jika user admin)
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('regional')) {
+                $buildingsQuery->where('regional_id', $request->regional);
+            } elseif ($request->filled('area')) {
+                $buildingsQuery->whereHas('regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
+        }
+        
+        $buildings = $buildingsQuery->orderBy('building_name')->get();
+        
+        // Device types - filter berdasarkan devices yang bisa diakses user
+        $deviceTypesQuery = Device::whereHas('room.floor.building', function ($q) {
+            $this->applyRegionalFilter($q, 'regional_id');
+        });
+        
+        $deviceTypes = $deviceTypesQuery->whereNotNull('device_type')
             ->distinct()
             ->pluck('device_type')
             ->filter()
             ->sort();
+
+        // Get areas dan regionals yang bisa diakses user
+        $areas = $this->getAccessibleAreas();
+        $regionals = $this->getAccessibleRegionals($filteredParams['area']);
+        
+        // Get filter restrictions untuk view
+        $filterRestrictions = $this->getFilterRestrictions();
         
         // Kembalikan view dengan data yang sudah difilter dan data untuk filter
-        return view('devices.index', compact('devices', 'rooms', 'deviceTypes'));
+        return view('devices.index', compact(
+            'devices', 
+            'rooms', 
+            'floors',
+            'buildings',
+            'deviceTypes',
+            'areas', 
+            'regionals', 
+            'filterRestrictions'
+        ));
     }
 
     /**
@@ -532,5 +660,34 @@ class DeviceController extends Controller
                 'message' => 'Gagal menghapus gambar: ' . $e->getMessage()
             ], 500);
         }
+    }
+
+    protected function checkPermission($permission)
+    {
+        $user = auth()->user();
+        if (!$user) return false;
+
+        $methodName = 'can' . ucfirst($permission);
+        
+        if (method_exists($user, $methodName)) {
+            return $user->$methodName();
+        }
+
+        return false;
+    }
+
+    /**
+     * Return unauthorized response
+     */
+    protected function unauthorized($request)
+    {
+        if ($request->expectsJson()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk mengakses ini'
+            ], 403);
+        }
+
+        return redirect()->back()->with('error', 'Anda tidak memiliki izin untuk mengakses halaman tersebut');
     }
 }

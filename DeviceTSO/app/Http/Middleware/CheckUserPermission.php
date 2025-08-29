@@ -21,9 +21,51 @@ class CheckUserPermission
             return redirect('/login');
         }
 
-        $methodName = 'can' . ucfirst($permission);
+        $hasPermission = false;
         
-        if (method_exists($user, $methodName) && $user->$methodName()) {
+        // PERBAIKAN: Cek berbagai variasi permission method
+        $methodName = 'can' . ucfirst($permission);
+        if (method_exists($user, $methodName)) {
+            $hasPermission = $user->$methodName();
+        }
+        
+        // PERBAIKAN: Tambah fallback untuk device-related permissions
+        if (!$hasPermission) {
+            // Cek berbagai variasi method name untuk device check
+            $deviceCheckMethods = [
+                'canAccessDeviceCheck',
+                'canDeviceCheck', 
+                'canAccessDevice',
+                'canPerformCheck'
+            ];
+            
+            if (str_contains(strtolower($permission), 'device')) {
+                foreach ($deviceCheckMethods as $method) {
+                    if (method_exists($user, $method)) {
+                        $hasPermission = $user->$method();
+                        if ($hasPermission) break;
+                    }
+                }
+            }
+        }
+
+        // DEBUGGING: Log permission check details
+        \Log::info('Permission check details', [
+            'user_id' => $user->id,
+            'user_role' => $user->role,
+            'user_regional' => $user->regional_id,
+            'permission_requested' => $permission,
+            'method_name' => $methodName,
+            'method_exists' => method_exists($user, $methodName),
+            'has_permission' => $hasPermission,
+            'is_admin' => $user->isAdmin(),
+            'is_ga' => $user->isGA(),
+            'is_operational' => $user->isOperational(),
+            'url' => $request->fullUrl(),
+            'debug_permissions' => method_exists($user, 'debugPermissions') ? $user->debugPermissions() : null
+        ]);
+
+        if ($hasPermission) {
             return $next($request);
         }
 
@@ -31,9 +73,11 @@ class CheckUserPermission
         \Log::warning('Unauthorized access attempt', [
             'user_id' => $user->id,
             'user_role' => $user->role,
+            'user_regional' => $user->regional_id,
             'permission' => $permission,
             'url' => $request->fullUrl(),
-            'method' => $request->method()
+            'method' => $request->method(),
+            'available_methods' => get_class_methods($user)
         ]);
 
         if ($request->expectsJson()) {
@@ -51,15 +95,17 @@ class CheckUserPermission
 
     private function getRedirectUrlBasedOnRole($user)
     {
-        switch ($user->role) {
-            case 'admin':
-                return '/dashboard';
-            case 'pic_ga':
-                return '/dashboard';
-            case 'pic_operational':
-                return '/dashboard';
-            default:
-                return '/dashboard';
+        // PERBAIKAN: Support untuk berbagai format role
+        $role = strtolower($user->role);
+        
+        if ($user->isAdmin()) {
+            return '/dashboard';
+        } elseif ($user->isGA()) {
+            return '/dashboard';
+        } elseif ($user->isOperational()) {
+            return '/dashboard';
+        } else {
+            return '/dashboard';
         }
     }
 }

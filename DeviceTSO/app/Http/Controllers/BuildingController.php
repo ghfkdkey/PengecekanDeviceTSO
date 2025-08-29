@@ -5,52 +5,70 @@ namespace App\Http\Controllers;
 use App\Models\Building;
 use App\Models\Area;
 use App\Models\Regional;
+use App\Traits\RegionalFilter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
 class BuildingController extends Controller 
 {
+    use RegionalFilter;
+    
     public function __construct()
     {
         $this->middleware('auth');
-        // Hapus debug dari constructor, pindah ke method yang membutuhkan
     }
 
     public function index(Request $request)
     {
-        // Debug untuk troubleshooting - hapus setelah masalah teratasi
-        // dd(auth()->user()->debugPermissions());
-        
-        // Ganti 'ManageArea' dengan 'ManageBuilding' sesuai debug output
         if (!$this->checkPermission('ManageBuilding')) {
+            return $this->unauthorized($request);
+        }
+
+        // Dapatkan parameter filter yang sudah disesuaikan dengan hak akses user
+        $filteredParams = $this->getFilteredRequestParams($request);
+        
+        // Validasi akses regional/area jika ada yang dikirim via request
+        if (!$this->validateRegionalAccess($request->get('regional'), $request->get('area'))) {
             return $this->unauthorized($request);
         }
 
         $query = Building::query();
 
-        if ($request->filled('regional')) {
-            $query->where('regional_id', $request->regional);
-        } elseif ($request->filled('area')) {
-            $query->whereHas('regional', function ($q) use ($request) {
-                $q->where('area_id', $request->area);
-            });
+        // Apply regional filter berdasarkan role user
+        $query = $this->applyRegionalFilter($query, 'regional_id');
+
+        // Apply additional filters (hanya jika user admin)
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('regional')) {
+                $query->where('regional_id', $request->regional);
+            } elseif ($request->filled('area')) {
+                $query->whereHas('regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
         }
 
         $buildings = $query->with('regional.area')
                         ->withCount('floors')
                         ->get();
 
-        $areas = Area::orderBy('area_name')->get();
-        $regionals = $request->filled('area') 
-            ? Regional::where('area_id', $request->area)->orderBy('regional_name')->get()
-            : Regional::orderBy('regional_name')->get();
+        // Get areas dan regionals yang bisa diakses user
+        $areas = $this->getAccessibleAreas();
+        $regionals = $this->getAccessibleRegionals($filteredParams['area']);
+        
+        // Get filter restrictions untuk view
+        $filterRestrictions = $this->getFilterRestrictions();
 
-        return view('buildings.index', compact('buildings', 'areas', 'regionals'));
+        return view('buildings.index', compact(
+            'buildings', 
+            'areas', 
+            'regionals', 
+            'filterRestrictions'
+        ));
     }
 
     public function store(Request $request)
     {
-        // Ganti 'ManageArea' dengan 'ManageBuilding'
         if (!$this->checkPermission('ManageBuilding')) {
             return $this->unauthorized($request);
         }
@@ -66,6 +84,14 @@ class BuildingController extends Controller
                 'building_name.required' => 'Nama gedung harus diisi.',
                 'regional_id.required' => 'Regional harus dipilih.',
             ]);
+
+            // Validasi akses regional untuk PIC GA dan PIC Operational
+            if (!$this->validateRegionalAccess($validated['regional_id'])) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke regional tersebut.'
+                ], 403);
+            }
 
             $validated['user_id'] = auth()->id();
             $building = Building::create($validated);
@@ -97,7 +123,11 @@ class BuildingController extends Controller
         if (!$this->checkPermission('ManageBuilding')) {
             return $this->unauthorized(request());
         }
-        return Building::with('regional', 'floors')->findOrFail($id);
+        
+        $query = Building::with('regional', 'floors');
+        $query = $this->applyRegionalFilter($query, 'regional_id');
+        
+        return $query->findOrFail($id);
     }
 
     public function update(Request $request, $id) 
@@ -106,8 +136,22 @@ class BuildingController extends Controller
             return $this->unauthorized($request);
         }
         
-        $building = Building::findOrFail($id);
-        $building->update($request->only('building_name', 'building_code'));
+        $query = Building::query();
+        $query = $this->applyRegionalFilter($query, 'regional_id');
+        
+        $building = $query->findOrFail($id);
+        
+        // Validasi regional_id jika ada dalam request
+        if ($request->has('regional_id')) {
+            if (!$this->validateRegionalAccess($request->regional_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Anda tidak memiliki akses ke regional tersebut.'
+                ], 403);
+            }
+        }
+        
+        $building->update($request->only('building_name', 'building_code', 'regional_id'));
         return $building;
     }
 
@@ -117,7 +161,12 @@ class BuildingController extends Controller
             return $this->unauthorized(request());
         }
         
-        Building::destroy($id);
+        $query = Building::query();
+        $query = $this->applyRegionalFilter($query, 'regional_id');
+        
+        $building = $query->findOrFail($id);
+        $building->delete();
+        
         return response()->json(['message' => 'Building deleted']);
     }
 

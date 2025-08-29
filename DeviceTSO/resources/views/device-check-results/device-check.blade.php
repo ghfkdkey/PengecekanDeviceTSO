@@ -18,6 +18,30 @@
                         <p class="mt-2 text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
                             Pilih lantai, ruangan, dan device untuk melakukan pengecekan
                         </p>
+                        <!-- Current User Information -->
+                        <div class="mt-3 flex items-center space-x-4">
+                            @if(!Auth::user()->isAdmin())
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                </svg>
+                                <span class="text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
+                                    {{ Auth::user()->role ?? 'Unknown Role' }}: <span class="font-medium text-gray-900">{{ Auth::user()->full_name ?? 'Unknown User' }}</span>
+                                </span>
+                            </div>
+                            @endif
+                            @if(!Auth::user()->isAdmin())
+                            <div class="flex items-center space-x-2">
+                                <svg class="w-4 h-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                </svg>
+                                <span id="currentLocationInfo" class="text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
+                                    Regional:  {{Auth::user()->regional->regional_name}}<span class="font-medium">-</span> 
+                                </span>
+                            </div>
+                            @endif
+                        </div>
                     </div>
                     <div class="flex space-x-3">
                         <a href="{{ route('device-check-results.index') }}" class="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
@@ -33,7 +57,7 @@
     </div>
 
     <!-- Main Content -->
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-8">
         <!-- Selection Form -->
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
             <div class="p-6">
@@ -201,10 +225,12 @@
 let selectedDevice = null;
 let checklistItems = [];
 let deviceCategories = [];
+let currentAreaRegionalInfo = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
+    updateCurrentLocationInfo();
 });
 
 // Setup event listeners
@@ -225,8 +251,10 @@ function setupEventListeners() {
         console.log('Room selected:', roomId);
         if (roomId) {
             loadDevices(roomId);
+            loadAreaRegionalInfo(roomId); // New function to load area/regional info
         } else {
             resetDeviceSelection();
+            hideAreaRegionalInfo();
         }
     });
 
@@ -276,6 +304,86 @@ function setupEventListeners() {
         e.preventDefault();
         saveCheckResults();
     });
+}
+
+// Update current location info in header
+function updateCurrentLocationInfo() {
+    // This would typically get current user's area/regional assignment
+    // For now, showing placeholder until room is selected
+    const locationInfo = document.getElementById('currentLocationInfo');
+    @if(Auth::user()->role !== 'admin')
+        locationInfo.innerHTML = 'Regional: <span class="font-medium">{{ Auth::user()->regional->regional_name }}</span>';
+    @endif
+
+}
+
+// Show area and regional information
+function showAreaRegionalInfo(roomInfo) {
+    // Update area information
+    document.getElementById('selectedAreaName').textContent = roomInfo.area_name || 'Tidak tersedia';
+    document.getElementById('selectedAreaCode').textContent = roomInfo.area_code || 'N/A';
+    
+    // Update regional information
+    document.getElementById('selectedRegionalName').textContent = roomInfo.regional_name || 'Tidak tersedia';
+    document.getElementById('selectedRegionalCode').textContent = roomInfo.regional_code || 'N/A';
+    
+    // Update assigned PIC information
+    if (roomInfo.assigned_pic) {
+        document.getElementById('assignedPicName').textContent = roomInfo.assigned_pic.name || 'Tidak ada PIC';
+        document.getElementById('assignedPicRole').textContent = roomInfo.assigned_pic.role || 'N/A';
+        
+        // Update PIC status badge
+        const statusElement = document.getElementById('assignedPicStatus');
+        const status = roomInfo.assigned_pic.status || 'unknown';
+        let statusClass = 'bg-gray-100 text-gray-800';
+        let statusText = 'Status tidak diketahui';
+        
+        switch(status) {
+            case 'active':
+                statusClass = 'bg-green-100 text-green-800';
+                statusText = 'Aktif';
+                break;
+            case 'inactive':
+                statusClass = 'bg-red-100 text-red-800';
+                statusText = 'Tidak Aktif';
+                break;
+            case 'on_duty':
+                statusClass = 'bg-blue-100 text-blue-800';
+                statusText = 'Sedang Bertugas';
+                break;
+            case 'off_duty':
+                statusClass = 'bg-yellow-100 text-yellow-800';
+                statusText = 'Tidak Bertugas';
+                break;
+        }
+        
+        statusElement.innerHTML = `
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClass}">
+                ${statusText}
+            </span>
+        `;
+    } else {
+        document.getElementById('assignedPicName').textContent = 'Tidak ada PIC terassign';
+        document.getElementById('assignedPicRole').textContent = 'N/A';
+        document.getElementById('assignedPicStatus').innerHTML = `
+            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                Tidak ada assignment
+            </span>
+        `;
+    }
+    
+    // Show the area/regional info card
+    document.getElementById('areaRegionalInfo').classList.remove('hidden');
+    
+    // Update header location info
+    const locationInfo = document.getElementById('currentLocationInfo');
+    locationInfo.innerHTML = `Area: <span class="font-medium">${roomInfo.area_name || 'N/A'}</span> | Regional: <span class="font-medium">${roomInfo.regional_name || 'N/A'}</span>`;
+}
+
+// Hide area and regional information
+function hideAreaRegionalInfo() {
+    document.getElementById('areaRegionalInfo').classList.add('hidden');
+    updateCurrentLocationInfo();
 }
 
 // Load rooms by floor
@@ -607,6 +715,18 @@ async function saveCheckResults() {
         });
     });
     
+    // Include area/regional information in the saved data
+    const saveData = {
+        device_id: selectedDevice.device_id,
+        checklist_results: results,
+        area_regional_info: currentAreaRegionalInfo,
+        operational_pic: {
+            name: '{{ Auth::user()->name ?? "Unknown User" }}',
+            id: '{{ Auth::user()->id ?? null }}',
+            checked_at: new Date().toISOString()
+        }
+    };
+    
     try {
         const response = await fetch('/api/device-check-results/multiple', {
             method: 'POST',
@@ -614,10 +734,7 @@ async function saveCheckResults() {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({
-                device_id: selectedDevice.device_id,
-                checklist_results: results
-            })
+            body: JSON.stringify(saveData)
         });
         
         if (response.ok) {
@@ -646,9 +763,11 @@ function resetRoomSelection() {
     document.getElementById('loadChecklistBtn').disabled = true;
     hideDeviceInfo();
     document.getElementById('checklistSection').classList.add('hidden');
+    hideAreaRegionalInfo();
     selectedDevice = null;
     window.availableDevices = [];
     deviceCategories = [];
+    currentAreaRegionalInfo = null;
 }
 
 function resetDeviceSelection() {
