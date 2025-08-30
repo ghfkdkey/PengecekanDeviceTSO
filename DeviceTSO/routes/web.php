@@ -137,7 +137,7 @@ Route::middleware('auth')->group(function () {
     // Checklist Items CRUD operations
     Route::post('/checklist-items', [ChecklistItemController::class, 'store'])->name('checklist-items.store');
     Route::put('/checklist-items/{checklistItem}', [ChecklistItemController::class, 'update'])->name('checklist-items.update');
-    Route::delete('/checklist-items/{id}', [ChecklistItemController::class, 'delete'])->name('checklist-items.delete');
+    Route::delete('/checklist-items/{id}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');
 });
 
 // Checklist Items manual CRUD routes
@@ -147,4 +147,4 @@ Route::post('/checklist-items', [ChecklistItemController::class, 'store'])->name
 Route::get('/checklist-items/{id}', [ChecklistItemController::class, 'show'])->name('checklist-items.show');
 Route::get('/checklist-items/{id}/edit', [ChecklistItemController::class, 'edit'])->name('checklist-items.edit');
 Route::put('/checklist-items/{id}', [ChecklistItemController::class, 'update'])->name('checklist-items.update');
-Route::delete('/checklist-items/{id}', [ChecklistItemController::class, 'delete'])->name('checklist-items.destroy');
+Route::delete('/checklist-items/{id}', [ChecklistItemController::class, 'destroy'])->name('checklist-items.destroy');

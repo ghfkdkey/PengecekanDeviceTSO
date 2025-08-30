@@ -144,7 +144,7 @@ class ChecklistItemController extends Controller
     /**
      * Delete the specified checklist item (only if no check results exist)
      */
-    public function delete($id)
+    public function destroy($id)
     {
         try {
             $item = ChecklistItem::findOrFail($id);

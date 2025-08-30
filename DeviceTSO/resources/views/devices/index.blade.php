@@ -6,10 +6,8 @@
 
 @section('content')
 <div class="space-y-6 font-poppins">
-    <!-- Header Actions -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div class="flex-1 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:space-x-4">
-            <!-- Building Filter -->
             <div class="lg:max-w-xs">
                 <select 
                     id="building-filter" 
@@ -26,7 +24,6 @@
                 </select>
             </div>
 
-            <!-- Floor Filter -->
             <div class="lg:max-w-xs">
                 <select 
                     id="floor-filter" 
@@ -43,7 +40,6 @@
                 </select>
             </div>
 
-            <!-- Room Filter -->
             <div class="lg:max-w-xs">
                 <select 
                     id="room-filter" 
@@ -58,7 +54,6 @@
                 </select>
             </div>
             
-            <!-- Device Type Filter -->
             <div class="lg:max-w-xs">
                 <select 
                     id="type-filter" 
@@ -74,7 +69,6 @@
             </div>
         </div>
         
-        <!-- Update the header actions section -->
         <div class="flex items-center space-x-2">
             <button 
                 id="export-excel-btn"
@@ -98,7 +92,6 @@
         </div>
     </div>
 
-    <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl shadow-sm p-6 border border-gray-200 hover:shadow-md transition-shadow">
             <div class="flex items-center">
@@ -143,7 +136,6 @@
         </div>
     </div>
 
-    <!-- Devices Grid -->
     <div class="bg-white rounded-xl shadow-sm border border-gray-200">
         <div class="p-6 border-b border-gray-200">
             <div class="flex items-center justify-between">
@@ -174,7 +166,6 @@
                                              alt="{{ $device->device_name }}" 
                                              class="w-full h-full object-cover"
                                              onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNEg0NFY0MEgyMFYyNFoiIGZpbGw9IiNEM0Q3RDEiLz4KPHBhdGggZD0iTTI4IDMySDM2VjQwSDI4VjMyWiIgZmlsbD0iI0QzRDdEMSIvPgo8L3N2Zz4K'">
-                                        <!-- Status indicator -->
                                         <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
                                     </div>
                                 @else
@@ -182,7 +173,6 @@
                                         <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                                         </svg>
-                                        <!-- Status indicator -->
                                         <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
                                     </div>
                                 @endif
@@ -253,7 +243,6 @@
                         </div>
 
                         <div class="space-y-3">
-                            <!-- Add condition status -->
                             <div class="flex items-center justify-between py-2 border-t border-gray-200">
                                 <span class="text-sm text-gray-600">Kondisi</span>
                                 <span class="px-2 py-1 text-xs rounded-full {{ $device->condition === 'baik' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
@@ -261,13 +250,11 @@
                                 </span>
                             </div>
                             
-                            <!-- Add merk -->
                             <div class="flex items-center justify-between py-2 border-t border-gray-200">
                                 <span class="text-sm text-gray-600">Merk</span>
                                 <span class="font-medium text-gray-900">{{ $device->merk }}</span>
                             </div>
                             
-                            <!-- Add PO/BAST info if exists -->
                             @if($device->tahun_po || $device->no_po)
                             <div class="flex items-center justify-between py-2 border-t border-gray-200">
                                 <span class="text-sm text-gray-600">PO</span>
@@ -312,7 +299,6 @@
     </div>
 </div>
 
-<!-- Add/Edit Device Modal -->
 <div id="device-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">
     <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95" id="modal-content">
@@ -333,6 +319,64 @@
                 <input type="hidden" id="form-method" name="_method" value="POST">
                 
                 <div>
+                    <label for="regional-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Regional <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="regional-select" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Regional</option>
+                        @isset($regionals)
+                            @foreach($regionals as $regional)
+                                <option value="{{ $regional->regional_id }}">{{ $regional->regional_name }}</option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+
+                <div>
+                    <label for="building-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Gedung <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="building-select" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Gedung</option>
+                        @isset($buildings)
+                            @foreach($buildings as $building)
+                                <option value="{{ $building->building_id }}" data-regional-id="{{ $building->regional_id }}">
+                                    {{ $building->building_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="floor-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Lantai <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="floor-select" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Lantai</option>
+                        @isset($floors)
+                            @foreach($floors as $floor)
+                                <option value="{{ $floor->floor_id }}" data-building-id="{{ $floor->building_id }}">
+                                    {{ $floor->floor_name }}
+                                </option>
+                            @endforeach
+                        @endisset
+                    </select>
+                </div>
+
+                <div>
                     <label for="room-select" class="block text-sm font-medium text-gray-700 mb-2">
                         Ruangan <span class="text-red-500">*</span>
                     </label>
@@ -343,9 +387,13 @@
                         required
                     >
                         <option value="">Pilih Ruangan</option>
-                        @foreach($rooms as $room)
-                            <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
-                        @endforeach
+                        @isset($rooms)
+                            @foreach($rooms as $room)
+                                <option value="{{ $room->room_id }}" data-floor-id="{{ $room->floor_id }}">
+                                    {{ $room->room_name }}
+                                </option>
+                            @endforeach
+                        @endisset
                     </select>
                     <div id="room_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
@@ -432,7 +480,6 @@
                     <div id="device_image_error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
                 
-                <!-- New fields for category, merk, tahun, no po, kondisi, and notes -->
                 <div>
                     <label for="category" class="block text-sm font-medium text-gray-700 mb-2">
                         Kategori <span class="text-red-500">*</span>
@@ -576,7 +623,6 @@
     </div>
 </div>
 
-<!-- Image Upload Modal -->
 <div id="image-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">  
     <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md transform transition-all duration-300 scale-95">
@@ -596,7 +642,6 @@
                 <input type="hidden" id="image-device-id" name="device_id">
                 <input type="hidden" id="image-form-method" name="_method" value="POST">
                 
-                <!-- Current Image Preview -->
                 <div id="current-image-preview" class="hidden">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Gambar Saat Ini</label>
                     <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
@@ -604,7 +649,6 @@
                     </div>
                 </div>
                 
-                <!-- Image Upload -->
                 <div>
                     <label for="device-image" class="block text-sm font-medium text-gray-700 mb-2">
                         Gambar Device <span class="text-red-500">*</span>
@@ -626,7 +670,6 @@
                     </div>
                     <div id="image-error" class="text-red-500 text-sm mt-1 hidden"></div>
                     
-                    <!-- Image Preview -->
                     <div id="image-preview-container" class="hidden mt-3">
                         <label class="block text-sm font-medium text-gray-700 mb-2">Preview</label>
                         <div class="w-32 h-32 rounded-lg overflow-hidden bg-gray-100 border border-gray-300">
@@ -660,7 +703,6 @@
     </div>
 </div>
 
-<!-- Delete Confirmation Modal -->
 <div id="delete-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-start justify-center p-4 overflow-y-auto">
     <div class="relative min-h-[calc(100vh-2rem)] flex items-center justify-center py-8">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md">
@@ -742,6 +784,11 @@
     const deviceIdInput = document.getElementById('device-id');
     const formMethod = document.getElementById('form-method');
     const deviceForm = document.getElementById('device-form');
+
+    // New elements for dependent dropdowns
+    const regionalSelect = document.getElementById('regional-select');
+    const buildingSelect = document.getElementById('building-select');
+    const floorSelect = document.getElementById('floor-select');
 
     // Image modal elements
     const closeImageModal = document.getElementById('close-image-modal');
@@ -904,6 +951,11 @@
             });
         }
 
+        // New dependent dropdown listeners
+        if (regionalSelect) regionalSelect.addEventListener('change', handleRegionalChangeInForm);
+        if (buildingSelect) buildingSelect.addEventListener('change', handleBuildingChangeInForm);
+        if (floorSelect) floorSelect.addEventListener('change', handleFloorChangeInForm);
+
         // Dynamic event binding for device cards
         bindDeviceCardEvents();
 
@@ -913,12 +965,10 @@
         // Form submit event
         if (deviceForm) {
             deviceForm.addEventListener('submit', handleSubmit);
-            console.log('Form submit handler attached');
         }
     }
 
     function bindDeviceCardEvents() {
-        // Edit buttons
         const editButtons = document.querySelectorAll('.edit-device-btn');
         editButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -957,7 +1007,6 @@
             });
         });
 
-        // Image buttons
         const imageButtons = document.querySelectorAll('.edit-device-image-btn');
         imageButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -972,7 +1021,6 @@
             });
         });
 
-        // Delete buttons
         const deleteButtons = document.querySelectorAll('.delete-device-btn');
         deleteButtons.forEach(function(btn) {
             btn.addEventListener('click', function(e) {
@@ -991,7 +1039,6 @@
         data = data || {};
         const isEdit = mode === 'edit';
 
-        // Update modal title and button text
         if (modalTitle) {
             modalTitle.textContent = isEdit ? 'Edit Device' : 'Tambah Device';
         }
@@ -999,21 +1046,44 @@
             submitText.textContent = isEdit ? 'Update' : 'Simpan';
         }
 
-        // Reset form
         if (deviceForm) {
             deviceForm.reset();
         }
         clearErrors();
 
+        // Reset dependent dropdowns before opening
+        if (regionalSelect) {
+            regionalSelect.value = '';
+            handleRegionalChangeInForm();
+        }
+
         if (isEdit && data) {
-            // Set values for existing fields
             if (deviceIdInput) deviceIdInput.value = data.deviceId || '';
             if (deviceNameInput) deviceNameInput.value = data.deviceName || '';
             if (deviceTypeSelect) deviceTypeSelect.value = data.deviceType || '';
             if (serialNumberInput) serialNumberInput.value = data.serialNumber || '';
-            if (roomSelect) roomSelect.value = data.roomId || '';
             
-            // Set values for new fields
+            // Set values for dependent dropdowns based on room ID
+            const roomOption = roomSelect.querySelector('option[value="' + data.roomId + '"]');
+            if (roomOption) {
+                const floorId = roomOption.getAttribute('data-floor-id');
+                const floorOption = floorSelect.querySelector('option[value="' + floorId + '"]');
+                if (floorOption) {
+                    const buildingId = floorOption.getAttribute('data-building-id');
+                    const buildingOption = buildingSelect.querySelector('option[value="' + buildingId + '"]');
+                    if (buildingOption) {
+                        const regionalId = buildingOption.getAttribute('data-regional-id');
+                        regionalSelect.value = regionalId;
+                        handleRegionalChangeInForm(regionalId);
+                        buildingSelect.value = buildingId;
+                        handleBuildingChangeInForm(buildingId);
+                        floorSelect.value = floorId;
+                        handleFloorChangeInForm(floorId);
+                        roomSelect.value = data.roomId;
+                    }
+                }
+            }
+            
             if (document.getElementById('category')) {
                 document.getElementById('category').value = data.category || '';
             }
@@ -1048,10 +1118,9 @@
         updateCharCounts();
         showModal(deviceModal);
 
-        // Focus on first input
         setTimeout(function() {
-            if (roomSelect) {
-                roomSelect.focus();
+            if (regionalSelect) {
+                regionalSelect.focus();
             }
         }, 100);
     }
@@ -1059,6 +1128,8 @@
     function closeDeviceModal() {
         hideModal(deviceModal);
         clearErrors();
+        if (regionalSelect) regionalSelect.value = '';
+        handleRegionalChangeInForm();
     }
 
     function openImageModal(deviceId, deviceName, currentImage) {
@@ -1076,7 +1147,6 @@
             submitImageText.textContent = currentImage ? 'Update' : 'Upload';
         }
 
-        // Show current image if exists
         if (currentImage && currentImage !== 'null' && currentImage !== '') {
             if (currentImage) {
                 currentImage.src = '/storage/' + currentImage;
@@ -1090,7 +1160,6 @@
             }
         }
 
-        // Reset form
         if (imageForm) {
             imageForm.reset();
         }
@@ -1157,15 +1226,10 @@
 
     async function handleSubmit(e) {
         e.preventDefault();
-        console.log('Form submitted');
         
         if (!validateForm()) {
-            console.log('Form validation failed');
             return;
         }
-        console.log('Form validation passed');
-
-        if (!validateForm()) return;
 
         const formData = new FormData(deviceForm);
         const deviceId = document.getElementById('device-id').value;
@@ -1259,14 +1323,12 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validate file size (10MB)
         if (file.size > 10 * 1024 * 1024) {
             showImageError('Ukuran file maksimal 10MB');
             e.target.value = '';
             return;
         }
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             showImageError('File harus berupa gambar');
             e.target.value = '';
@@ -1275,7 +1337,6 @@
 
         hideImageError();
 
-        // Show preview
         const reader = new FileReader();
         reader.onload = function(e) {
             if (imagePreview) {
@@ -1361,27 +1422,38 @@
     function validateForm() {
         clearErrors();
         let isValid = true;
+        
+        if (!regionalSelect.value) {
+            showError('regional-error', 'Pilih regional terlebih dahulu');
+            isValid = false;
+        }
 
-        // Validate room selection
+        if (!buildingSelect.value) {
+            showError('building-error', 'Pilih gedung terlebih dahulu');
+            isValid = false;
+        }
+
+        if (!floorSelect.value) {
+            showError('floor-error', 'Pilih lantai terlebih dahulu');
+            isValid = false;
+        }
+
         if (!document.getElementById('room-select').value) {
             showError('room_id-error', 'Pilih ruangan terlebih dahulu');
             isValid = false;
         }
 
-        // Validate device name
         const deviceName = document.getElementById('device-name').value.trim();
         if (!deviceName) {
             showError('device_name-error', 'Nama device harus diisi');
             isValid = false;
         }
 
-        // Validate device type
         if (!document.getElementById('device-type').value) {
             showError('device_type-error', 'Tipe device harus dipilih');
             isValid = false;
         }
 
-        // Add validation for new required fields
         if (!document.getElementById('category').value.trim()) {
             showError('category-error', 'Kategori harus diisi');
             isValid = false;
@@ -1406,7 +1478,6 @@
             errorElement.textContent = message;
             errorElement.classList.remove('hidden');
 
-            // Add error styling to input
             const input = errorElement.previousElementSibling;
             if (input) {
                 input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
@@ -1421,7 +1492,6 @@
             error.textContent = '';
         });
 
-        // Remove error styling
         const inputs = document.querySelectorAll('input, select');
         inputs.forEach(function(input) {
             input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
@@ -1429,14 +1499,12 @@
     }
 
     function updateCharCounts() {
-        // Device name character count
         if (deviceNameInput && deviceCharCount) {
             const deviceCount = deviceNameInput.value.length || 0;
             deviceCharCount.textContent = deviceCount;
             updateCharCountColor(deviceCharCount, deviceCount, 100);
         }
 
-        // Serial number character count
         if (serialNumberInput && serialCharCount) {
             const serialCount = serialNumberInput.value.length || 0;
             serialCharCount.textContent = serialCount;
@@ -1478,27 +1546,22 @@
 
             let shouldShow = true;
 
-            // Filter by room
             if (roomValue && roomId !== roomValue) {
                 shouldShow = false;
             }
 
-            // Filter by floor
             if (floorValue && floorId !== floorValue) {
                 shouldShow = false;
             }
 
-            // Filter by building
             if (buildingValue && buildingId !== buildingValue) {
                 shouldShow = false;
             }
 
-            // Filter by device type
             if (typeValue && deviceType !== typeValue) {
                 shouldShow = false;
             }
 
-            // Filter by search
             if (searchValue && 
                 !deviceName.includes(searchValue) && 
                 !roomName.includes(searchValue) && 
@@ -1515,12 +1578,10 @@
             }
         });
 
-        // Update count
         if (filteredCount) {
             filteredCount.textContent = visibleCount;
         }
 
-        // Show/hide empty state
         const emptyState = document.getElementById('empty-state');
         if (visibleCount === 0 && deviceCards.length > 0) {
             if (!emptyState) {
@@ -1530,7 +1591,8 @@
             emptyState.remove();
         }
     }
-
+    
+    // Dependent dropdown logic for the main filter
     function handleBuildingChange() {
         const buildingValue = buildingFilter ? buildingFilter.value : '';
         if (floorFilter) {
@@ -1550,6 +1612,59 @@
         }
         if (roomFilter) roomFilter.value = '';
         filterDevices();
+    }
+
+    // New dependent dropdown logic for the form modal
+    function handleRegionalChangeInForm(initialValue = null) {
+        const regionalValue = initialValue || regionalSelect.value;
+        buildingSelect.value = '';
+        floorSelect.value = '';
+        roomSelect.value = '';
+
+        const buildingOptions = buildingSelect.querySelectorAll('option');
+        buildingOptions.forEach(function(opt) {
+            if (!opt.value) {
+                opt.style.display = '';
+                return;
+            }
+            const regionalId = opt.getAttribute('data-regional-id');
+            opt.style.display = (!regionalValue || regionalId === regionalValue) ? '' : 'none';
+        });
+        
+        handleBuildingChangeInForm();
+    }
+
+    function handleBuildingChangeInForm(initialValue = null) {
+        const buildingValue = initialValue || buildingSelect.value;
+        floorSelect.value = '';
+        roomSelect.value = '';
+
+        const floorOptions = floorSelect.querySelectorAll('option');
+        floorOptions.forEach(function(opt) {
+            if (!opt.value) {
+                opt.style.display = '';
+                return;
+            }
+            const buildingId = opt.getAttribute('data-building-id');
+            opt.style.display = (!buildingValue || buildingId === buildingValue) ? '' : 'none';
+        });
+
+        handleFloorChangeInForm();
+    }
+
+    function handleFloorChangeInForm(initialValue = null) {
+        const floorValue = initialValue || floorSelect.value;
+        roomSelect.value = '';
+
+        const roomOptions = roomSelect.querySelectorAll('option');
+        roomOptions.forEach(function(opt) {
+            if (!opt.value) {
+                opt.style.display = '';
+                return;
+            }
+            const floorId = opt.getAttribute('data-floor-id');
+            opt.style.display = (!floorValue || floorId === floorValue) ? '' : 'none';
+        });
     }
 
     function showEmptySearchState() {
@@ -1668,7 +1783,6 @@
     function showNotification(message, type) {
         type = type || 'info';
         
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = 'fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 translate-x-full';
 
@@ -1695,13 +1809,11 @@
 
         document.body.appendChild(notification);
 
-        // Slide in
         setTimeout(function() {
             notification.classList.remove('translate-x-full');
             notification.classList.add('translate-x-0');
         }, 100);
 
-        // Auto remove after 5 seconds
         setTimeout(function() {
             notification.classList.remove('translate-x-0');
             notification.classList.add('translate-x-full');
@@ -1714,7 +1826,6 @@
     }
 
     function handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + N: Add new device
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
             if (!deviceModal || deviceModal.classList.contains('hidden')) {
@@ -1722,7 +1833,6 @@
             }
         }
 
-        // Escape: Close modals
         if (e.key === 'Escape') {
             if (deviceModal && !deviceModal.classList.contains('hidden')) {
                 closeDeviceModal();
@@ -1735,7 +1845,6 @@
             }
         }
 
-        // Ctrl/Cmd + F: Focus search
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             e.preventDefault();
             if (searchDevices) {
@@ -1757,13 +1866,11 @@
                 });
                 
                 if (response.ok) {
-                    // Check if response is JSON (error) or blob (file)
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
                         const result = await response.json();
                         showNotification(result.message || 'Gagal mengekspor data', 'error');
                     } else {
-                        // Handle successful file download
                         const blob = await response.blob();
                         const filename = response.headers.get('content-disposition')?.split('filename=')[1] || 'devices.xlsx';
                         
@@ -1800,7 +1907,6 @@
         };
     }
 
-    // Make resetFilters available globally
     window.resetFilters = resetFilters;
 </script>
 @endpush

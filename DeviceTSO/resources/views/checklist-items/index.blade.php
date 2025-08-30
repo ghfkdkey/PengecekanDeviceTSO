@@ -480,11 +480,13 @@ function editItem(id) {
 }
 
 // Delete item function
+// Kode ini menggantikan fungsi deleteItemUrl dan event listener confirm-delete-btn yang ada sebelumnya
 function deleteItemUrl(url, question) {
     document.getElementById('delete-item-question').textContent = question;
     document.getElementById('confirm-delete-btn').setAttribute('data-delete-url', url);
     document.getElementById('deleteModal').classList.remove('hidden');
 }
+
 
 // Close modal functions
 function closeViewModal() {
@@ -545,33 +547,30 @@ function updateItem(e) {
     });
 }
 
-// Confirm delete handler
+// Event listener yang diperbarui untuk menangani AJAX DELETE
 document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
     const url = this.getAttribute('data-delete-url');
     const deleteText = document.getElementById('delete-text');
     const deleteSpinner = document.getElementById('delete-spinner');
+    const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
 
     if (!url) {
         showNotification('URL hapus tidak valid', 'error');
         return;
     }
 
-    // Show loading state
+    // Tampilkan loading state
     this.disabled = true;
     deleteText.classList.add('hidden');
     deleteSpinner.classList.remove('hidden');
 
     try {
-        // Use POST with method spoofing for maximum compatibility with Laravel
         const response = await fetch(url, {
-            method: 'POST',
+            method: 'DELETE', // Menggunakan method DELETE
             headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ _method: 'DELETE' })
+                'X-CSRF-TOKEN': csrfToken, // Menyertakan token CSRF
+                'Accept': 'application/json'
+            }
         });
 
         if (!response.ok) {
@@ -583,7 +582,7 @@ document.getElementById('confirm-delete-btn').addEventListener('click', async fu
 
         if (result.success) {
             closeDeleteModal();
-            showNotification('Checklist item berhasil dihapus', 'success');
+            showNotification(result.message, 'success');
             setTimeout(() => window.location.reload(), 1000);
         } else {
             throw new Error(result.message || 'Gagal menghapus checklist item');
@@ -596,15 +595,9 @@ document.getElementById('confirm-delete-btn').addEventListener('click', async fu
         deleteText.classList.remove('hidden');
         deleteSpinner.classList.add('hidden');
         
-        let errorMessage = 'Terjadi kesalahan saat menghapus checklist item';
-        if (error.message && error.message !== 'Failed to fetch') {
-            errorMessage = error.message;
-        }
-        
-        showNotification(errorMessage, 'error');
+        showNotification(error.message, 'error');
     }
 });
-
 // Close modals when clicking outside
 document.addEventListener('click', function(e) {
     if (e.target.id === 'viewModal') {

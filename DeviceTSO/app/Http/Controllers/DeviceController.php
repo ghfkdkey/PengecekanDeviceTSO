@@ -6,6 +6,7 @@ use App\Models\Device;
 use App\Models\Room;
 use App\Models\Floor;
 use App\Models\Building;
+use App\Models\Regional; // Import model Regional
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
@@ -20,7 +21,7 @@ class DeviceController extends Controller
     public function index(Request $request)
     {
         // Mulai query builder dengan eager loading relasi yang dibutuhkan
-        $query = Device::with(['room.floor.building']);
+        $query = Device::with(['room.floor.building.regional']);
 
         // Terapkan filter berdasarkan input dari request
         if ($request->filled('room')) {
@@ -56,19 +57,37 @@ class DeviceController extends Controller
         // Eksekusi query untuk mendapatkan device yang sudah difilter
         $devices = $query->get();
         
-        // Data untuk dropdown filter tidak perlu difilter
+        // Data untuk dropdown filter dan form
+        $regionals = Regional::with('buildings')->orderBy('regional_name')->get();
+        $buildings = Building::with('regional', 'floors')->orderBy('building_name')->get();
+        $floors = Floor::with('building', 'rooms')->orderBy('floor_name')->get();
         $rooms = Room::with(['floor.building'])->orderBy('room_name')->get();
-        $floors = Floor::with('building')->orderBy('floor_name')->get();
-        $buildings = Building::orderBy('building_name')->get();
         
         $deviceTypes = Device::whereNotNull('device_type')
             ->distinct()
             ->pluck('device_type')
             ->filter()
             ->sort();
-        
+
+        // Rekap: jumlah device per kategori
+        $devicesByCategory = $devices
+            ->groupBy(function ($d) { return $d->category ?? 'Lainnya'; })
+            ->map(function ($group) { return $group->count(); })
+            ->sortDesc();
+
+        // Rekap: jumlah device per area
+        $devicesByArea = $devices
+            ->groupBy(function ($d) {
+                return optional($d->room->floor->building->regional->area)->area_name ?? 'Tidak diketahui';
+            })
+            ->map(function ($group) { return $group->count(); })
+            ->sortDesc();
+
         // Kembalikan view dengan data yang sudah difilter dan data untuk filter
-        return view('devices.index', compact('devices', 'rooms', 'floors', 'buildings', 'deviceTypes'));
+        return view('devices.index', compact(
+            'devices', 'rooms', 'floors', 'buildings', 'deviceTypes', 'regionals',
+            'devicesByCategory', 'devicesByArea'
+        ));
     }
 
     /**
@@ -128,8 +147,8 @@ class DeviceController extends Controller
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Jika validasi gagal, kirim error sebagai JSON
             return response()->json([
-                'success' => false, 
-                'message' => 'Data tidak valid', 
+                'success' => false,  
+                'message' => 'Data tidak valid',  
                 'errors' => $e->errors()
             ], 422);
         }
@@ -195,8 +214,8 @@ class DeviceController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
-                'success' => false, 
-                'message' => 'Data tidak valid', 
+                'success' => false,  
+                'message' => 'Data tidak valid',  
                 'errors' => $e->errors()
             ], 422);
         }
