@@ -9,6 +9,9 @@ use App\Models\Device;
 use App\Models\ChecklistItem;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Models\User;
+use App\Mail\DeviceStatusChangedMail;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\DB;
 
 class DeviceCheckResultController extends Controller
@@ -79,18 +82,95 @@ class DeviceCheckResultController extends Controller
     public function update(Request $request, $id)
     {
         $user = auth()->user();
-        $result = DeviceCheckResult::findOrFail($id);
+        $result = DeviceCheckResult::with(['device.room.floor.building.regional'])->findOrFail($id);
         
         // Check if user can access this result based on regional
         if (!$user->isAdmin()) {
-            $device = $result->device()->with('room.floor.building.regional')->first();
-            if ($device->room->floor->building->regional->regional_id !== $user->regional_id) {
+            if ($result->device->room->floor->building->regional->regional_id !== $user->regional_id) {
                 abort(403, 'Unauthorized access to this device check result');
             }
         }
         
+        $oldStatus = $result->status;
         $result->update($request->all());
+        
+        // Send email notification if status changed to 'failed' or 'maintenance'
+        if ($oldStatus !== $result->status && in_array($result->status, ['failed', 'maintenance'])) {
+            $this->sendStatusChangeNotification($result);
+        }
+        
         return $result;
+    }
+
+    public function updateIndividualResult(Request $request, $id)
+    {
+        $validated = $request->validate([
+            'status' => 'required|string|in:passed,failed,pending,maintenance',
+            'notes' => 'nullable|string',
+        ]);
+
+        $user = auth()->user();
+        $result = DeviceCheckResult::findOrFail($id);
+        
+        // Check if user can access this result based on regional
+        if (!$user->isAdmin() && $result->device->room->floor->building->regional_id !== $user->regional_id) {
+            return response()->json(['error' => 'Unauthorized access'], 403);
+        }
+
+        $oldStatus = $result->status;
+        
+        $result->status = $validated['status'];
+        $result->notes = $validated['notes'];
+        if ($result->isDirty('status') || $result->isDirty('notes')) {
+            $result->updated_at_custom = now();
+        }
+        $result->save();
+        $result->refresh();
+
+        // Send email notification if status changed to 'failed' or 'maintenance'
+        if ($oldStatus !== $result->status && in_array($result->status, ['failed', 'maintenance'])) {
+            $this->sendStatusChangeNotification($result);
+        }
+
+        return response()->json([
+            'message' => 'Check result updated successfully',
+            'result' => $result->fresh(['device', 'checklistItem', 'user'])
+        ]);
+    }
+
+    private function sendStatusChangeNotification($result)
+    {
+        try {
+            // Get regional dari device
+            $regional = $result->device->room->floor->building->regional;
+            
+            // Get PIC users untuk regional tersebut
+            $picUsers = User::where('regional_id', $regional->regional_id)
+                ->where(function($query) {
+                    $query->whereIn('role', [User::ROLE_PIC_GA, User::ROLE_PIC_OPERATIONAL, 'PIC General Affair (GA)', 'PIC Operasional']);
+                })
+                ->get();
+
+            // Send email ke setiap PIC
+            foreach ($picUsers as $pic) {
+                if ($pic->email) {
+                    Mail::to($pic->email)->send(new DeviceStatusChangedMail($result, $pic));
+                }
+            }
+            
+            \Log::info('Email notification sent for device status change', [
+                'device_id' => $result->device_id,
+                'status' => $result->status,
+                'regional_id' => $regional->regional_id,
+                'pic_count' => $picUsers->count()
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Failed to send email notification: ' . $e->getMessage(), [
+                'device_id' => $result->device_id,
+                'status' => $result->status
+            ]);
+        }
     }
 
     public function destroy($id)
@@ -311,7 +391,6 @@ class DeviceCheckResultController extends Controller
         return response()->json($sessions);
     }
 
-    // PERBAIKAN: API: session detail - dengan filter regional
     public function sessionDetail(Request $request)
     {
         $request->validate([
@@ -320,8 +399,6 @@ class DeviceCheckResultController extends Controller
         ]);
 
         $user = auth()->user();
-        
-        // Cek apakah device ini boleh diakses user
         if (!$user->isAdmin()) {
             $device = Device::with('room.floor.building.regional')->findOrFail($request->device_id);
             if ($device->room->floor->building->regional->regional_id !== $user->regional_id) {
@@ -342,6 +419,11 @@ class DeviceCheckResultController extends Controller
         $checkedAtFormatted = Carbon::parse($checkedAt)->format('Y-m-d H:i:s');
 
         $results = DeviceCheckResult::with(['device.room.floor.building.regional', 'checklistItem', 'user'])
+            ->select([
+                '*',
+                DB::raw('COALESCE(updated_at_custom, checked_at) as last_updated'),
+                DB::raw('COALESCE(original_checked_at, checked_at) as first_checked')
+            ])
             ->where('device_id', $request->device_id)
             ->where('checked_at', $checkedAtFormatted)
             ->orderBy('checklist_id')
@@ -350,17 +432,13 @@ class DeviceCheckResultController extends Controller
         return response()->json($results);
     }
 
-    // PERBAIKAN: API: latest session per device - dengan filter regional
     public function listLatestPerDevice()
     {
         $user = auth()->user();
-        
-        // Subquery to get latest checked_at per device
         $latestSub = DB::table('device_check_results')
             ->select('device_id', DB::raw('MAX(checked_at) as latest_checked_at'))
             ->groupBy('device_id');
 
-        // Join with results to aggregate counts for the latest session
         $query = DB::table('device_check_results as dcr')
             ->joinSub($latestSub, 'latest', function ($join) {
                 $join->on('latest.device_id', '=', 'dcr.device_id')
@@ -381,6 +459,8 @@ class DeviceCheckResultController extends Controller
         $sessions = $query->select(
                 'dcr.device_id',
                 DB::raw('latest.latest_checked_at as checked_at'),
+                DB::raw('MAX(dcr.original_checked_at) as original_checked_at'),
+                DB::raw('MAX(dcr.updated_at_custom) as updated_at_custom'),
                 'd.device_name',
                 'd.device_type',
                 'd.serial_number',
@@ -390,6 +470,7 @@ class DeviceCheckResultController extends Controller
                 DB::raw("SUM(CASE WHEN dcr.status = 'passed' THEN 1 ELSE 0 END) as passed_count"),
                 DB::raw("SUM(CASE WHEN dcr.status = 'failed' THEN 1 ELSE 0 END) as failed_count"),
                 DB::raw("SUM(CASE WHEN dcr.status = 'pending' THEN 1 ELSE 0 END) as pending_count"),
+                DB::raw("SUM(CASE WHEN dcr.status = 'maintenance' THEN 1 ELSE 0 END) as maintenance_count"),
                 DB::raw('COUNT(*) as total_items')
             )
             ->groupBy(

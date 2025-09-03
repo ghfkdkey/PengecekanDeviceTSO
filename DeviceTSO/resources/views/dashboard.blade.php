@@ -100,8 +100,8 @@
             </div>
         </div>
 
-        <!-- Quick Actions & Device Status -->
-        <div class="space-y-8">
+        <!-- Quick Actions & Device Status Chart -->
+        <div class="space-y-6">
             <!-- Quick Actions -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
@@ -126,38 +126,44 @@
                 </div>
             </div>
 
-            <!-- Device Status Summary -->
+            <!-- Device Status Chart -->
             <div class="bg-white rounded-xl shadow-sm border border-gray-200">
                 <div class="p-6 border-b border-gray-200">
                     <h3 class="text-lg font-telkomsel font-semibold text-gray-900">Status Device</h3>
                 </div>
                 <div class="p-6">
-                    <div class="space-y-4">
-                        <!-- Pending -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
+                    <div class="relative">
+                        <canvas id="deviceStatusChart" width="300" height="300"></canvas>
+                    </div>
+                    <!-- Legend -->
+                    <div class="mt-4 space-y-2">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center space-x-2">
                                 <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Pending</span>
+                                <span class="text-gray-700">Pending</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900" id="pendingDevices">-</span>
+                            <span class="font-medium text-gray-900" id="pendingLegend">-</span>
                         </div>
-                        
-                        <!-- Passed -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center space-x-2">
                                 <div class="w-3 h-3 bg-green-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Passed</span>
+                                <span class="text-gray-700">Passed</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900" id="passedDevices">-</span>
+                            <span class="font-medium text-gray-900" id="passedLegend">-</span>
                         </div>
-                        
-                        <!-- Failed -->
-                        <div class="flex items-center justify-between">
-                            <div class="flex items-center space-x-3">
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center space-x-2">
                                 <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                <span class="text-sm text-gray-700">Failed</span>
+                                <span class="text-gray-700">Failed</span>
                             </div>
-                            <span class="text-sm font-medium text-gray-900" id="failedDevices">-</span>
+                            <span class="font-medium text-gray-900" id="failedLegend">-</span>
+                        </div>
+                        <div class="flex items-center justify-between text-sm">
+                            <div class="flex items-center space-x-2">
+                                <div class="w-3 h-3 bg-gray-500 rounded-full"></div>
+                                <span class="text-gray-700">Maintenance</span>
+                            </div>
+                            <span class="font-medium text-gray-900" id="maintenanceLegend">-</span>
                         </div>
                     </div>
                 </div>
@@ -168,12 +174,17 @@
 @endsection
 
 @push('scripts')
+<!-- Chart.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
 <script>
     // Dashboard data
     let dashboardData = {
         stats: {},
         activities: []
     };
+
+    // Chart instance
+    let deviceStatusChart = null;
 
     // Load dashboard data
     async function loadDashboardData() {
@@ -183,6 +194,7 @@
             if (statsResponse.ok) {
                 dashboardData.stats = await statsResponse.json();
                 updateStats();
+                updateChart();
             }
 
             // Load recent activities (5 most recent)
@@ -203,9 +215,71 @@
         document.getElementById('pendingDevicesCount').textContent = stats.pending_devices || 0;
         document.getElementById('passedDevices').textContent = stats.passed_devices || 0;
         document.getElementById('failedDevices').textContent = stats.failed_devices || 0;
+    }
+
+    // Update pie chart
+    function updateChart() {
+        const stats = dashboardData.stats;
+        const ctx = document.getElementById('deviceStatusChart').getContext('2d');
         
-        // Update device status in side panel
-        document.getElementById('pendingDevices').textContent = stats.pending_devices || 0;
+        const pendingCount = stats.pending_devices || 0;
+        const passedCount = stats.passed_devices || 0;
+        const failedCount = stats.failed_devices || 0;
+        const maintenanceCount = stats.maintenance_devices || 0;
+        
+        // Update legend
+        document.getElementById('pendingLegend').textContent = pendingCount;
+        document.getElementById('passedLegend').textContent = passedCount;
+        document.getElementById('failedLegend').textContent = failedCount;
+        document.getElementById('maintenanceLegend').textContent = maintenanceCount;
+
+        // Destroy existing chart if it exists
+        if (deviceStatusChart) {
+            deviceStatusChart.destroy();
+        }
+
+        // Create new chart
+        deviceStatusChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: ['Pending', 'Passed', 'Failed', 'Maintenance'],
+                datasets: [{
+                    data: [pendingCount, passedCount, failedCount, maintenanceCount],
+                    backgroundColor: [
+                        '#EAB308', // Yellow for pending
+                        '#22C55E', // Green for passed
+                        '#EF4444', // Red for failed
+                        '#6B7280'  // Gray for maintenance
+                    ],
+                    borderColor: [
+                        '#EAB308',
+                        '#22C55E',
+                        '#EF4444',
+                        '#6B7280'
+                    ],
+                    borderWidth: 2,
+                    hoverOffset: 4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        display: false // We're using custom legend
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((context.parsed / total) * 100).toFixed(1) : 0;
+                                return `${context.label}: ${context.parsed} (${percentage}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
     }
 
     // Fungsi untuk format time ago dengan timezone yang benar
@@ -345,26 +419,6 @@
         };
         
         return icons[type] || icons.default;
-    }
-
-    // Format time ago
-    function formatTimeAgo(dateString) {
-        const now = new Date();
-        const date = new Date(dateString);
-        const diffInSeconds = Math.floor((now - date) / 1000);
-        
-        if (diffInSeconds < 60) {
-            return 'Baru saja';
-        } else if (diffInSeconds < 3600) {
-            const minutes = Math.floor(diffInSeconds / 60);
-            return `${minutes} menit yang lalu`;
-        } else if (diffInSeconds < 86400) {
-            const hours = Math.floor(diffInSeconds / 3600);
-            return `${hours} jam yang lalu`;
-        } else {
-            const days = Math.floor(diffInSeconds / 86400);
-            return `${days} hari yang lalu`;
-        }
     }
 
     // Initialize dashboard

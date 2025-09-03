@@ -11,10 +11,10 @@
                 <div class="flex items-center justify-between">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
-                            Checklist Items
+                            Pertanyaan Checklist
                         </h1>
                         <p class="mt-2 text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
-                            Manage checklist questions for device inspections
+                            Kelola pertanyaan checklist untuk pengecekan device
                         </p>
                     </div>
                     <div class="flex space-x-3">
@@ -62,7 +62,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Items</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Pertanyaan</p>
                         <p class="text-2xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">{{ $checklistItems->count() }}</p>
                     </div>
                 </div>
@@ -76,7 +76,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Device Types</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Tipe Device</p>
                         <p class="text-2xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">{{ $checklistItems->unique('device_type')->count() }}</p>
                     </div>
                 </div>
@@ -90,7 +90,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Check Results</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Hasil Check</p>
                         <p class="text-2xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">{{ $checklistItems->sum(fn($item) => $item->checkResults->count()) }}</p>
                     </div>
                 </div>
@@ -103,9 +103,9 @@
                 <form method="GET" action="{{ route('checklist-items.index') }}">
                     <div class="flex flex-col sm:flex-row gap-4">
                         <div class="sm:w-64">
-                            <label for="device_type" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Filter by Device Type</label>
+                            <label for="device_type" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Filter by Tipe Device</label>
                             <select name="device_type" id="device_type" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" style="font-family: 'Poppins', sans-serif;">
-                                <option value="">All Device Types</option>
+                                <option value="">Semua Tipe Device</option>
                                 @foreach($checklistItems->unique('device_type')->pluck('device_type') as $deviceType)
                                     <option value="{{ $deviceType }}" {{ request('device_type') == $deviceType ? 'selected' : '' }}>
                                         {{ $deviceType }}
@@ -121,7 +121,7 @@
                         <div class="flex-1">
                             <label for="search" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Cari Items</label>
                             <div class="relative">
-                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Search by question or device type..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" style="font-family: 'Poppins', sans-serif;">
+                                <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari berdasarkan pertanyaan atau device..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent" style="font-family: 'Poppins', sans-serif;">
                                 <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                     <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -138,7 +138,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div class="px-6 py-4 bg-gray-50 border-b border-gray-200">
                 <h2 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
-                    Checklist Items
+                    Pertanyaan Checklist
                 </h2>
             </div>
             
@@ -165,10 +165,10 @@
                         <thead class="bg-gray-50">
                             <tr>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">No</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Device Type</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Question</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Check Results</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Actions</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Tipe Device</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Pertanyaan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Hasil Check</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white divide-y divide-gray-200" style="font-family: 'Poppins', sans-serif;">
@@ -206,7 +206,7 @@
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $item->checkResults->count() > 0 ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800' }}">
-                                            {{ $item->checkResults->count() }} results
+                                            {{ $item->checkResults->count() }} hasil
                                         </span>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500 space-x-2">
@@ -243,7 +243,7 @@
                             @empty
                                 <tr>
                                     <td colspan="6" class="px-6 py-12 text-center text-sm text-gray-500">
-                                        No checklist items found matching your criteria.
+                                        Tidak ada pertanyaan checklist yang sesuai.
                                     </td>
                                 </tr>
                             @endforelse

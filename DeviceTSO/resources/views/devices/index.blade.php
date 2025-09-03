@@ -139,148 +139,152 @@
         
         <div id="devices-container" class="p-6">
             @if($devices->count() > 0)
-                <div id="devices-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    @foreach($devices as $device)
-                    <div class="device-card bg-gray-50 rounded-lg p-6 hover:shadow-md transition-all duration-200 border border-gray-200 hover:border-telkomsel-red/30" 
-                         data-device-id="{{ $device->device_id }}" 
-                         data-room-id="{{ $device->room_id }}"
-                         data-device-type="{{ strtolower($device->device_type ?? '') }}"
-                         data-room-name="{{ $device->room->room_name ?? '' }}">
-                        
-                        <div class="flex items-start justify-between mb-4">
-                            <div class="flex items-center space-x-3">
-                                @if($device->image_path)
-                                    <div class="w-16 h-16 rounded-lg overflow-hidden bg-gray-100 relative">
-                                        <img src="{{ asset('storage/' . $device->image_path) }}" 
-                                             alt="{{ $device->device_name }}" 
-                                             class="w-full h-full object-cover"
-                                             onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjQiIGhlaWdodD0iNjQiIHZpZXdCb3g9IjAgMCA2NCA2NCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPHJlY3Qgd2lkdGg9IjY0IiBoZWlnaHQ9IjY0IiBmaWxsPSIjRjNGNEY2Ii8+CjxwYXRoIGQ9Ik0yMCAyNEg0NFY0MEgyMFYyNFoiIGZpbGw9IiNEM0Q3RDEiLz4KPHBhdGggZD0iTTI4IDMySDM2VjQwSDI4VjMyWiIgZmlsbD0iI0QzRDdEMSIvPgo8L3N2Zz4K'">
-                                        <!-- Status indicator -->
-                                        <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
-                                    </div>
-                                @else
-                                    <div class="bg-telkomsel-blue rounded-lg p-2 relative">
-                                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                <div id="devices-table" class="overflow-x-auto">
+                    <table class="min-w-full table-auto border-collapse">
+                        <thead class="bg-gray-100">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Device Name</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Device Type</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Room</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Serial Number</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Condition</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white">
+                            @foreach($devices as $device)
+                            <tr class="border-b hover:bg-gray-50">
+                                <td class="px-6 py-4 text-sm font-medium text-gray-900">{{ $device->device_name }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">{{ ucfirst($device->device_type) }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">{{ $device->room->room_name ?? 'N/A' }}</td>
+                                <td class="px-6 py-4 text-sm text-gray-700">
+                                    @if($device->serial_number)
+                                        <span class="font-mono text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded">{{ $device->serial_number }}</span>
+                                    @else
+                                        <span class="text-gray-500">N/A</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <span class="px-2 py-1 text-xs rounded-full {{ $device->condition === 'baik' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
+                                        {{ ucfirst($device->condition) }}
+                                    </span>
+                                </td>
+                                <td class="px-6 py-4 text-sm space-x-2">
+                                    <!-- View Button -->
+                                    <button 
+                                        class="view-device-btn text-gray-600 hover:text-blue-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                        data-device-id="{{ $device->device_id }}"
+                                        data-device-name="{{ $device->device_name }}"
+                                        data-device-type="{{ $device->device_type }}"
+                                        data-serial-number="{{ $device->serial_number }}"
+                                        data-room-name="{{ $device->room->room_name ?? 'N/A' }}"
+                                        data-category="{{ $device->category }}"
+                                        data-merk="{{ $device->merk }}"
+                                        data-tahun-po="{{ $device->tahun_po }}"
+                                        data-no-po="{{ $device->no_po }}"
+                                        data-tahun-bast="{{ $device->tahun_bast }}"
+                                        data-no-bast="{{ $device->no_bast }}"
+                                        data-condition="{{ $device->condition }}"
+                                        data-notes="{{ $device->notes }}"
+                                        data-image-path="{{ $device->image_path }}"
+                                        title="View Device"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path></svg>
+                                    </button>
+                                    <!-- Edit Button -->
+                                    <button 
+                                        class="edit-device-btn text-gray-600 hover:text-telkomsel-red p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                        data-device-id="{{ $device->device_id }}"
+                                        data-device-name="{{ $device->device_name }}"
+                                        data-device-type="{{ $device->device_type }}"
+                                        data-serial-number="{{ $device->serial_number }}"
+                                        data-room-id="{{ $device->room_id }}"
+                                        data-category="{{ $device->category }}"
+                                        data-merk="{{ $device->merk }}"
+                                        data-tahun-po="{{ $device->tahun_po }}"
+                                        data-no-po="{{ $device->no_po }}"
+                                        data-tahun-bast="{{ $device->tahun_bast }}"
+                                        data-no-bast="{{ $device->no_bast }}"
+                                        data-condition="{{ $device->condition }}"
+                                        data-notes="{{ $device->notes }}"
+                                        title="Edit Device"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
                                         </svg>
-                                        <!-- Status indicator -->
-                                        <div class="absolute -top-1 -right-1 w-3 h-3 device-status-{{ $device->status ?? 'unknown' }} rounded-full border-2 border-white"></div>
-                                    </div>
-                                @endif
-                                <div>
-                                    <h4 class="font-semibold text-gray-900 text-lg">{{ $device->device_name }}</h4>
-                                    <p class="text-sm text-gray-600">ID: #{{ $device->device_id }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="flex space-x-2">
-                                <button 
-                                    class="edit-device-btn text-gray-600 hover:text-telkomsel-red p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                                    data-device-id="{{ $device->device_id }}"
-                                    data-device-name="{{ $device->device_name }}"
-                                    data-device-type="{{ $device->device_type }}"
-                                    data-serial-number="{{ $device->serial_number }}"
-                                    data-room-id="{{ $device->room_id }}"
-                                    data-category="{{ $device->category }}"
-                                    data-merk="{{ $device->merk }}"
-                                    data-tahun-po="{{ $device->tahun_po }}"
-                                    data-no-po="{{ $device->no_po }}"
-                                    data-tahun-bast="{{ $device->tahun_bast }}"
-                                    data-no-bast="{{ $device->no_bast }}"
-                                    data-condition="{{ $device->condition }}"
-                                    data-notes="{{ $device->notes }}"
-                                    title="Edit Device"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
-                                    </svg>
-                                </button>
-                                <button 
-                                    class="delete-device-btn text-gray-600 hover:text-red-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
-                                    data-device-id="{{ $device->device_id }}"
-                                    data-device-name="{{ $device->device_name }}"
-                                    title="Hapus Device"
-                                >
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                        
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">Ruangan</span>
-                                <span class="font-semibold text-telkomsel-blue text-sm">{{ $device->room->room_name ?? 'N/A' }}</span>
-                            </div>
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">Tipe</span>
-                                <span class="font-semibold text-gray-900 text-sm">{{ ucfirst($device->device_type) ?? 'N/A' }}</span>
-                            </div>
-                            @if($device->serial_number)
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">Serial Number</span>
-                                <span class="font-mono text-xs text-gray-700 bg-gray-100 px-2 py-1 rounded">{{ $device->serial_number }}</span>
-                            </div>
-                            @endif
-                        </div>
-
-                        <div class="space-y-3">
-                            <!-- Add condition status -->
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">Kondisi</span>
-                                <span class="px-2 py-1 text-xs rounded-full {{ $device->condition === 'baik' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' }}">
-                                    {{ ucfirst($device->condition) }}
-                                </span>
-                            </div>
-                            
-                            <!-- Add merk -->
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">Merk</span>
-                                <span class="font-medium text-gray-900">{{ $device->merk }}</span>
-                            </div>
-                            
-                            <!-- Add PO/BAST info if exists -->
-                            @if($device->tahun_po || $device->no_po)
-                            <div class="flex items-center justify-between py-2 border-t border-gray-200">
-                                <span class="text-sm text-gray-600">PO</span>
-                                <span class="text-sm text-gray-900">
-                                    {{ $device->no_po }} ({{ $device->tahun_po }})
-                                </span>
-                            </div>
-                            @endif
-                        </div>
-                        <div class="mt-4 flex space-x-2">
-                            <button 
-                                class="edit-device-image-btn flex-1 bg-telkomsel-blue text-white px-4 py-2 rounded-lg hover:bg-telkomsel-blue/80 transition-colors text-sm font-medium flex items-center justify-center space-x-2"
-                                data-device-id="{{ $device->device_id }}"
-                                data-device-name="{{ $device->device_name }}"
-                                data-current-image="{{ $device->image_path }}"
-                                title="Edit Device Image">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                                </svg>
-                                <span>{{ $device->image_path ? 'Edit Gambar' : 'Tambah Gambar' }}</span>
-                            </button>
-                        </div>
-                    </div>
-                    @endforeach
+                                    </button>
+                                    <!-- Delete Button -->
+                                    <button 
+                                        class="delete-device-btn text-gray-600 hover:text-red-600 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                                        data-device-id="{{ $device->device_id }}"
+                                        data-device-name="{{ $device->device_name }}"
+                                        title="Delete Device"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                                        </svg>
+                                    </button>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
                 </div>
             @else
                 <div id="empty-state" class="text-center py-12">
                     <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
                     </svg>
-                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum Ada Device</h3>
-                    <p class="text-gray-600 mb-4">Mulai dengan menambahkan device pertama untuk sistem Anda.</p>
+                    <h3 class="text-lg font-medium text-gray-900 mb-2">Belum ada device yang ditemukan</h3>
+                    <p class="text-gray-600 mb-4">Ayo mulai tambahkan device terlebih dahulu.</p>
                     <button 
                         class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200"
                         onclick="document.getElementById('add-device-btn').click()"
                     >
-                        Tambah Device Pertama
+                        Add First Device
                     </button>
                 </div>
             @endif
+        </div>
+    </div>
+</div>
+
+<!-- View Device Modal -->
+<div id="device-view-modal" class="fixed inset-0 bg-black bg-opacity-50 hidden z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl shadow-xl w-full max-w-lg">
+        <div class="p-6">
+            <div class="flex items-center justify-between">
+                <h3 class="text-xl font-semibold text-gray-900">Detail Device</h3>
+                <!-- FIX: Changed id to be unique -->
+                <button id="close-view-modal" class="text-gray-400 hover:text-gray-600 p-2 rounded-lg hover:bg-gray-100">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mt-4 space-y-2">
+                <div id="view-modal-image-container" class="mb-4">
+                    <img id="view-device-image" src="https://placehold.co/600x400/e2e8f0/adb5bd?text=No+Image" alt="Device Image" class="w-full h-48 object-cover rounded-lg bg-gray-100">
+                </div>
+                <div class="grid grid-cols-3 gap-x-4 gap-y-2">
+                    <strong class="col-span-1 text-gray-500">Nama</strong><span id="view-device-name" class="col-span-2 text-gray-800 font-medium">: </span>
+                    <strong class="col-span-1 text-gray-500">Tipe</strong><span id="view-device-type" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Serial Number</strong><span id="view-serial-number" class="col-span-2 text-gray-700 font-mono text-sm">: </span>
+                    <strong class="col-span-1 text-gray-500">Ruangan</strong><span id="view-room" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Kategori</strong><span id="view-category" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Merk</strong><span id="view-merk" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Tahun PO</strong><span id="view-tahun-po" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">No PO</strong><span id="view-no-po" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Tahun BAST</strong><span id="view-tahun-bast" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">No BAST</strong><span id="view-no-bast" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500">Kondisi</strong><span id="view-condition" class="col-span-2 text-gray-700">: </span>
+                    <strong class="col-span-1 text-gray-500 align-top">Notes</strong>
+                    <div class="col-span-2">
+                        <p id="view-notes" class="text-gray-700 relative -left-1"></p>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -687,7 +691,9 @@
     const deviceModal = document.getElementById('device-modal');
     const deleteModal = document.getElementById('delete-modal');
     const imageModal = document.getElementById('image-modal');
+    const deviceViewModal = document.getElementById('device-view-modal');
     const closeModal = document.getElementById('close-modal');
+    const closeViewModal = document.getElementById('close-view-modal'); // FIX: New element for view modal close button
     const cancelBtn = document.getElementById('cancel-btn');
     const imageForm = document.getElementById('image-form');
     const modalContent = document.getElementById('modal-content');
@@ -698,8 +704,6 @@
     const roomFilter = document.getElementById('room-filter');
     const typeFilter = document.getElementById('type-filter');
     const searchDevices = document.getElementById('search-devices');
-    const gridViewBtn = document.getElementById('grid-view');
-    const listViewBtn = document.getElementById('list-view');
     const devicesContainer = document.getElementById('devices-container');
     const devicesGrid = document.getElementById('devices-grid');
     const filteredCount = document.getElementById('filtered-count');
@@ -736,7 +740,6 @@
     const deleteText = document.getElementById('delete-text');
     const deleteSpinner = document.getElementById('delete-spinner');
 
-    let currentView = 'grid';
     let deleteDeviceId = null;
     let currentImageDeviceId = null;
 
@@ -766,6 +769,14 @@
             });
         }
 
+        // FIX: Add event listener for the view modal close button
+        if (closeViewModal) {
+            closeViewModal.addEventListener('click', function(e) {
+                e.preventDefault();
+                closeViewModalHandler();
+            });
+        }
+
         if (cancelBtn) {
             cancelBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -777,6 +788,15 @@
             deviceModal.addEventListener('click', function(e) {
                 if (e.target === deviceModal) {
                     closeDeviceModal();
+                }
+            });
+        }
+        
+        // FIX: Add event listener for clicking outside the view modal
+        if (deviceViewModal) {
+            deviceViewModal.addEventListener('click', function(e) {
+                if (e.target === deviceViewModal) {
+                    closeViewModalHandler();
                 }
             });
         }
@@ -857,19 +877,6 @@
             searchDevices.addEventListener('input', debounce(filterDevices, 300));
         }
 
-        // View toggle events
-        if (gridViewBtn) {
-            gridViewBtn.addEventListener('click', function() {
-                toggleView('grid');
-            });
-        }
-
-        if (listViewBtn) {
-            listViewBtn.addEventListener('click', function() {
-                toggleView('list');
-            });
-        }
-
         // Dynamic event binding for device cards
         bindDeviceCardEvents();
 
@@ -884,6 +891,33 @@
     }
 
     function bindDeviceCardEvents() {
+        // View buttons
+        const viewButtons = document.querySelectorAll('.view-device-btn');
+        viewButtons.forEach(function(btn) {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                e.stopPropagation();
+
+                const data = {
+                    deviceName: this.getAttribute('data-device-name'),
+                    deviceType: this.getAttribute('data-device-type'),
+                    serialNumber: this.getAttribute('data-serial-number'),
+                    roomName: this.getAttribute('data-room-name'),
+                    category: this.getAttribute('data-category'),
+                    merk: this.getAttribute('data-merk'),
+                    tahunPo: this.getAttribute('data-tahun-po'),
+                    noPo: this.getAttribute('data-no-po'),
+                    tahunBast: this.getAttribute('data-tahun-bast'),
+                    noBast: this.getAttribute('data-no-bast'),
+                    condition: this.getAttribute('data-condition'),
+                    notes: this.getAttribute('data-notes'),
+                    imagePath: this.getAttribute('data-image-path')
+                };
+
+                openViewModal(data);
+            });
+        });
+
         // Edit buttons
         const editButtons = document.querySelectorAll('.edit-device-btn');
         editButtons.forEach(function(btn) {
@@ -891,35 +925,22 @@
                 e.preventDefault();
                 e.stopPropagation();
                 
-                const deviceId = this.getAttribute('data-device-id');
-                const deviceName = this.getAttribute('data-device-name');
-                const deviceType = this.getAttribute('data-device-type');
-                const serialNumber = this.getAttribute('data-serial-number');
-                const roomId = this.getAttribute('data-room-id');
-                const category = this.getAttribute('data-category');
-                const merk = this.getAttribute('data-merk');
-                const tahunPo = this.getAttribute('data-tahun-po');
-                const noPo = this.getAttribute('data-no-po');
-                const tahunBast = this.getAttribute('data-tahun-bast');
-                const noBast = this.getAttribute('data-no-bast');
-                const condition = this.getAttribute('data-condition');
-                const notes = this.getAttribute('data-notes');
-                
-                openModal('edit', { 
-                    deviceId,
-                    deviceName, 
-                    deviceType, 
-                    serialNumber, 
-                    roomId,
-                    category,
-                    merk,
-                    tahunPo,
-                    noPo,
-                    tahunBast,
-                    noBast,
-                    condition,
-                    notes
-                });
+                const deviceData = { 
+                    deviceId: this.getAttribute('data-device-id'),
+                    deviceName: this.getAttribute('data-device-name'), 
+                    deviceType: this.getAttribute('data-device-type'), 
+                    serialNumber: this.getAttribute('data-serial-number'), 
+                    roomId: this.getAttribute('data-room-id'),
+                    category: this.getAttribute('data-category'),
+                    merk: this.getAttribute('data-merk'),
+                    tahunPo: this.getAttribute('data-tahun-po'),
+                    noPo: this.getAttribute('data-no-po'),
+                    tahunBast: this.getAttribute('data-tahun-bast'),
+                    noBast: this.getAttribute('data-no-bast'),
+                    condition: this.getAttribute('data-condition'),
+                    notes: this.getAttribute('data-notes')
+                };
+                openModal('edit', deviceData);
             });
         });
 
@@ -953,6 +974,39 @@
         });
     }
 
+    function openViewModal(data) {
+        // Populate the modal with the device details
+        document.getElementById('view-device-name').textContent = `: ${data.deviceName || 'N/A'}`;
+        document.getElementById('view-device-type').textContent = `: ${data.deviceType || 'N/A'}`;
+        document.getElementById('view-serial-number').textContent = `: ${data.serialNumber || 'N/A'}`;
+        document.getElementById('view-room').textContent = `: ${data.roomName || 'N/A'}`;
+        document.getElementById('view-category').textContent = `: ${data.category || 'N/A'}`;
+        document.getElementById('view-merk').textContent = `: ${data.merk || 'N/A'}`;
+        document.getElementById('view-tahun-po').textContent = `: ${data.tahunPo || 'N/A'}`;
+        document.getElementById('view-no-po').textContent = `: ${data.noPo || 'N/A'}`;
+        document.getElementById('view-tahun-bast').textContent = `: ${data.tahunBast || 'N/A'}`;
+        document.getElementById('view-no-bast').textContent = `: ${data.noBast || 'N/A'}`;
+        document.getElementById('view-condition').textContent = `: ${data.condition || 'N/A'}`;
+        document.getElementById('view-notes').textContent = `: ${data.notes || 'Tidak ada catatan.'}`;
+
+        // Show image
+        const imageElement = document.getElementById('view-device-image');
+        if (data.imagePath && data.imagePath !== 'null') {
+            imageElement.src = '/storage/' + data.imagePath;
+            imageElement.onerror = () => { imageElement.src = 'https://placehold.co/600x400/e2e8f0/adb5bd?text=Image+Not+Found'; };
+        } else {
+            imageElement.src = 'https://placehold.co/600x400/e2e8f0/adb5bd?text=No+Image';
+        }
+
+        // Open the modal
+        showModal(deviceViewModal);
+    }
+    
+    // FIX: New handler function for closing view modal
+    function closeViewModalHandler() {
+        hideModal(deviceViewModal);
+    }
+
     function openModal(mode, data) {
         data = data || {};
         const isEdit = mode === 'edit';
@@ -980,30 +1034,14 @@
             if (roomSelect) roomSelect.value = data.roomId || '';
             
             // Set values for new fields
-            if (document.getElementById('category')) {
-                document.getElementById('category').value = data.category || '';
-            }
-            if (document.getElementById('merk')) {
-                document.getElementById('merk').value = data.merk || '';
-            }
-            if (document.getElementById('tahun_po')) {
-                document.getElementById('tahun_po').value = data.tahunPo || '';
-            }
-            if (document.getElementById('no_po')) {
-                document.getElementById('no_po').value = data.noPo || '';
-            }
-            if (document.getElementById('tahun_bast')) {
-                document.getElementById('tahun_bast').value = data.tahunBast || '';
-            }
-            if (document.getElementById('no_bast')) {
-                document.getElementById('no_bast').value = data.noBast || '';
-            }
-            if (document.getElementById('condition')) {
-                document.getElementById('condition').value = data.condition || '';
-            }
-            if (document.getElementById('notes')) {
-                document.getElementById('notes').value = data.notes || '';
-            }
+            if (document.getElementById('category')) document.getElementById('category').value = data.category || '';
+            if (document.getElementById('merk')) document.getElementById('merk').value = data.merk || '';
+            if (document.getElementById('tahun_po')) document.getElementById('tahun_po').value = data.tahunPo || '';
+            if (document.getElementById('no_po')) document.getElementById('no_po').value = data.noPo || '';
+            if (document.getElementById('tahun_bast')) document.getElementById('tahun_bast').value = data.tahunBast || '';
+            if (document.getElementById('no_bast')) document.getElementById('no_bast').value = data.noBast || '';
+            if (document.getElementById('condition')) document.getElementById('condition').value = data.condition || '';
+            if (document.getElementById('notes')) document.getElementById('notes').value = data.notes || '';
 
             if (formMethod) formMethod.value = 'PUT';
         } else {
@@ -1043,9 +1081,10 @@
         }
 
         // Show current image if exists
+        const currentImageElem = document.getElementById('current-image');
         if (currentImage && currentImage !== 'null' && currentImage !== '') {
-            if (currentImage) {
-                currentImage.src = '/storage/' + currentImage;
+            if (currentImageElem) {
+                currentImageElem.src = '/storage/' + currentImage;
             }
             if (currentImagePreview) {
                 currentImagePreview.classList.remove('hidden');
@@ -1131,8 +1170,6 @@
         }
         console.log('Form validation passed');
 
-        if (!validateForm()) return;
-
         const formData = new FormData(deviceForm);
         const deviceId = document.getElementById('device-id').value;
         const isEdit = deviceId !== '';
@@ -1181,8 +1218,7 @@
 
         const formData = new FormData(imageForm);
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        const tokenInput = document.querySelector('input[name="_token"]');
-        formData.append('_token', csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : ''));
+        formData.append('_token', csrfToken ? csrfToken.content : '');
 
         setImageLoading(true);
 
@@ -1194,18 +1230,14 @@
                 'Accept': 'application/json'
             }
         })
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
+        .then(response => response.json())
+        .then(result => {
             setImageLoading(false);
 
             if (result.success) {
                 showNotification(result.message || 'Gambar berhasil diupload!', 'success');
                 closeImageModalHandler();
-                setTimeout(function() {
-                    location.reload();
-                }, 1000);
+                setTimeout(() => location.reload(), 1000);
             } else {
                 if (result.errors) {
                     showImageError(result.errors.image ? result.errors.image[0] : 'Terjadi kesalahan!');
@@ -1214,7 +1246,7 @@
                 }
             }
         })
-        .catch(function(error) {
+        .catch(error => {
             console.error('Error:', error);
             setImageLoading(false);
             showImageError('Terjadi kesalahan pada server!');
@@ -1225,14 +1257,12 @@
         const file = e.target.files[0];
         if (!file) return;
 
-        // Validate file size (10MB)
         if (file.size > 10 * 1024 * 1024) {
             showImageError('Ukuran file maksimal 10MB');
             e.target.value = '';
             return;
         }
 
-        // Validate file type
         if (!file.type.startsWith('image/')) {
             showImageError('File harus berupa gambar');
             e.target.value = '';
@@ -1241,27 +1271,20 @@
 
         hideImageError();
 
-        // Show preview
         const reader = new FileReader();
         reader.onload = function(e) {
-            if (imagePreview) {
-                imagePreview.src = e.target.result;
-            }
-            if (imagePreviewContainer) {
-                imagePreviewContainer.classList.remove('hidden');
-            }
+            if (imagePreview) imagePreview.src = e.target.result;
+            if (imagePreviewContainer) imagePreviewContainer.classList.remove('hidden');
         };
         reader.readAsDataURL(file);
     }
 
     function validateImageForm() {
         hideImageError();
-
         if (!deviceImageInput.files || deviceImageInput.files.length === 0) {
             showImageError('Pilih gambar terlebih dahulu');
             return false;
         }
-
         return true;
     }
 
@@ -1286,38 +1309,30 @@
 
         setDeleteLoading(true);
 
-        const data = {};
         const csrfToken = document.querySelector('meta[name="csrf-token"]');
-        const tokenInput = document.querySelector('input[name="_token"]');
-        data._token = csrfToken ? csrfToken.content : (tokenInput ? tokenInput.value : '');
-        data._method = 'DELETE';
-
-        fetch('/devices/' + deleteDeviceId, {
-            method: 'POST',
+        
+        fetch(`/devices/${deleteDeviceId}`, {
+            method: 'DELETE',
             headers: {
                 'Content-Type': 'application/json',
                 'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify(data)
+                'Accept': 'application/json',
+                'X-CSRF-TOKEN': csrfToken ? csrfToken.content : ''
+            }
         })
-        .then(function(response) {
-            return response.json();
-        })
-        .then(function(result) {
+        .then(response => response.json())
+        .then(result => {
             setDeleteLoading(false);
 
             if (result.success) {
                 showNotification(result.message || 'Device berhasil dihapus!', 'success');
                 closeDeleteModal();
-                setTimeout(function() {
-                    location.reload();
-                }, 1000);
+                setTimeout(() => location.reload(), 1000);
             } else {
                 showNotification(result.message || 'Gagal menghapus device!', 'error');
             }
         })
-        .catch(function(error) {
+        .catch(error => {
             console.error('Error:', error);
             setDeleteLoading(false);
             showNotification('Terjadi kesalahan pada server!', 'error');
@@ -1328,26 +1343,22 @@
         clearErrors();
         let isValid = true;
 
-        // Validate room selection
         if (!document.getElementById('room-select').value) {
             showError('room_id-error', 'Pilih ruangan terlebih dahulu');
             isValid = false;
         }
 
-        // Validate device name
         const deviceName = document.getElementById('device-name').value.trim();
         if (!deviceName) {
             showError('device_name-error', 'Nama device harus diisi');
             isValid = false;
         }
 
-        // Validate device type
         if (!document.getElementById('device-type').value) {
             showError('device_type-error', 'Tipe device harus dipilih');
             isValid = false;
         }
 
-        // Add validation for new required fields
         if (!document.getElementById('category').value.trim()) {
             showError('category-error', 'Kategori harus diisi');
             isValid = false;
@@ -1371,8 +1382,6 @@
         if (errorElement) {
             errorElement.textContent = message;
             errorElement.classList.remove('hidden');
-
-            // Add error styling to input
             const input = errorElement.previousElementSibling;
             if (input) {
                 input.classList.add('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
@@ -1382,27 +1391,24 @@
 
     function clearErrors() {
         const errorElements = document.querySelectorAll('[id$="-error"]');
-        errorElements.forEach(function(error) {
+        errorElements.forEach(error => {
             error.classList.add('hidden');
             error.textContent = '';
         });
 
-        // Remove error styling
-        const inputs = document.querySelectorAll('input, select');
-        inputs.forEach(function(input) {
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
             input.classList.remove('border-red-500', 'focus:border-red-500', 'focus:ring-red-500');
         });
     }
 
     function updateCharCounts() {
-        // Device name character count
         if (deviceNameInput && deviceCharCount) {
             const deviceCount = deviceNameInput.value.length || 0;
             deviceCharCount.textContent = deviceCount;
             updateCharCountColor(deviceCharCount, deviceCount, 100);
         }
 
-        // Serial number character count
         if (serialNumberInput && serialCharCount) {
             const serialCount = serialNumberInput.value.length || 0;
             serialCharCount.textContent = serialCount;
@@ -1412,7 +1418,6 @@
 
     function updateCharCountColor(element, count, max) {
         element.classList.remove('text-gray-500', 'text-yellow-600', 'text-red-500');
-
         if (count > max) {
             element.classList.add('text-red-500');
         } else if (count > max * 0.8) {
@@ -1426,76 +1431,64 @@
         const roomValue = roomFilter ? roomFilter.value : '';
         const typeValue = typeFilter ? typeFilter.value : '';
         const searchValue = searchDevices ? searchDevices.value.toLowerCase().trim() : '';
-        const deviceCards = document.querySelectorAll('.device-card');
+        const allRows = document.querySelectorAll('#devices-table tbody tr');
 
         let visibleCount = 0;
 
-        deviceCards.forEach(function(card) {
-            const roomId = card.getAttribute('data-room-id');
-            const roomName = card.getAttribute('data-room-name').toLowerCase();
-            const deviceType = card.getAttribute('data-device-type');
-            const deviceNameElement = card.querySelector('h4');
-            const deviceName = deviceNameElement ? deviceNameElement.textContent.toLowerCase() : '';
-            const deviceId = card.getAttribute('data-device-id');
+        allRows.forEach(row => {
+            const deviceName = row.cells[0].textContent.toLowerCase();
+            const deviceType = row.cells[1].textContent.toLowerCase();
+            const roomName = row.cells[2].textContent.toLowerCase();
+            const serialNumber = row.cells[3].textContent.toLowerCase();
+            const deviceRoomId = row.querySelector('.edit-device-btn').getAttribute('data-room-id');
 
             let shouldShow = true;
 
-            // Filter by room
-            if (roomValue && roomId !== roomValue) {
+            if (roomValue && deviceRoomId !== roomValue) {
                 shouldShow = false;
             }
 
-            // Filter by device type
-            if (typeValue && deviceType !== typeValue) {
+            if (typeValue && !deviceType.includes(typeValue.toLowerCase())) {
                 shouldShow = false;
             }
 
-            // Filter by search
             if (searchValue && 
                 !deviceName.includes(searchValue) && 
-                !roomName.includes(searchValue) && 
-                !deviceId.includes(searchValue) &&
-                !deviceType.includes(searchValue)) {
+                !roomName.includes(searchValue) &&
+                !serialNumber.includes(searchValue)) {
                 shouldShow = false;
             }
 
             if (shouldShow) {
-                card.style.display = '';
+                row.style.display = '';
                 visibleCount++;
             } else {
-                card.style.display = 'none';
+                row.style.display = 'none';
             }
         });
 
-        // Update count
         if (filteredCount) {
             filteredCount.textContent = visibleCount;
         }
 
-        // Show/hide empty state
+        const table = document.getElementById('devices-table');
         const emptyState = document.getElementById('empty-state');
-        if (visibleCount === 0 && deviceCards.length > 0) {
-            if (!emptyState) {
-                showEmptySearchState();
-            }
-        } else if (emptyState) {
-            emptyState.remove();
+        if (visibleCount === 0 && table) {
+             if (!document.getElementById('empty-search-state')) showEmptySearchState(table);
+        } else {
+            const emptySearch = document.getElementById('empty-search-state');
+            if (emptySearch) emptySearch.remove();
         }
     }
 
-    function showEmptySearchState() {
-        const emptyHtml = '<div id="empty-state" class="text-center py-12">' +
-            '<svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>' +
-            '</svg>' +
-            '<h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>' +
-            '<p class="text-gray-600 mb-4">Tidak ditemukan device yang sesuai dengan pencarian Anda.</p>' +
-            '<button class="text-telkomsel-red hover:text-telkomsel-dark-red font-medium" onclick="resetFilters()">Reset Filter</button>' +
-        '</div>';
-
-        if (devicesGrid) {
-            devicesGrid.insertAdjacentHTML('afterend', emptyHtml);
-        }
+    function showEmptySearchState(table) {
+        const emptyHtml = `<div id="empty-search-state" class="text-center py-12">
+            <svg class="w-24 h-24 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/></svg>
+            <h3 class="text-lg font-medium text-gray-900 mb-2">Tidak Ada Hasil</h3>
+            <p class="text-gray-600 mb-4">Tidak ditemukan device yang sesuai dengan pencarian Anda.</p>
+            <button class="text-telkomsel-red hover:text-telkomsel-dark-red font-medium" onclick="resetFilters()">Reset Filter</button>
+        </div>`;
+        table.insertAdjacentHTML('afterend', emptyHtml);
     }
 
     function resetFilters() {
@@ -1503,40 +1496,6 @@
         if (roomFilter) roomFilter.value = '';
         if (typeFilter) typeFilter.value = '';
         filterDevices();
-    }
-
-    function toggleView(viewType) {
-        currentView = viewType;
-
-        if (viewType === 'grid') {
-            if (gridViewBtn) {
-                gridViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-                gridViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            }
-
-            if (listViewBtn) {
-                listViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-                listViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            }
-
-            if (devicesGrid) {
-                devicesGrid.className = 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6';
-            }
-        } else {
-            if (listViewBtn) {
-                listViewBtn.classList.add('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-                listViewBtn.classList.remove('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-            }
-
-            if (gridViewBtn) {
-                gridViewBtn.classList.add('text-gray-600', 'hover:text-telkomsel-red', 'hover:bg-gray-100');
-                gridViewBtn.classList.remove('text-telkomsel-red', 'bg-telkomsel-red/10', 'border-telkomsel-red/20');
-            }
-
-            if (devicesGrid) {
-                devicesGrid.className = 'space-y-4';
-            }
-        }
     }
 
     function setLoading(loading) {
@@ -1578,44 +1537,37 @@
     function showNotification(message, type) {
         type = type || 'info';
         
-        // Create notification element
         const notification = document.createElement('div');
         notification.className = 'fixed top-4 right-4 z-50 max-w-sm w-full transform transition-all duration-300 translate-x-full';
 
         const bgColor = type === 'success' ? 'bg-green-500' : 
-                       type === 'error' ? 'bg-red-500' : 
-                       type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
+                        type === 'error' ? 'bg-red-500' : 
+                        type === 'warning' ? 'bg-yellow-500' : 'bg-blue-500';
 
         const icon = type === 'success' ? 'M5 13l4 4L19 7' :
-                    type === 'error' ? 'M6 18L18 6M6 6l12 12' :
-                    type === 'warning' ? 'M12 8v4m0 4h.01' :
-                    'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
+                     type === 'error' ? 'M6 18L18 6M6 6l12 12' :
+                     type === 'warning' ? 'M12 8v4m0 4h.01' :
+                     'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z';
 
-        notification.innerHTML = '<div class="' + bgColor + ' text-white p-4 rounded-lg shadow-lg flex items-center space-x-3">' +
-            '<svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="' + icon + '"/>' +
-            '</svg>' +
-            '<p class="flex-1">' + message + '</p>' +
-            '<button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">' +
-                '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">' +
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>' +
-                '</svg>' +
-            '</button>' +
-        '</div>';
+        notification.innerHTML = `<div class="${bgColor} text-white p-4 rounded-lg shadow-lg flex items-center space-x-3">
+            <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${icon}"/></svg>
+            <p class="flex-1">${message}</p>
+            <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-white hover:text-gray-200">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>`;
 
         document.body.appendChild(notification);
 
-        // Slide in
-        setTimeout(function() {
+        setTimeout(() => {
             notification.classList.remove('translate-x-full');
             notification.classList.add('translate-x-0');
         }, 100);
 
-        // Auto remove after 5 seconds
-        setTimeout(function() {
+        setTimeout(() => {
             notification.classList.remove('translate-x-0');
             notification.classList.add('translate-x-full');
-            setTimeout(function() {
+            setTimeout(() => {
                 if (notification.parentNode) {
                     notification.remove();
                 }
@@ -1624,7 +1576,6 @@
     }
 
     function handleKeyboardShortcuts(e) {
-        // Ctrl/Cmd + N: Add new device
         if ((e.ctrlKey || e.metaKey) && e.key === 'n') {
             e.preventDefault();
             if (!deviceModal || deviceModal.classList.contains('hidden')) {
@@ -1632,25 +1583,17 @@
             }
         }
 
-        // Escape: Close modals
         if (e.key === 'Escape') {
-            if (deviceModal && !deviceModal.classList.contains('hidden')) {
-                closeDeviceModal();
-            }
-            if (imageModal && !imageModal.classList.contains('hidden')) {
-                closeImageModalHandler();
-            }
-            if (deleteModal && !deleteModal.classList.contains('hidden')) {
-                closeDeleteModal();
-            }
+            if (deviceModal && !deviceModal.classList.contains('hidden')) closeDeviceModal();
+            if (imageModal && !imageModal.classList.contains('hidden')) closeImageModalHandler();
+            if (deleteModal && !deleteModal.classList.contains('hidden')) closeDeleteModal();
+            // FIX: Add check for view modal
+            if (deviceViewModal && !deviceViewModal.classList.contains('hidden')) closeViewModalHandler();
         }
 
-        // Ctrl/Cmd + F: Focus search
         if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
             e.preventDefault();
-            if (searchDevices) {
-                searchDevices.focus();
-            }
+            if (searchDevices) searchDevices.focus();
         }
     }
     const exportExcelBtn = document.getElementById('export-excel-btn');
@@ -1667,13 +1610,11 @@
                 });
                 
                 if (response.ok) {
-                    // Check if response is JSON (error) or blob (file)
                     const contentType = response.headers.get('content-type');
                     if (contentType && contentType.includes('application/json')) {
                         const result = await response.json();
                         showNotification(result.message || 'Gagal mengekspor data', 'error');
                     } else {
-                        // Handle successful file download
                         const blob = await response.blob();
                         const filename = response.headers.get('content-disposition')?.split('filename=')[1] || 'devices.xlsx';
                         
@@ -1710,7 +1651,6 @@
         };
     }
 
-    // Make resetFilters available globally
     window.resetFilters = resetFilters;
 </script>
 @endpush

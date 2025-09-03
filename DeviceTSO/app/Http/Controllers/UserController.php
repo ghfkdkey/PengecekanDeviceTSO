@@ -436,7 +436,6 @@ class UserController extends Controller
 
     private function getPendingChecksCount($user)
     {
-        // Implementasi sesuai logic bisnis Anda
         return 0;
     }
 }

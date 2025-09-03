@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Device Check Results')
+@section('title', 'Hasil Pengecekan')
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
@@ -75,14 +75,15 @@
             </div>
             <div class="bg-white rounded-lg shadow-sm p-6 border border-gray-200">
                 <div class="flex items-center">
-                    <div class="p-3 rounded-full bg-blue-100">
-                        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v5a2 2 0 002 2zm8 0V9a2 2 0 00-2-2H9a2 2 0 00-2 2v8a2 2 0 002 2h2a2 2 0 002-2z"></path>
+                    <div class="p-3 rounded-full bg-orange-100">
+                        <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path>
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Checks</p>
-                        <p class="text-2xl font-bold text-blue-600" id="totalCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Maintenance</p>
+                        <p class="text-2xl font-bold text-orange-600" id="maintenanceCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
                     </div>
                 </div>
             </div>
@@ -110,6 +111,7 @@
                             <option value="passed">Passed</option>
                             <option value="failed">Failed</option>
                             <option value="pending">Pending</option>
+                            <option value="maintenance">Maintenance</option>
                         </select>
                     </div>
                     <div>
@@ -141,7 +143,7 @@
         <div class="bg-white rounded-lg shadow-sm border border-gray-200">
             <div class="px-6 py-4 border-b border-gray-200">
                 <h3 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
-                    Device Check Results
+                    Hasil Pengecekan Device
                 </h3>
             </div>
             <div class="overflow-x-auto">
@@ -216,6 +218,7 @@
                             <option value="passed">Passed</option>
                             <option value="failed">Failed</option>
                             <option value="pending">Pending</option>
+                            <option value="maintenance">Maintenance</option>
                         </select>
                     </div>
                     <div class="md:col-span-2">
@@ -261,12 +264,61 @@
     </div>
 </div>
 
+<!-- Edit Checklist Result Modal -->
+<div id="editChecklistModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full hidden z-50">
+    <div class="relative top-20 mx-auto p-5 border w-11/12 md:w-1/2 lg:w-1/3 shadow-lg rounded-md bg-white">
+        <div class="mt-3">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;" id="editModalTitle">
+                    Edit Checklist Result
+                </h3>
+                <button onclick="closeEditModal()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">Checklist Item</label>
+                <p id="editQuestion" class="text-sm text-gray-900 bg-gray-50 p-2 rounded"></p>
+            </div>
+            
+            <form id="editChecklistForm" onsubmit="handleEditSubmit(event)">
+                <div class="mb-4">
+                    <label for="editStatus" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Status</label>
+                    <select id="editStatus" name="status" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                        <option value="passed">Passed</option>
+                        <option value="failed">Failed</option>
+                        <option value="pending">Pending</option>
+                        <option value="maintenance">Maintenance</option>
+                    </select>
+                </div>
+                
+                <div class="mb-6">
+                    <label for="editNotes" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Notes</label>
+                    <textarea id="editNotes" name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;" placeholder="Additional notes..."></textarea>
+                </div>
+                
+                <div class="flex justify-end space-x-3">
+                    <button type="button" onclick="closeEditModal()" class="px-4 py-2 bg-gray-300 hover:bg-gray-400 text-gray-800 font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
+                        Cancel
+                    </button>
+                    <button type="submit" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors duration-200" style="font-family: 'Poppins', sans-serif;">
+                        Update
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 <script>
 let checkResults = [];
 let filteredResults = [];
 let currentPage = 1;
 const itemsPerPage = 10;
-let editingId = null;
+let editingChecklistResult = null;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
@@ -296,24 +348,26 @@ async function loadCheckResults() {
 // Load dropdown data
 async function loadDropdownData() {
     try {
-        // Load devices
         const devicesResponse = await fetch('/api/devices');
         const devices = await devicesResponse.json();
-        populateSelect('device_id', devices, 'device_id', 'device_name');
+        // PERBAIKAN: Tambahkan fallback '|| []' untuk memastikan 'devices' selalu array
+        populateSelect('device_id', devices || [], 'device_id', 'device_name');
 
-        // Load checklist items
         const checklistResponse = await fetch('/api/checklist-items');
         const checklistItems = await checklistResponse.json();
-        populateSelect('checklist_id', checklistItems, 'checklist_id', 'question');
+        // PERBAIKAN: Tambahkan fallback '|| []'
+        populateSelect('checklist_id', checklistItems || [], 'checklist_id', 'question');
 
-        // Load users
         const usersResponse = await fetch('/api/users');
-        const users = await usersResponse.json();
-        populateSelect('user_id', users, 'user_id', 'full_name');
+        const usersData = await usersResponse.json();
+        // PERBAIKAN: Tambahkan fallback '|| []' untuk 'usersData.allUsers'
+        populateSelect('user_id', usersData.allUsers || [], 'id', 'full_name');
 
-        // Populate device type filter
-        const deviceTypes = [...new Set(devices.map(d => d.device_type))];
-        populateSelect('deviceTypeFilter', deviceTypes.map(type => ({value: type, label: type})), 'value', 'label');
+        if (Array.isArray(devices)) {
+            const deviceTypes = [...new Set(devices.map(d => d.device_type))];
+            populateSelect('deviceTypeFilter', deviceTypes.map(type => ({value: type, label: type})), 'value', 'label');
+        }
+
     } catch (error) {
         console.error('Error loading dropdown data:', error);
     }
@@ -367,11 +421,6 @@ function filterResults() {
             (result.room_name && result.room_name.toLowerCase().includes(searchTerm)) ||
             (result.floor_name && result.floor_name.toLowerCase().includes(searchTerm));
 
-        const passed = result.passed_count || 0;
-        const failed = result.failed_count || 0;
-        const pending = result.pending_count || 0;
-        const sessionStatus = failed > 0 ? 'failed' : (pending > 0 ? 'pending' : 'passed');
-
         const matchesStatus = !statusFilter || sessionStatus === statusFilter;
         const matchesDeviceType = !deviceTypeFilter || result.device_type === deviceTypeFilter;
         
@@ -388,26 +437,19 @@ function filterResults() {
 
 // Update statistics
 function updateStats() {
-    let passed = 0;
-    let failed = 0;
-    let pending = 0;
-
+    const counts = { passed: 0, failed: 0, pending: 0, maintenance: 0 };
+    
     checkResults.forEach(r => {
-        const f = r.failed_count || 0;
-        const p = r.pending_count || 0;
-        if (f > 0) {
-            failed += 1;
-        } else if (p > 0) {
-            pending += 1;
-        } else {
-            passed += 1;
+        const sessionStatus = getSessionStatus(r);
+        if (counts[sessionStatus] !== undefined) {
+            counts[sessionStatus]++;
         }
     });
 
-    document.getElementById('passedCount').textContent = passed;
-    document.getElementById('failedCount').textContent = failed;
-    document.getElementById('pendingCount').textContent = pending;
-    document.getElementById('totalCount').textContent = checkResults.length;
+    document.getElementById('passedCount').textContent = counts.passed;
+    document.getElementById('failedCount').textContent = counts.failed;
+    document.getElementById('pendingCount').textContent = counts.pending;
+    document.getElementById('maintenanceCount').textContent = counts.maintenance;
 }
 
 // Render table
@@ -434,12 +476,10 @@ function renderTable() {
         const row = document.createElement('tr');
         row.className = 'hover:bg-gray-50';
         
-        const passed = result.passed_count || 0;
-        const failed = result.failed_count || 0;
-        const pending = result.pending_count || 0;
-        const sessionStatus = failed > 0 ? 'failed' : (pending > 0 ? 'pending' : 'passed');
+        const sessionStatus = getSessionStatus(result);
         const statusBadge = getStatusBadge(sessionStatus);
-        const formattedDate = formatDate(result.checked_at);
+        const dateToDisplay = result.updated_at_custom || result.original_checked_at || result.checked_at;
+        const formattedDate = formatDate(dateToDisplay);
         
         row.innerHTML = `
             <td class="px-6 py-4 whitespace-nowrap">
@@ -492,12 +532,30 @@ function renderTable() {
     document.getElementById('totalResults').textContent = filteredResults.length;
 }
 
+function getSessionStatus(result) {
+    const failed = result.failed_count || 0;
+    const maintenance = result.maintenance_count || 0;
+    const pending = result.pending_count || 0;
+
+    if (failed > 0) {
+        return 'failed';
+    }
+    if (maintenance > 0) {
+        return 'maintenance';
+    }
+    if (pending > 0) {
+        return 'pending';
+    }
+    return 'passed';
+}
+
 // Get status badge HTML
 function getStatusBadge(status) {
     const badges = {
         'passed': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Passed</span>',
         'failed': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Failed</span>',
-        'pending': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>'
+        'pending': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>',
+        'maintenance': '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">Maintenance</span>'
     };
     return badges[status] || '<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unknown</span>';
 }
@@ -597,7 +655,7 @@ async function viewDetailSession(deviceId, checkedAt) {
         const first = items[0];
         const deviceType = first?.device?.device_type || '';
 
-        // Ambil master checklist berdasarkan tipe device
+        // Ambil master checklist
         let checklist = [];
         if (deviceType) {
             try {
@@ -609,6 +667,11 @@ async function viewDetailSession(deviceId, checkedAt) {
         }
 
         const detailContent = document.getElementById('detailContent');
+        
+        // Header dengan informasi tambahan
+        const firstCheckedDate = first.original_checked_at || first.first_checked || first.checked_at;
+        const lastUpdatedDate = first.updated_at_custom;
+        
         const header = `
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
                 <div>
@@ -626,37 +689,19 @@ async function viewDetailSession(deviceId, checkedAt) {
                     <p class="text-sm text-gray-900">${first.user?.full_name || 'N/A'}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Check Date</label>
-                    <p class="text-sm text-gray-900">${formatDate(first.checked_at)}</p>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">First Check Date</label>
+                    <p class="text-sm text-gray-900">${formatDate(firstCheckedDate)}</p>
                 </div>
+                ${lastUpdatedDate ? `
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                    <p class="text-sm text-gray-900">${formatDate(lastUpdatedDate)}</p>
+                </div>
+                ` : ''}
             </div>
         `;
-
-        // Map hasil sesi by checklist_id
-        const resultByChecklistId = {};
-        items.forEach(r => { resultByChecklistId[r.checklist_id] = r; });
-
-        // Buat rows berdasarkan master checklist (fallback ke items jika master kosong)
-        const sourceList = (Array.isArray(checklist) && checklist.length > 0)
-            ? checklist
-            : items.map(i => i.checklistItem).filter(Boolean);
-
-        const rows = sourceList.map(ci => {
-            const cid = ci.checklist_id;
-            const res = resultByChecklistId[cid] || null;
-            const status = res?.status || 'pending';
-            const notes = res?.notes || '';
-            const question = ci.question || '';
-            return `
-                <tr>
-                    <td class="px-4 py-2 text-sm text-gray-900">${question}</td>
-                    <td class="px-4 py-2">${getStatusBadge(status)}</td>
-                    <td class="px-4 py-2 text-sm text-gray-700">${notes}</td>
-                </tr>
-            `;
-        }).join('');
-
-        detailContent.innerHTML = header + `
+        
+        const tableStructure = `
             <div class="border rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
@@ -664,17 +709,114 @@ async function viewDetailSession(deviceId, checkedAt) {
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checklist</th>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">${rows}</tbody>
+                    <tbody class="bg-white divide-y divide-gray-200" id="session-detail-tbody">
+                    </tbody>
                 </table>
             </div>
         `;
+        
+        detailContent.innerHTML = header + tableStructure;
+        
+        const tbody = document.getElementById('session-detail-tbody');
+
+        // Map hasil sesi by checklist_id
+        const resultByChecklistId = {};
+        items.forEach(r => { resultByChecklistId[r.checklist_id] = r; });
+
+        const sourceList = (Array.isArray(checklist) && checklist.length > 0)
+            ? checklist
+            : items.map(i => i.checklistItem).filter(Boolean);
+
+        sourceList.forEach(ci => {
+            const cid = ci.checklist_id;
+            const res = resultByChecklistId[cid] || {};
+            const status = res.status || 'pending';
+            const notes = res.notes || '';
+            const question = ci.question || '';
+
+            const row = document.createElement('tr');
+
+            // Sel untuk Pertanyaan
+            const questionCell = document.createElement('td');
+            questionCell.className = 'px-4 py-2 text-sm text-gray-900';
+            questionCell.textContent = question;
+            row.appendChild(questionCell);
+
+            // Sel untuk Status
+            const statusCell = document.createElement('td');
+            statusCell.className = 'px-4 py-2';
+            statusCell.innerHTML = getStatusBadge(status);
+            row.appendChild(statusCell);
+
+            // Sel untuk Notes
+            const notesCell = document.createElement('td');
+            notesCell.className = 'px-4 py-2 text-sm text-gray-700';
+            notesCell.textContent = notes;
+            row.appendChild(notesCell);
+
+            // Sel untuk Tombol Aksi
+            const actionCell = document.createElement('td');
+            actionCell.className = 'px-4 py-2 text-center';
+            const editButton = document.createElement('button');
+            editButton.className = 'text-blue-600 hover:text-blue-900 text-sm font-medium';
+            editButton.textContent = 'Edit';
+            
+            // Event listener untuk edit dengan data lengkap
+            editButton.addEventListener('click', () => {
+                editingChecklistResult = {
+                    checklistId: cid,
+                    question: question,
+                    currentStatus: status,
+                    currentNotes: notes,
+                    deviceId: deviceId,
+                    checkedAt: checkedAt
+                };
+                
+                document.getElementById('editModalTitle').textContent = 'Edit Checklist Result';
+                document.getElementById('editQuestion').textContent = question;
+                document.getElementById('editStatus').value = status;
+                document.getElementById('editNotes').value = notes;
+                
+                document.getElementById('editChecklistModal').classList.remove('hidden');
+            });
+            
+            actionCell.appendChild(editButton);
+            row.appendChild(actionCell);
+            
+            tbody.appendChild(row);
+        });
+
         document.getElementById('detailModal').classList.remove('hidden');
     } catch (e) {
         console.error('Error loading session detail', e);
         showNotification('Error loading session detail', 'error');
     }
+}
+
+function editChecklistResult(checklistId, currentStatus, currentNotes, question) {
+    editingChecklistResult = {
+        checklistId: checklistId,
+        question: question,
+        currentStatus: currentStatus,
+        currentNotes: currentNotes
+    };
+    
+    // Set form values
+    document.getElementById('editModalTitle').textContent = 'Edit Checklist Result';
+    document.getElementById('editQuestion').textContent = question;
+    document.getElementById('editStatus').value = currentStatus;
+    document.getElementById('editNotes').value = currentNotes;
+    
+    // Show modal
+    document.getElementById('editChecklistModal').classList.remove('hidden');
+}
+
+function closeEditModal() {
+    document.getElementById('editChecklistModal').classList.add('hidden');
+    editingChecklistResult = null;
 }
 
 function closeDetailModal() {
@@ -711,6 +853,61 @@ async function handleFormSubmit(e) {
     } catch (error) {
         console.error('Error saving check result:', error);
         showNotification('Error saving check result', 'error');
+    }
+}
+
+async function handleEditSubmit(e) {
+    e.preventDefault();
+    
+    if (!editingChecklistResult) return;
+    
+    const formData = new FormData(e.target);
+    const status = formData.get('status');
+    const notes = formData.get('notes');
+    
+    try {
+        // Find the actual result_id from current session data
+        const url = `/api/device-check-session-detail?device_id=${editingChecklistResult.deviceId}&checked_at=${encodeURIComponent(editingChecklistResult.checkedAt)}`;
+        const response = await fetch(url);
+        const items = await response.json();
+        
+        const targetResult = items.find(item => item.checklist_id === editingChecklistResult.checklistId);
+        
+        if (!targetResult) {
+            throw new Error('Result not found in the session');
+        }
+        
+        // Update the result
+        const updateResponse = await fetch(`/api/device-check-results/${targetResult.result_id}/update-status`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({
+                status: status,
+                notes: notes
+            })
+        });
+        
+        if (updateResponse.ok) {
+            const deviceIdToRefresh = editingChecklistResult.deviceId;
+            const checkedAtToRefresh = editingChecklistResult.checkedAt;
+
+            closeEditModal();
+
+            showNotification('Checklist result updated successfully', 'success');
+            viewDetailSession(deviceIdToRefresh, checkedAtToRefresh); 
+            loadCheckResults(); 
+            
+        } else {
+            const errorData = await updateResponse.json();
+            throw new Error(errorData.message || 'Failed to update result');
+        }
+        
+    } catch (error) {
+        console.error('Error updating checklist result:', error);
+        showNotification('Error updating checklist result: ' + error.message, 'error');
     }
 }
 

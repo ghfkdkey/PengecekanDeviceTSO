@@ -108,15 +108,9 @@
                             style="font-family: 'Poppins', sans-serif;">
                             
                             <option value="">Select Role</option>
-
-                            @if(auth()->user()->isAdmin())
                                 <option value="{{ \App\Models\User::ROLE_ADMIN }}">Admin</option>
                                 <option value="{{ \App\Models\User::ROLE_PIC_GA }}">PIC General Affair (GA)</option>
                                 <option value="{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}">PIC Operasional</option>
-                            @endif
-                            @if(auth()->user()->isGA())
-                                <option value="{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}">PIC Operasional</option>
-                            @endif
                         </select>
                     </div>
                     <div>
@@ -216,9 +210,9 @@
                         <label for="role" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Role</label>
                         <select id="role" name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <option value="">Select Role</option>
-                            <option value="admin">Admin</option>
-                            <option value="PIC General Affair (GA)">PIC General Affair (GA)</option>
-                            <option value="PIC Operasional">PIC Operasional</option>
+                            <option value="{{ \App\Models\User::ROLE_ADMIN }}">Admin</option>
+                            <option value="{{ \App\Models\User::ROLE_PIC_GA }}">PIC General Affair (GA)</option>
+                            <option value="{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}">PIC Operasional</option>
                         </select>
                     </div>
                     <div>
@@ -373,8 +367,10 @@ function setupEventListeners() {
     document.getElementById('role').addEventListener('change', function() {
         const regionalContainer = document.getElementById('regional-select-container');
         const regionalSelect = document.getElementById('regional');
+        const picGaRole = '{{ \App\Models\User::ROLE_PIC_GA }}';
+        const picOperationalRole = '{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}';
         
-        if (this.value === 'PIC General Affair (GA)' || this.value === 'PIC Operasional') {
+        if (this.value === picGaRole || this.value === picOperationalRole) {
             regionalContainer.classList.remove('hidden');
             regionalSelect.required = true;
             loadRegionals();
@@ -424,9 +420,9 @@ function filterUsers() {
 
 // Update statistics
 function updateStats() {
-    const adminCount = users.filter(u => u.role === 'admin').length;
-    const gaCount = users.filter(u => u.role === 'PIC General Affair (GA)').length;
-    const operationalCount = users.filter(u => u.role === 'PIC Operasional').length;
+    const adminCount = users.filter(u => u.role === '{{ \App\Models\User::ROLE_ADMIN }}').length;
+    const gaCount = users.filter(u => u.role === '{{ \App\Models\User::ROLE_PIC_GA }}').length;
+    const operationalCount = users.filter(u => u.role === '{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}').length;
 
     document.getElementById('adminCount').textContent = adminCount;
     document.getElementById('gaCount').textContent = gaCount;
@@ -528,19 +524,19 @@ function renderTable() {
 // Get role badge HTML
 function getRoleBadge(role) {
     switch (role) {
-        case 'admin':
+        case '{{ \App\Models\User::ROLE_ADMIN }}':
             return `
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
                     Admin
                 </span>
             `;
-        case 'PIC General Affair (GA)':
+        case '{{ \App\Models\User::ROLE_PIC_GA }}':
             return `
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                     PIC General Affair (GA)
                 </span>
             `;
-        case 'PIC Operasional':
+        case '{{ \App\Models\User::ROLE_PIC_OPERATIONAL }}':
             return `
                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                     PIC Operasional

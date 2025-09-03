@@ -19,56 +19,80 @@ class DashboardController extends Controller
     public function stats()
     {
         try {
-            $totalDevices   = Device::count();
-            $totalFloors    = Floor::count();
-            $totalRooms     = Room::count();
-            $totalBuildings = Building::count();
-            $totalRegionals = Regional::count();
-            $totalAreas     = Area::count();
+            $user = auth()->user(); // Dapatkan user yang sedang login
+            
+            // Cek apakah pengguna adalah admin, PIC GA atau PIC Operasional
+            $isAdmin = $user->isAdmin();
+            $isGA = $user->isGA();
+            $isOperational = $user->isOperational();
 
-            $totals = DB::table(DB::raw("
-                (
-                    SELECT
-                        dcr.device_id,
-                        SUM(CASE WHEN dcr.status = 'failed'  THEN 1 ELSE 0 END) AS failed_count,
-                        SUM(CASE WHEN dcr.status = 'pending' THEN 1 ELSE 0 END) AS pending_count,
-                        SUM(CASE WHEN dcr.status = 'passed'  THEN 1 ELSE 0 END) AS passed_count
-                    FROM device_check_results dcr
-                    JOIN (
-                        SELECT device_id, MAX(checked_at) AS latest_checked_at
-                        FROM device_check_results
-                        GROUP BY device_id
-                    ) latest
-                        ON latest.device_id = dcr.device_id
-                    AND latest.latest_checked_at = dcr.checked_at
-                    GROUP BY dcr.device_id
-                ) x
-            "))
-            ->selectRaw("
-                SUM(CASE WHEN x.failed_count  > 0 THEN 1 ELSE 0 END)                                      AS failed_devices,
-                SUM(CASE WHEN x.failed_count  = 0 AND x.pending_count > 0 THEN 1 ELSE 0 END)              AS pending_devices,
-                SUM(CASE WHEN x.failed_count  = 0 AND x.pending_count = 0 THEN 1 ELSE 0 END)              AS passed_devices
-            ")
-            ->first();
+            // Hitung total perangkat yang dapat diakses oleh user
+            $totalDevicesQuery = Device::query();
+            
+            if (!$isAdmin) {
+                // Jika bukan admin, filter perangkat berdasarkan regional_id
+                $totalDevicesQuery->whereHas('room.floor.building.regional', function($query) use ($user) {
+                    $query->where('regional_id', $user->regional_id);
+                });
+            }
+            
+            $totalDevices = $totalDevicesQuery->count();
 
-            $failedDevices  = (int) ($totals->failed_devices  ?? 0);
-            $pendingDevices = (int) ($totals->pending_devices ?? 0);
-            $passedDevices  = (int) ($totals->passed_devices  ?? 0);
+            // Hitung perangkat berdasarkan status (failed, pending, passed, maintenance)
+            $statusCounts = DB::table('device_check_results as dcr')
+                ->selectRaw("
+                    COUNT(DISTINCT CASE WHEN dcr.status = 'failed' THEN dcr.device_id END) AS failed_devices,
+                    COUNT(DISTINCT CASE WHEN dcr.status = 'pending' THEN dcr.device_id END) AS pending_devices,
+                    COUNT(DISTINCT CASE WHEN dcr.status = 'passed' THEN dcr.device_id END) AS passed_devices,
+                    COUNT(DISTINCT CASE WHEN dcr.status = 'maintenance' THEN dcr.device_id END) AS maintenance_devices
+                ")
+                ->join('devices as d', 'd.device_id', '=', 'dcr.device_id')
+                ->join('rooms as r', 'r.room_id', '=', 'd.room_id')
+                ->join('floors as f', 'f.floor_id', '=', 'r.floor_id')
+                ->join('buildings as b', 'b.building_id', '=', 'f.building_id')
+                ->join('regionals as rg', 'rg.regional_id', '=', 'b.regional_id')
+                ->when(!$isAdmin, function($query) use ($user) {
+                    // Untuk non-admin, filter berdasarkan regional_id
+                    $query->where('rg.regional_id', $user->regional_id);
+                })
+                ->groupBy('dcr.device_id')
+                ->first();
 
+            // Hitung perangkat yang belum memiliki hasil pengecekan
+            $devicesWithResults = DeviceCheckResult::distinct('device_id')
+                ->whereIn('device_id', function ($query) use ($user) {
+                    $query->select('d.device_id')
+                        ->from('devices as d')
+                        ->join('rooms as r', 'r.room_id', '=', 'd.room_id')
+                        ->join('floors as f', 'f.floor_id', '=', 'r.floor_id')
+                        ->join('buildings as b', 'b.building_id', '=', 'f.building_id')
+                        ->join('regionals as rg', 'rg.regional_id', '=', 'b.regional_id')
+                        ->where('rg.regional_id', $user->regional_id);
+                })
+                ->count('device_id');
+
+            // Hitung perangkat yang tidak memiliki hasil pengecekan (belum ada status)
+            $devicesWithoutResults = $totalDevices - $devicesWithResults;
+
+            // Perhitungan untuk Admin (hanya perangkat yang belum diperiksa yang dihitung sebagai pending)
+            if ($isAdmin) {
+                $pendingDevices = $devicesWithoutResults;  // Admin hanya melihat perangkat yang belum diperiksa
+            } else {
+                // Untuk PIC GA atau PIC Operasional, hitung perangkat yang belum diperiksa sebagai pending
+                $pendingDevices = (int) ($statusCounts->pending_devices ?? 0) + $devicesWithoutResults;
+            }
+
+            // Kembalikan hasil statistik
             return response()->json([
-                'total_devices'   => $totalDevices,
-                'total_floors'    => $totalFloors,
-                'total_rooms'     => $totalRooms,
-                'total_buildings' => $totalBuildings,
-                'total_regionals' => $totalRegionals,
-                'total_areas'     => $totalAreas,
+                'total_devices' => $totalDevices,
                 'pending_devices' => $pendingDevices,
-                'passed_devices'  => $passedDevices,
-                'failed_devices'  => $failedDevices,
+                'failed_devices' => (int) ($statusCounts->failed_devices ?? 0),
+                'passed_devices' => (int) ($statusCounts->passed_devices ?? 0),
+                'maintenance_devices' => (int) ($statusCounts->maintenance_devices ?? 0),
             ]);
         } catch (\Exception $e) {
             return response()->json([
-                'error'   => 'Failed to load dashboard statistics',
+                'error' => 'Failed to load dashboard statistics',
                 'message' => $e->getMessage(),
             ], 500);
         }
