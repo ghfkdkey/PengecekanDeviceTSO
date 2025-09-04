@@ -46,6 +46,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('rooms', RoomController::class);
 
     // Device Management
+    Route::get('/devices/export-excel', [DeviceController::class, 'exportExcel'])->name('devices.exportExcel');
+    Route::post('/devices/upload-image', [DeviceController::class, 'uploadImage'])->name('devices.uploadImage');
     Route::resource('devices', DeviceController::class);
 
     // Checklist Management

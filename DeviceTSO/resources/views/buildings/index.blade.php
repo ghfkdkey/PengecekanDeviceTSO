@@ -81,46 +81,7 @@
                     d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
             </svg>
           </div>
-        </div>
-    
-        <!-- Filter by Area -->
-        <div class="flex flex-col justify-center">
-          <select
-            id="filter-area"
-            class="h-10 min-w-44 rounded-lg border border-gray-300 px-4 focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-            {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}
-          >
-            <option value="">Semua Area</option>
-            @foreach($areas as $area)
-              <option value="{{ $area->area_id }}"
-                {{ (request('area') == $area->area_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedAreaId'] == $area->area_id)) ? 'selected' : '' }}>
-                {{ $area->area_name }}
-              </option>
-            @endforeach
-          </select>
-          @if($filterRestrictions['isRestricted'])
-            <p class="mt-1 text-xs text-gray-500">Filter terkunci sesuai regional Anda</p>
-          @endif
-        </div>
-    
-        <!-- Filter by Regional -->
-        <div class="flex flex-col justify-center">
-          <select
-            id="filter-regional"
-            class="h-10 min-w-48 rounded-lg border border-gray-300 px-4 focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red {{ $filterRestrictions['isRestricted'] ? 'bg-gray-100 cursor-not-allowed' : '' }}"
-            {{ $filterRestrictions['isRestricted'] ? 'disabled' : '' }}>
-            <option value="">Semua Regional</option>
-            @foreach($regionals as $regional)
-              <option value="{{ $regional->regional_id }}" data-area-id="{{ $regional->area_id }}"
-                {{ (request('regional') == $regional->regional_id || ($filterRestrictions['isRestricted'] && $filterRestrictions['assignedRegionalId'] == $regional->regional_id)) ? 'selected' : '' }}>
-                {{ $regional->regional_name }}
-              </option>
-            @endforeach
-          </select>
-          @if($filterRestrictions['isRestricted'])
-            <p class="mt-1 text-xs text-gray-500">Filter terkunci sesuai regional Anda</p>
-          @endif
-        </div>
+        </div>  
     
       </div>
     
@@ -139,6 +100,7 @@
         </button>
       </div>
     </div>
+    
 
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
@@ -853,14 +815,22 @@ document.addEventListener('DOMContentLoaded', function() {
         applyFilters();
     };
     
+    // Ganti seluruh fungsi ini
     async function handleFormSubmit(e) {
         e.preventDefault();
         
+        // PERBAIKAN: Aktifkan sementara field yang disabled agar nilainya terbaca oleh FormData
+        const disabledFields = document.querySelectorAll('#building-form [disabled]');
+        disabledFields.forEach(field => field.disabled = false);
+        
         const formData = new FormData(buildingForm);
+        
+        // Kembalikan ke state disabled setelah nilainya diambil agar tampilan tidak berubah
+        disabledFields.forEach(field => field.disabled = true);
+        
         const buildingId = formData.get('building_id');
         const method = formData.get('_method');
         
-        // Show loading state
         showLoadingState();
         clearErrors();
         
@@ -882,16 +852,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const result = await response.json();
             
             if (response.ok) {
-                // Success
                 showNotification(result.message || 'Building berhasil disimpan!', 'success');
-                closeModal();
-                
-                // Reload page to show updated data
                 setTimeout(() => {
                     window.location.reload();
                 }, 1000);
             } else {
-                // Validation errors
                 if (result.errors) {
                     showValidationErrors(result.errors);
                 } else {
@@ -1034,5 +999,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endpush
-
 @endsection

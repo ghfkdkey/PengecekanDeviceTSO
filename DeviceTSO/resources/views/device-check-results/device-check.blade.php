@@ -6,11 +6,21 @@
 
 @section('content')
 <div class="min-h-screen bg-gray-50">
+    @php
+        // Array untuk mapping nama role
+        $roleNames = [
+            'pic_ga' => 'PIC General Affair (GA)',
+            'pic_operational' => 'PIC Operasional',
+            'admin' => 'Admin',
+        ];
+        $userRole = Auth::user()->role;
+        $displayName = $roleNames[$userRole] ?? ucfirst($userRole); // Ambil nama lengkap, atau kapitalisasi jika tidak ada
+    @endphp
     <!-- Header Section -->
     <div class="bg-white shadow-sm border-b border-gray-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="py-6">
-                <div class="flex items-center justify-between">
+                <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                         <h1 class="text-3xl font-bold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
                             Pengecekan Device
@@ -26,7 +36,8 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
                                 </svg>
                                 <span class="text-sm text-gray-600" style="font-family: 'Poppins', sans-serif;">
-                                    {{ Auth::user()->role ?? 'Unknown Role' }}: <span class="font-medium text-gray-900">{{ Auth::user()->full_name ?? 'Unknown User' }}</span>
+                                    {{-- FIX: Menggunakan nama role yang sudah di-mapping --}}
+                                    {{ $displayName }}: <span class="font-medium text-gray-900">{{ Auth::user()->full_name ?? 'Unknown User' }}</span>
                                 </span>
                             </div>
                             @endif
@@ -227,15 +238,12 @@ let checklistItems = [];
 let deviceCategories = [];
 let currentAreaRegionalInfo = null;
 
-// Initialize page
 document.addEventListener('DOMContentLoaded', function() {
     setupEventListeners();
     updateCurrentLocationInfo();
 });
 
-// Setup event listeners
 function setupEventListeners() {
-    // Floor selection
     document.getElementById('floorSelect').addEventListener('change', function() {
         const floorId = this.value;
         if (floorId) {
@@ -245,28 +253,33 @@ function setupEventListeners() {
         }
     });
 
-    // Room selection
     document.getElementById('roomSelect').addEventListener('change', function() {
         const roomId = this.value;
         console.log('Room selected:', roomId);
         if (roomId) {
             loadDevices(roomId);
-            loadAreaRegionalInfo(roomId); // New function to load area/regional info
+            loadAreaRegionalInfo(roomId);
         } else {
             resetDeviceSelection();
             hideAreaRegionalInfo();
         }
     });
 
-    // Category selection
     document.getElementById('categorySelect').addEventListener('change', function() {
         console.log('Category selected:', this.value);
         filterDevicesByCategory();
     });
 
-    // Device selection
     document.getElementById('deviceSelect').addEventListener('change', function() {
         const deviceId = this.value;
+        const selectedOption = this.options[this.selectedIndex];
+        if (selectedOption && selectedOption.disabled) {
+            showNotification('Device ini sedang dalam maintenance dan tidak bisa dipilih.', 'error');
+            this.value = ''; 
+            hideDeviceInfo();
+            document.getElementById('loadChecklistBtn').disabled = true;
+            return; 
+        }
         if (deviceId) {
             selectedDevice = getSelectedDeviceData(deviceId);
             showDeviceInfo(selectedDevice);
@@ -277,39 +290,31 @@ function setupEventListeners() {
         }
     });
 
-    // Load checklist button
     document.getElementById('loadChecklistBtn').addEventListener('click', function() {
         if (selectedDevice) {
             loadChecklist(selectedDevice.device_type);
         }
     });
 
-    // Check all button
     document.getElementById('checkAllBtn').addEventListener('click', function() {
         checkAllItems();
     });
 
-    // Uncheck all button
     document.getElementById('uncheckAllBtn').addEventListener('click', function() {
         uncheckAllItems();
     });
 
-    // Reset button
     document.getElementById('resetBtn').addEventListener('click', function() {
         resetChecklist();
     });
 
-    // Form submission
     document.getElementById('checklistForm').addEventListener('submit', function(e) {
         e.preventDefault();
         saveCheckResults();
     });
 }
 
-// Update current location info in header
 function updateCurrentLocationInfo() {
-    // This would typically get current user's area/regional assignment
-    // For now, showing placeholder until room is selected
     const locationInfo = document.getElementById('currentLocationInfo');
     @if(Auth::user()->role !== 'admin')
         locationInfo.innerHTML = 'Regional: <span class="font-medium">{{ Auth::user()->regional->regional_name }}</span>';
@@ -317,22 +322,17 @@ function updateCurrentLocationInfo() {
 
 }
 
-// Show area and regional information
 function showAreaRegionalInfo(roomInfo) {
-    // Update area information
     document.getElementById('selectedAreaName').textContent = roomInfo.area_name || 'Tidak tersedia';
     document.getElementById('selectedAreaCode').textContent = roomInfo.area_code || 'N/A';
     
-    // Update regional information
     document.getElementById('selectedRegionalName').textContent = roomInfo.regional_name || 'Tidak tersedia';
     document.getElementById('selectedRegionalCode').textContent = roomInfo.regional_code || 'N/A';
     
-    // Update assigned PIC information
     if (roomInfo.assigned_pic) {
         document.getElementById('assignedPicName').textContent = roomInfo.assigned_pic.name || 'Tidak ada PIC';
         document.getElementById('assignedPicRole').textContent = roomInfo.assigned_pic.role || 'N/A';
         
-        // Update PIC status badge
         const statusElement = document.getElementById('assignedPicStatus');
         const status = roomInfo.assigned_pic.status || 'unknown';
         let statusClass = 'bg-gray-100 text-gray-800';
@@ -372,21 +372,17 @@ function showAreaRegionalInfo(roomInfo) {
         `;
     }
     
-    // Show the area/regional info card
     document.getElementById('areaRegionalInfo').classList.remove('hidden');
     
-    // Update header location info
     const locationInfo = document.getElementById('currentLocationInfo');
     locationInfo.innerHTML = `Area: <span class="font-medium">${roomInfo.area_name || 'N/A'}</span> | Regional: <span class="font-medium">${roomInfo.regional_name || 'N/A'}</span>`;
 }
 
-// Hide area and regional information
 function hideAreaRegionalInfo() {
     document.getElementById('areaRegionalInfo').classList.add('hidden');
     updateCurrentLocationInfo();
 }
 
-// Load rooms by floor
 async function loadRooms(floorId) {
     try {
         console.log('Loading rooms for floor:', floorId);
@@ -423,7 +419,6 @@ async function loadRooms(floorId) {
     }
 }
 
-// Load devices by room
 async function loadDevices(roomId) {
     try {
         console.log('Loading devices for room:', roomId);
@@ -436,11 +431,9 @@ async function loadDevices(roomId) {
         const devices = await response.json();
         console.log('Devices loaded:', devices);
         
-        // Store devices for filtering
         window.availableDevices = devices;
         
         if (devices && devices.length > 0) {
-            // Get unique categories
             deviceCategories = [...new Set(devices.map(device => device.device_type))];
             console.log('Available categories:', deviceCategories);
             
@@ -454,17 +447,13 @@ async function loadDevices(roomId) {
                 categorySelect.appendChild(option);
             });
             
-            // Enable category select
             categorySelect.disabled = false;
             console.log('Category select enabled:', categorySelect.disabled);
             
-            // Show debug info
             document.getElementById('categoryDebug').textContent = `Available categories: ${deviceCategories.join(', ')}`;
             
-            // Populate device select with all devices initially
             populateDeviceSelect(devices);
             
-            // Enable device select
             document.getElementById('deviceSelect').disabled = false;
         } else {
             showNotification('Tidak ada device di ruangan ini', 'info');
@@ -472,7 +461,6 @@ async function loadDevices(roomId) {
             document.getElementById('deviceSelect').disabled = true;
         }
         
-        // Do not reset here; we just populated the selects
     } catch (error) {
         console.error('Error loading devices:', error);
         showNotification('Error loading devices: ' + error.message, 'error');
@@ -481,7 +469,6 @@ async function loadDevices(roomId) {
     }
 }
 
-// Populate device select
 function populateDeviceSelect(devices) {
     const deviceSelect = document.getElementById('deviceSelect');
     deviceSelect.innerHTML = '<option value="">Pilih Device</option>';
@@ -492,19 +479,21 @@ function populateDeviceSelect(devices) {
             option.value = device.device_id;
             option.textContent = `${device.device_name} (${device.device_type})`;
             option.dataset.device = JSON.stringify(device);
+            if (device.latest_status === 'maintenance') {
+                option.disabled = true;
+                option.classList.add('text-gray-400', 'bg-gray-100');
+                option.textContent += ' (Maintenance)';
+            }
             deviceSelect.appendChild(option);
         });
         deviceSelect.disabled = false;
-        console.log('Device select populated with', devices.length, 'devices');
         document.getElementById('deviceDebug').textContent = `Available devices: ${devices.length}`;
     } else {
         deviceSelect.disabled = true;
-        console.log('No devices to populate');
         document.getElementById('deviceDebug').textContent = 'No devices available';
     }
 }
 
-// Filter devices by category
 function filterDevicesByCategory() {
     const selectedCategory = document.getElementById('categorySelect').value;
     const devices = window.availableDevices || [];
@@ -516,7 +505,6 @@ function filterDevicesByCategory() {
     
     console.log('Filtering devices by category:', selectedCategory, 'Found:', filteredDevices.length, 'devices');
     populateDeviceSelect(filteredDevices);
-    // After changing category, clear current device selection but keep device dropdown enabled
     document.getElementById('deviceSelect').value = '';
     selectedDevice = null;
     document.getElementById('loadChecklistBtn').disabled = true;
@@ -524,7 +512,6 @@ function filterDevicesByCategory() {
     document.getElementById('checklistSection').classList.add('hidden');
 }
 
-// Get selected device data
 function getSelectedDeviceData(deviceId) {
     const deviceSelect = document.getElementById('deviceSelect');
     const selectedOption = deviceSelect.querySelector(`option[value="${deviceId}"]`);
@@ -536,7 +523,6 @@ function getSelectedDeviceData(deviceId) {
     return null;
 }
 
-// Show device information
 function showDeviceInfo(device) {
     document.getElementById('deviceName').textContent = device.device_name;
     document.getElementById('deviceType').textContent = device.device_type;
@@ -544,12 +530,10 @@ function showDeviceInfo(device) {
     document.getElementById('deviceInfo').classList.remove('hidden');
 }
 
-// Hide device information
 function hideDeviceInfo() {
     document.getElementById('deviceInfo').classList.add('hidden');
 }
 
-// Load checklist by device type
 async function loadChecklist(deviceType) {
     try {
         console.log('Loading checklist for device type:', deviceType);
@@ -570,7 +554,6 @@ async function loadChecklist(deviceType) {
     }
 }
 
-// Render checklist table
 function renderChecklist() {
     const tbody = document.getElementById('checklistTableBody');
     tbody.innerHTML = '';

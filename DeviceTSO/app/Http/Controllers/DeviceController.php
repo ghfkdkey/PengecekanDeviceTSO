@@ -24,27 +24,22 @@ class DeviceController extends Controller
 
     public function index(Request $request)
     {
-        if (!$this->checkPermission('ManageBuilding')) { // atau ManageDevice jika ada
+        if (!$this->checkPermission('ManageBuilding')) { 
             return $this->unauthorized($request);
         }
 
-        // Dapatkan parameter filter yang sudah disesuaikan dengan hak akses user
         $filteredParams = $this->getFilteredRequestParams($request);
         
-        // Validasi akses regional/area jika ada yang dikirim via request
         if (!$this->validateRegionalAccess($request->get('regional'), $request->get('area'))) {
             return $this->unauthorized($request);
         }
 
-        // Mulai query builder dengan eager loading relasi yang dibutuhkan
         $query = Device::with(['room.floor.building.regional.area']);
 
-        // Apply regional filter untuk devices melalui relasi room.floor.building
         $query->whereHas('room.floor.building', function ($q) {
             $this->applyRegionalFilter($q, 'regional_id');
         });
 
-        // Terapkan filter berdasarkan input dari request (hanya admin yang bisa custom filter)
         if (auth()->user()->isAdmin()) {
             if ($request->filled('room')) {
                 $query->where('room_id', $request->room);
@@ -84,7 +79,7 @@ class DeviceController extends Controller
         $devices = $query->get();
         
         // Query rooms dengan filter regional
-        $roomsQuery = Room::with('floor.building.regional');
+        $roomsQuery = Room::with(['floor.building.regional']);
         $roomsQuery->whereHas('floor.building', function ($q) {
             $this->applyRegionalFilter($q, 'regional_id');
         });
@@ -149,6 +144,20 @@ class DeviceController extends Controller
         }
         
         $buildings = $buildingsQuery->orderBy('building_name')->get();
+        $buildingsForFilter = Building::with('regional.area');
+        $buildingsForFilter = $this->applyRegionalFilter($buildingsForFilter, 'regional_id');
+
+        if (auth()->user()->isAdmin()) {
+            if ($request->filled('regional')) {
+                $buildingsForFilter->where('regional_id', $request->regional);
+            } elseif ($request->filled('area')) {
+                $buildingsForFilter->whereHas('regional', function ($q) use ($request) {
+                    $q->where('area_id', $request->area);
+                });
+            }
+        }
+
+        $buildingsForFilter = $buildingsForFilter->orderBy('building_name')->get();
         
         // Device types - filter berdasarkan devices yang bisa diakses user
         $deviceTypesQuery = Device::whereHas('room.floor.building', function ($q) {
@@ -174,6 +183,7 @@ class DeviceController extends Controller
             'rooms', 
             'floors',
             'buildings',
+            'buildingsForFilter',
             'deviceTypes',
             'areas', 
             'regionals', 
@@ -277,7 +287,6 @@ class DeviceController extends Controller
                 'room_id' => 'required|exists:rooms,room_id',
                 'device_name' => 'required|string|max:100',
                 'device_type' => 'required|string|max:50',
-                // Pastikan validasi unique mengabaikan device saat ini
                 'serial_number' => 'nullable|string|max:100|unique:devices,serial_number,' . $id . ',device_id',
                 'image' => 'nullable|image|mimes:jpg,jpeg,png,gif|max:2048',
                 'category' => 'required|string|max:50',
@@ -290,7 +299,15 @@ class DeviceController extends Controller
                 'condition' => 'required|string|in:baik,rusak',
             ]);
             
-            // ... (logika update image Anda sudah benar) ...
+            if ($request->hasFile('image')) {
+                // Jika ada gambar lama, hapus
+                if ($device->image_path) {
+                    Storage::disk('public')->delete($device->image_path);
+                }
+                // Simpan gambar baru
+                $path = $request->file('image')->store('devices', 'public');
+                $validated['image_path'] = $path;
+            }
 
             $device->update($validated);
 
@@ -487,14 +504,24 @@ class DeviceController extends Controller
     public function exportExcel(Request $request)
     {
         try {
-            // SOLUSI: Lakukan Eager Loading untuk semua relasi bertingkat
-            $devices = Device::with([
-                'room.floor.building.regional.area'
-            ])->get();
+            // Terapkan filter yang sama seperti di halaman index
+            $user = auth()->user();
+            $query = Device::with(['room.floor.building.regional.area']);
+
+            if (!$user->isAdmin() && $user->regional_id) {
+                $query->whereHas('room.floor.building', function ($buildingQuery) use ($user) {
+                    $buildingQuery->where('regional_id', $user->regional_id);
+                });
+            }
+
+            $devices = $query->get();
 
             if ($devices->isEmpty()) {
-                // Sebaiknya redirect dengan pesan error jika tidak ada data
-                return back()->with('error', 'Tidak ada data device untuk diekspor.');
+                // KIRIM JSON JIKA TIDAK ADA DATA, BUKAN REDIRECT
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Tidak ada data device untuk diekspor.'
+                ], 404); // Kode 404 Not Found lebih sesuai
             }
 
             $spreadsheet = new Spreadsheet();
@@ -505,24 +532,27 @@ class DeviceController extends Controller
             $headers = [
                 'Kode Gedung', 'Area', 'Regional', 'Nama Gedung', 'Lantai', 'Ruangan',
                 'Kategori', 'Tipe Device', 'Merk', 'Nama Device', 'Serial Number',
-                'Catatan', 'No PO', 'No BAST', 'Tahun BAST', 'Kondisi'
+                'Catatan', 'No PO', 'Tahun PO', 'No BAST', 'Tahun BAST', 'Kondisi'
             ];
-            $sheet->fromArray($headers, NULL, 'A1');
+            $sheet->fromArray($headers, null, 'A1');
 
             // Style Headers
-            $sheet->getStyle('A1:P1')->getFont()->setBold(true);
-            $sheet->getStyle('A1:P1')->getFill()
+            $sheet->getStyle('A1:Q1')->getFont()->setBold(true); // Sampai kolom Q
+            $sheet->getStyle('A1:Q1')->getFill()
                 ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
                 ->getStartColor()->setRGB('E5E7EB');
 
             // Add Data
             $row = 2;
             foreach ($devices as $device) {
-                // Gunakan null coalescing operator (??) untuk keamanan jika relasi kosong
-                $sheet->setCellValue('A' . $row, $device->room->floor->building->building_code ?? 'N/A');
-                $sheet->setCellValue('B' . $row, $device->room->floor->building->regional->area->area_name ?? 'N/A');
-                $sheet->setCellValue('C' . $row, $device->room->floor->building->regional->regional_name ?? 'N/A');
-                $sheet->setCellValue('D' . $row, $device->room->floor->building->building_name ?? 'N/A');
+                $building = $device->room->floor->building ?? null;
+                $regional = $building->regional ?? null;
+                $area = $regional->area ?? null;
+                
+                $sheet->setCellValue('A' . $row, $building->building_code ?? 'N/A');
+                $sheet->setCellValue('B' . $row, $area->area_name ?? 'N/A');
+                $sheet->setCellValue('C' . $row, $regional->regional_name ?? 'N/A');
+                $sheet->setCellValue('D' . $row, $building->building_name ?? 'N/A');
                 $sheet->setCellValue('E' . $row, $device->room->floor->floor_name ?? 'N/A');
                 $sheet->setCellValue('F' . $row, $device->room->room_name ?? 'N/A');
                 $sheet->setCellValue('G' . $row, $device->category ?? 'N/A');
@@ -532,14 +562,15 @@ class DeviceController extends Controller
                 $sheet->setCellValue('K' . $row, $device->serial_number ?? 'N/A');
                 $sheet->setCellValue('L' . $row, $device->notes ?? 'N/A');
                 $sheet->setCellValue('M' . $row, $device->no_po ?? 'N/A');
-                $sheet->setCellValue('N' . $row, $device->no_bast ?? 'N/A');
-                $sheet->setCellValue('O' . $row, $device->tahun_bast ?? 'N/A');
-                $sheet->setCellValue('P' . $row, $device->condition ? ucfirst($device->condition) : 'N/A');
+                $sheet->setCellValue('N' . $row, $device->tahun_po ?? 'N/A');
+                $sheet->setCellValue('O' . $row, $device->no_bast ?? 'N/A');
+                $sheet->setCellValue('P' . $row, $device->tahun_bast ?? 'N/A');
+                $sheet->setCellValue('Q' . $row, $device->condition);
                 $row++;
             }
 
             // Auto-size columns
-            foreach (range('A', 'P') as $column) {
+            foreach (range('A', 'Q') as $column) {
                 $sheet->getColumnDimension($column)->setAutoSize(true);
             }
 
@@ -551,9 +582,11 @@ class DeviceController extends Controller
             }, $filename);
 
         } catch (\Exception $e) {
-            \Log::error('Excel export error: ' . $e->getMessage() . ' in file ' . $e->getFile() . ' on line ' . $e->getLine());
-            // Redirect dengan pesan error agar user tahu
-            return back()->with('error', 'Gagal mengekspor data: Terjadi kesalahan internal.');
+            \Log::error('Excel export error: ' . $e->getMessage());
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengekspor data: Terjadi kesalahan internal.'
+            ], 500);
         }
     }
 

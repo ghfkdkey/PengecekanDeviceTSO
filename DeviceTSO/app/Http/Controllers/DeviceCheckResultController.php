@@ -18,11 +18,9 @@ class DeviceCheckResultController extends Controller
 {
     public function index()
     {
-        // For web, render the page
         return view('device-check-results.index');
     }
 
-    // API: list check results with relations for history table
     public function apiIndex()
     {
         $user = auth()->user();
@@ -33,7 +31,6 @@ class DeviceCheckResultController extends Controller
             'user'
         ]);
 
-        // Filter berdasarkan regional user jika bukan admin
         if (!$user->isAdmin()) {
             $query->whereHas('device.room.floor.building.regional', function($q) use ($user) {
                 $q->where('regional_id', $user->regional_id);
@@ -63,7 +60,6 @@ class DeviceCheckResultController extends Controller
         
         $query = DeviceCheckResult::with(['device.room.floor.building.regional', 'checklistItem', 'user']);
         
-        // Filter berdasarkan regional user jika bukan admin
         if (!$user->isAdmin()) {
             $query->whereHas('device.room.floor.building.regional', function($q) use ($user) {
                 $q->where('regional_id', $user->regional_id);
@@ -84,7 +80,6 @@ class DeviceCheckResultController extends Controller
         $user = auth()->user();
         $result = DeviceCheckResult::with(['device.room.floor.building.regional'])->findOrFail($id);
         
-        // Check if user can access this result based on regional
         if (!$user->isAdmin()) {
             if ($result->device->room->floor->building->regional->regional_id !== $user->regional_id) {
                 abort(403, 'Unauthorized access to this device check result');
@@ -94,7 +89,6 @@ class DeviceCheckResultController extends Controller
         $oldStatus = $result->status;
         $result->update($request->all());
         
-        // Send email notification if status changed to 'failed' or 'maintenance'
         if ($oldStatus !== $result->status && in_array($result->status, ['failed', 'maintenance'])) {
             $this->sendStatusChangeNotification($result);
         }
@@ -112,7 +106,6 @@ class DeviceCheckResultController extends Controller
         $user = auth()->user();
         $result = DeviceCheckResult::findOrFail($id);
         
-        // Check if user can access this result based on regional
         if (!$user->isAdmin() && $result->device->room->floor->building->regional_id !== $user->regional_id) {
             return response()->json(['error' => 'Unauthorized access'], 403);
         }
@@ -123,11 +116,11 @@ class DeviceCheckResultController extends Controller
         $result->notes = $validated['notes'];
         if ($result->isDirty('status') || $result->isDirty('notes')) {
             $result->updated_at_custom = now();
+            $result->user_id = $user->id;
         }
         $result->save();
         $result->refresh();
 
-        // Send email notification if status changed to 'failed' or 'maintenance'
         if ($oldStatus !== $result->status && in_array($result->status, ['failed', 'maintenance'])) {
             $this->sendStatusChangeNotification($result);
         }
@@ -141,17 +134,14 @@ class DeviceCheckResultController extends Controller
     private function sendStatusChangeNotification($result)
     {
         try {
-            // Get regional dari device
             $regional = $result->device->room->floor->building->regional;
             
-            // Get PIC users untuk regional tersebut
             $picUsers = User::where('regional_id', $regional->regional_id)
                 ->where(function($query) {
                     $query->whereIn('role', [User::ROLE_PIC_GA, User::ROLE_PIC_OPERATIONAL, 'PIC General Affair (GA)', 'PIC Operasional']);
                 })
                 ->get();
 
-            // Send email ke setiap PIC
             foreach ($picUsers as $pic) {
                 if ($pic->email) {
                     Mail::to($pic->email)->send(new DeviceStatusChangedMail($result, $pic));
@@ -178,7 +168,6 @@ class DeviceCheckResultController extends Controller
         $user = auth()->user();
         $result = DeviceCheckResult::findOrFail($id);
         
-        // Check if user can access this result based on regional
         if (!$user->isAdmin()) {
             $device = $result->device()->with('room.floor.building.regional')->first();
             if ($device->room->floor->building->regional->regional_id !== $user->regional_id) {
@@ -194,14 +183,12 @@ class DeviceCheckResultController extends Controller
         return view('device-check-results.index');
     }
 
-    // PERBAIKAN: Filter floors berdasarkan regional user
     public function deviceCheckPage()
     {
         $user = auth()->user();
         
         $floorsQuery = Floor::with(['rooms.devices', 'building.regional']);
         
-        // Filter berdasarkan regional user jika bukan admin
         if (!$user->isAdmin()) {
             $floorsQuery->whereHas('building.regional', function($query) use ($user) {
                 $query->where('regional_id', $user->regional_id);
@@ -254,13 +241,12 @@ class DeviceCheckResultController extends Controller
         }
     }
 
-    // PERBAIKAN: API method to get devices by room - dengan filter regional
+
     public function getDevicesByRoom($roomId)
     {
         try {
             $user = auth()->user();
             
-            // Cek apakah room ini boleh diakses user
             if (!$user->isAdmin()) {
                 $room = Room::with('floor.building.regional')->findOrFail($roomId);
                 if ($room->floor->building->regional->regional_id !== $user->regional_id) {
@@ -268,26 +254,46 @@ class DeviceCheckResultController extends Controller
                 }
             }
             
-            $devices = Device::where('room_id', $roomId)
-                            ->select('device_id', 'device_name', 'device_type', 'serial_number')
-                            ->get();
-            
-            \Log::info('Devices for room ' . $roomId . ': ' . $devices->count() . ' devices found');
-            \Log::info('Device types: ' . $devices->pluck('device_type')->unique()->implode(', '));
-            \Log::info('User access info', [
-                'user_id' => $user->id,
-                'user_regional_id' => $user->regional_id,
-                'room_id' => $roomId
-            ]);
-            
+            $latestChecksSubquery = DB::table('device_check_results')
+                ->select('device_id', DB::raw('MAX(checked_at) as last_checked_at'))
+                ->groupBy('device_id');
+
+            $devices = DB::table('devices as d')
+                ->where('d.room_id', $roomId)
+                ->leftJoinSub($latestChecksSubquery, 'latest_checks', function ($join) {
+                    $join->on('d.device_id', '=', 'latest_checks.device_id');
+                })
+                ->leftJoin('device_check_results as dcr', function ($join) {
+                    $join->on('dcr.device_id', '=', 'latest_checks.device_id')
+                        ->on('dcr.checked_at', '=', 'latest_checks.last_checked_at');
+                })
+                ->select(
+                    'd.device_id',
+                    'd.device_name',
+                    'd.device_type',
+                    'd.serial_number',
+                    DB::raw("
+                        (CASE
+                            WHEN SUM(CASE WHEN dcr.status = 'failed' THEN 1 ELSE 0 END) > 0 THEN 'failed'
+                            WHEN SUM(CASE WHEN dcr.status = 'maintenance' THEN 1 ELSE 0 END) > 0 THEN 'maintenance'
+                            WHEN SUM(CASE WHEN dcr.status = 'pending' THEN 1 ELSE 0 END) > 0 THEN 'pending'
+                            WHEN MAX(dcr.status) IS NOT NULL THEN 'passed'
+                            ELSE NULL
+                        END) as latest_status
+                    ")
+                )
+                ->groupBy('d.device_id', 'd.device_name', 'd.device_type', 'd.serial_number')
+                ->orderBy('d.device_name')
+                ->get();
+                
             return response()->json($devices);
+
         } catch (\Exception $e) {
             \Log::error('Error getting devices for room ' . $roomId . ': ' . $e->getMessage());
-            return response()->json(['error' => $e->getMessage()], 500);
+            return response()->json(['error' => 'Gagal memuat data device.'], 500);
         }
     }
 
-    // API method to get checklist items by device type
     public function getChecklistByDeviceType($deviceType)
     {
         $checklistItems = ChecklistItem::where('device_type', $deviceType)
@@ -297,7 +303,6 @@ class DeviceCheckResultController extends Controller
         return response()->json($checklistItems);
     }
 
-    // Store multiple check results
     public function storeMultipleResults(Request $request)
     {
         $request->validate([
@@ -310,7 +315,6 @@ class DeviceCheckResultController extends Controller
 
         $user = auth()->user();
         
-        // PERBAIKAN: Cek apakah device ini boleh diakses user
         if (!$user->isAdmin()) {
             $device = Device::with('room.floor.building.regional')->findOrFail($request->device_id);
             if ($device->room->floor->building->regional->regional_id !== $user->regional_id) {
@@ -341,7 +345,6 @@ class DeviceCheckResultController extends Controller
         ]);
     }
 
-    // PERBAIKAN: API: list aggregated check sessions - dengan filter regional
     public function listSessions()
     {
         $user = auth()->user();
@@ -354,7 +357,6 @@ class DeviceCheckResultController extends Controller
             ->join('regionals as reg', 'reg.regional_id', '=', 'b.regional_id')
             ->join('users as u', 'u.id', '=', 'dcr.user_id');
 
-        // Filter berdasarkan regional user jika bukan admin
         if (!$user->isAdmin()) {
             $query->where('reg.regional_id', $user->regional_id);
         }
@@ -451,7 +453,6 @@ class DeviceCheckResultController extends Controller
             ->join('regionals as reg', 'reg.regional_id', '=', 'b.regional_id')
             ->join('users as u', 'u.id', '=', 'dcr.user_id');
 
-        // Filter berdasarkan regional user jika bukan admin
         if (!$user->isAdmin()) {
             $query->where('reg.regional_id', $user->regional_id);
         }

@@ -59,7 +59,16 @@ class User extends Authenticatable
         return $this->belongsTo(Regional::class, 'regional_id');
     }
 
-    // Role checker methods - PERBAIKAN: tambah support untuk format lama
+    public function getRoleNameAttribute(): string
+    {
+        return match ($this->role) {
+            self::ROLE_ADMIN => 'Admin',
+            self::ROLE_PIC_GA => 'PIC General Affair (GA)',
+            self::ROLE_PIC_OPERATIONAL => 'PIC Operasional',
+            default => ucfirst($this->role),
+        };
+    }
+
     public function isAdmin()
     {
         return in_array($this->role, [self::ROLE_ADMIN, 'admin']);

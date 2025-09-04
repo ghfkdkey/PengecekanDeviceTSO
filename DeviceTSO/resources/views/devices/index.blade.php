@@ -5,10 +5,28 @@
 @section('page-subtitle', 'Kelola device untuk sistem pengecekan')
 
 @section('content')
-<div class="space-y-6 font-poppins">
+<div 
+    class="space-y-6" 
+    id="device-manager-container"
+    data-floors="{{ $floors->map(function($floor) { return ['floor_id' => $floor->floor_id, 'floor_name' => $floor->floor_name, 'building_id' => $floor->building_id]; })->values()->toJson() }}"
+    data-rooms="{{ $rooms->map(function($room) { return ['room_id' => $room->room_id, 'room_name' => $room->room_name, 'floor_id' => $room->floor_id, 'building_id' => $room->floor->building_id]; })->values()->toJson() }}">
     <!-- Header Actions -->
     <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between space-y-4 lg:space-y-0">
         <div class="flex-1 space-y-4 lg:space-y-0 lg:flex lg:items-center lg:space-x-4">
+            <!-- Building Filter -->
+            <div class="lg:max-w-xs">
+                <select 
+                    id="building-filter" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red bg-white"
+                >
+                    <option value="">Semua Gedung</option>
+                    @foreach($buildingsForFilter as $building)
+                        <option value="{{ $building->building_id }}" {{ request('building') == $building->building_id ? 'selected' : '' }}>
+                            {{ $building->building_name }} ({{ $building->building_code }})
+                        </option>
+                    @endforeach
+                </select>
+            </div>
             <!-- Room Filter -->
             <div class="lg:max-w-xs">
                 <select 
@@ -143,12 +161,12 @@
                     <table class="min-w-full table-auto border-collapse">
                         <thead class="bg-gray-100">
                             <tr>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Device Name</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Device Type</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Room</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Serial Number</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Condition</th>
-                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Actions</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Nama Device</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Tipe Device</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Ruangan</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Nomor Seri</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Kondisi</th>
+                                <th class="px-6 py-3 text-left text-sm font-medium text-gray-500">Aksi</th>
                             </tr>
                         </thead>
                         <tbody class="bg-white">
@@ -199,6 +217,7 @@
                                         data-device-type="{{ $device->device_type }}"
                                         data-serial-number="{{ $device->serial_number }}"
                                         data-room-id="{{ $device->room_id }}"
+                                        data-building-id="{{ $device->room->floor->building_id ?? '' }}"
                                         data-category="{{ $device->category }}"
                                         data-merk="{{ $device->merk }}"
                                         data-tahun-po="{{ $device->tahun_po }}"
@@ -241,7 +260,7 @@
                         class="bg-gradient-to-r from-telkomsel-red to-telkomsel-dark-red text-white px-6 py-2 rounded-lg hover:from-telkomsel-dark-red hover:to-telkomsel-red transition-all duration-200"
                         onclick="document.getElementById('add-device-btn').click()"
                     >
-                        Add First Device
+                        Tambah Device
                     </button>
                 </div>
             @endif
@@ -308,7 +327,37 @@
                 @csrf
                 <input type="hidden" id="device-id" name="device_id">
                 <input type="hidden" id="form-method" name="_method" value="POST">
-                
+
+                <div>
+                    <label for="building-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Gedung <span class="text-red-500">*</span>
+                    </label>
+                    <select 
+                        id="building-select" 
+                        name="building_id" 
+                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
+                        required
+                    >
+                        <option value="">Pilih Gedung</option>
+                        @foreach($buildingsForFilter as $building)
+                            <option value="{{ $building->building_id }}">
+                                {{ $building->building_name }} ({{ $building->building_code }})
+                            </option>
+                        @endforeach
+                    </select>
+                    <div id="building_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
+                <div>
+                    <label for="floor-select" class="block text-sm font-medium text-gray-700 mb-2">
+                        Lantai <span class="text-red-500">*</span>
+                    </label>
+                    <select id="floor-select" name="floor_id" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors" required disabled>
+                        <option value="">Pilih Lantai</option>
+                    </select>
+                    <div id="floor_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                </div>
+
                 <div>
                     <label for="room-select" class="block text-sm font-medium text-gray-700 mb-2">
                         Ruangan <span class="text-red-500">*</span>
@@ -318,11 +367,10 @@
                         name="room_id" 
                         class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-telkomsel-red focus:border-telkomsel-red transition-colors"
                         required
+                        disabled
                     >
                         <option value="">Pilih Ruangan</option>
-                        @foreach($rooms as $room)
-                            <option value="{{ $room->room_id }}">{{ $room->room_name }}</option>
-                        @endforeach
+                        <!-- Options akan diisi via JavaScript berdasarkan building yang dipilih -->
                     </select>
                     <div id="room_id-error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
@@ -388,25 +436,21 @@
                 </div>
                 
                 <div>
-                    <label for="device-image-form" class="block text-sm font-medium text-gray-700 mb-2">
+                    <label for="image" class="block text-sm font-medium text-gray-700 mb-2">
                         Gambar Device
                     </label>
-                    <div class="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-300 border-dashed rounded-lg hover:border-telkomsel-red transition-colors">
-                        <div class="space-y-1 text-center">
-                            <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
-                                <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-                            </svg>
-                            <div class="flex text-sm text-gray-600">
-                                <label for="device-image-form" class="relative cursor-pointer bg-white rounded-md font-medium text-telkomsel-red hover:text-telkomsel-dark-red focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-telkomsel-red">
-                                    <span>Upload gambar</span>
-                                    <input id="device-image-form" name="image" type="file" class="sr-only" accept="image/*">
-                                </label>
-                                <p class="pl-1">atau drag and drop</p>
-                            </div>
-                            <p class="text-xs text-gray-500">PNG, JPG, GIF max 10MB</p>
+                    <input type="file" id="image" name="image" accept="image/png, image/jpeg, image/gif" class="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-gray-50 file:text-gray-700 hover:file:bg-gray-100">
+                    <div id="image-error" class="text-red-500 text-sm mt-1 hidden"></div>
+                    
+                    <div id="image-preview-wrapper" class="mt-4 hidden">
+                        <label class="block text-sm font-medium text-gray-700 mb-2">Image Preview</label>
+                        <div class="relative group">
+                            <img id="image-preview-element" src="#" alt="Image Preview" class="rounded-lg object-cover h-48 w-full">
+                            <button type="button" id="remove-image-btn" class="absolute top-2 right-2 bg-black bg-opacity-50 text-white rounded-full p-1 hover:bg-opacity-75 focus:outline-none opacity-0 group-hover:opacity-100 transition-opacity">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                            </button>
                         </div>
                     </div>
-                    <div id="device_image_error" class="text-red-500 text-sm mt-1 hidden"></div>
                 </div>
                 
                 <!-- New fields for category, merk, tahun, no po, kondisi, and notes -->
@@ -686,14 +730,18 @@
 
 @push('scripts')
 <script>
-    // Elements
+    const container = document.getElementById('device-manager-container');
+
+    const floorsData = JSON.parse(container.dataset.floors || '[]');
+    const roomsData = JSON.parse(container.dataset.rooms || '[]');
+
     const addDeviceBtn = document.getElementById('add-device-btn');
     const deviceModal = document.getElementById('device-modal');
     const deleteModal = document.getElementById('delete-modal');
     const imageModal = document.getElementById('image-modal');
     const deviceViewModal = document.getElementById('device-view-modal');
     const closeModal = document.getElementById('close-modal');
-    const closeViewModal = document.getElementById('close-view-modal'); // FIX: New element for view modal close button
+    const closeViewModal = document.getElementById('close-view-modal'); 
     const cancelBtn = document.getElementById('cancel-btn');
     const imageForm = document.getElementById('image-form');
     const modalContent = document.getElementById('modal-content');
@@ -703,6 +751,7 @@
     const loadingSpinner = document.getElementById('loading-spinner');
     const roomFilter = document.getElementById('room-filter');
     const typeFilter = document.getElementById('type-filter');
+    const buildingFilter = document.getElementById('building-filter');
     const searchDevices = document.getElementById('search-devices');
     const devicesContainer = document.getElementById('devices-container');
     const devicesGrid = document.getElementById('devices-grid');
@@ -713,10 +762,16 @@
     const deviceCharCount = document.getElementById('device-char-count');
     const serialCharCount = document.getElementById('serial-char-count');
     const roomSelect = document.getElementById('room-select');
+    const buildingSelect = document.getElementById('building-select');
+    const floorSelect = document.getElementById('floor-select');
     const deviceTypeSelect = document.getElementById('device-type');
     const deviceIdInput = document.getElementById('device-id');
     const formMethod = document.getElementById('form-method');
     const deviceForm = document.getElementById('device-form');
+    const imageInput = document.getElementById('image');
+    const imagePreviewWrapper = document.getElementById('image-preview-wrapper');
+    const imagePreviewElement = document.getElementById('image-preview-element');
+    const removeImageBtn = document.getElementById('remove-image-btn');
 
     // Image modal elements
     const closeImageModal = document.getElementById('close-image-modal');
@@ -769,7 +824,6 @@
             });
         }
 
-        // FIX: Add event listener for the view modal close button
         if (closeViewModal) {
             closeViewModal.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -792,7 +846,6 @@
             });
         }
         
-        // FIX: Add event listener for clicking outside the view modal
         if (deviceViewModal) {
             deviceViewModal.addEventListener('click', function(e) {
                 if (e.target === deviceViewModal) {
@@ -801,7 +854,6 @@
             });
         }
 
-        // Image modal events
         if (closeImageModal) {
             closeImageModal.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -824,7 +876,6 @@
             });
         }
 
-        // Delete modal events
         if (cancelDeleteBtn) {
             cancelDeleteBtn.addEventListener('click', function(e) {
                 e.preventDefault();
@@ -859,20 +910,30 @@
             serialNumberInput.addEventListener('input', updateCharCounts);
         }
 
-        // Image input events
-        if (deviceImageInput) {
+        if (deviceImageInput) { 
             deviceImageInput.addEventListener('change', handleImageChange);
         }
-
-        // Filter and search events
+        if (imageInput) {
+            imageInput.addEventListener('change', handleImagePreview);
+        }
+        if (removeImageBtn) {
+            removeImageBtn.addEventListener('click', removeImagePreview);
+        }
         if (roomFilter) {
             roomFilter.addEventListener('change', filterDevices);
         }
-
+        if (buildingSelect) {
+            buildingSelect.addEventListener('change', handleBuildingChange);
+        }
+        if (floorSelect) { 
+            floorSelect.addEventListener('change', handleFloorChange);
+        }
         if (typeFilter) {
             typeFilter.addEventListener('change', filterDevices);
         }
-
+        if (buildingFilter) {
+            buildingFilter.addEventListener('change', filterDevices);
+        }
         if (searchDevices) {
             searchDevices.addEventListener('input', debounce(filterDevices, 300));
         }
@@ -888,6 +949,28 @@
             deviceForm.addEventListener('submit', handleSubmit);
             console.log('Form submit handler attached');
         }
+    }
+
+    function handleImagePreview(event) {
+        const file = event.target.files[0];
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+
+            reader.onload = function(e) {
+                imagePreviewElement.src = e.target.result;
+                imagePreviewWrapper.classList.remove('hidden');
+            }
+
+            reader.readAsDataURL(file);
+        } else {
+            removeImagePreview();
+        }
+    }
+
+    function removeImagePreview() {
+        imageInput.value = ''; // Hapus file yang sudah dipilih
+        imagePreviewElement.src = '#';
+        imagePreviewWrapper.classList.add('hidden');
     }
 
     function bindDeviceCardEvents() {
@@ -931,6 +1014,7 @@
                     deviceType: this.getAttribute('data-device-type'), 
                     serialNumber: this.getAttribute('data-serial-number'), 
                     roomId: this.getAttribute('data-room-id'),
+                    buildingId: this.getAttribute('data-building-id'),
                     category: this.getAttribute('data-category'),
                     merk: this.getAttribute('data-merk'),
                     tahunPo: this.getAttribute('data-tahun-po'),
@@ -1024,6 +1108,7 @@
             deviceForm.reset();
         }
         clearErrors();
+        removeImagePreview();
 
         if (isEdit && data) {
             // Set values for existing fields
@@ -1032,6 +1117,33 @@
             if (deviceTypeSelect) deviceTypeSelect.value = data.deviceType || '';
             if (serialNumberInput) serialNumberInput.value = data.serialNumber || '';
             if (roomSelect) roomSelect.value = data.roomId || '';
+
+            if (data.roomId) {
+                const selectedRoom = roomsData.find(room => room.room_id == data.roomId);
+                if (selectedRoom) {
+                    const selectedFloor = floorsData.find(floor => floor.floor_id == selectedRoom.floor_id);
+                    const existingImagePath = document.querySelector(`.edit-device-btn[data-device-id="${data.deviceId}"]`)?.getAttribute('data-image-path');
+                    if (existingImagePath && existingImagePath !== 'null') {
+                        imagePreviewElement.src = `/storage/${existingImagePath}`;
+                        imagePreviewWrapper.classList.remove('hidden');
+                    }
+                    if (selectedFloor) {
+                        buildingSelect.value = selectedFloor.building_id || '';
+                        handleBuildingChange();
+                        
+                        // Beri jeda agar UI browser sempat me-render dropdown lantai
+                        setTimeout(() => {
+                            floorSelect.value = selectedFloor.floor_id || '';
+                            handleFloorChange();
+
+                            // Beri jeda lagi untuk me-render dropdown ruangan
+                            setTimeout(() => {
+                                roomSelect.value = data.roomId || '';
+                            }, 50);
+                        }, 50);
+                    }
+                }
+            }
             
             // Set values for new fields
             if (document.getElementById('category')) document.getElementById('category').value = data.category || '';
@@ -1063,6 +1175,7 @@
     function closeDeviceModal() {
         hideModal(deviceModal);
         clearErrors();
+        removeImagePreview();
     }
 
     function openImageModal(deviceId, deviceName, currentImage) {
@@ -1211,6 +1324,52 @@
         }
     }
 
+    function handleBuildingChange() {
+        const selectedBuildingId = buildingSelect.value;
+        
+        // Reset dropdown lantai dan ruangan
+        floorSelect.innerHTML = '<option value="">Pilih Lantai</option>';
+        roomSelect.innerHTML = '<option value="">Pilih Ruangan</option>';
+        floorSelect.disabled = true;
+        roomSelect.disabled = true;
+        
+        if (selectedBuildingId) {
+            floorSelect.disabled = false;
+            const filteredFloors = floorsData.filter(floor => floor.building_id == selectedBuildingId);
+            
+            filteredFloors.forEach(floor => {
+                const option = document.createElement('option');
+                option.value = floor.floor_id;
+                option.textContent = floor.floor_name;
+                floorSelect.appendChild(option);
+            });
+        }
+    }
+
+    function handleFloorChange() {
+        const selectedFloorId = floorSelect.value;
+
+        // Reset dropdown ruangan
+        roomSelect.innerHTML = '<option value="">Pilih Ruangan</option>';
+        roomSelect.disabled = true;
+
+        if (selectedFloorId) {
+            // Aktifkan dropdown ruangan
+            roomSelect.disabled = false;
+
+            // Filter ruangan berdasarkan floor_id yang dipilih (ini logika yang benar)
+            const filteredRooms = roomsData.filter(room => room.floor_id == selectedFloorId);
+            
+            // Isi pilihan ruangan
+            filteredRooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.room_id;
+                option.textContent = room.room_name;
+                roomSelect.appendChild(option);
+            });
+        }
+    }
+
     function handleImageSubmit(e) {
         e.preventDefault();
 
@@ -1343,6 +1502,11 @@
         clearErrors();
         let isValid = true;
 
+        if (!buildingSelect.value) {
+            showError('building_id-error', 'Pilih gedung terlebih dahulu');
+            isValid = false;
+        }
+
         if (!document.getElementById('room-select').value) {
             showError('room_id-error', 'Pilih ruangan terlebih dahulu');
             isValid = false;
@@ -1427,9 +1591,18 @@
         }
     }
 
+    function getDeviceBuildingId(roomId) {
+        @foreach($rooms as $room)
+            if ('{{ $room->room_id }}' === roomId) {
+                return '{{ $room->floor->building_id ?? '' }}';
+            }
+        @endforeach
+        return '';
+    }
     function filterDevices() {
         const roomValue = roomFilter ? roomFilter.value : '';
         const typeValue = typeFilter ? typeFilter.value : '';
+        const buildingValue = buildingFilter ? buildingFilter.value : '';
         const searchValue = searchDevices ? searchDevices.value.toLowerCase().trim() : '';
         const allRows = document.querySelectorAll('#devices-table tbody tr');
 
@@ -1442,6 +1615,8 @@
             const serialNumber = row.cells[3].textContent.toLowerCase();
             const deviceRoomId = row.querySelector('.edit-device-btn').getAttribute('data-room-id');
 
+            const deviceBuildingId = getDeviceBuildingId(deviceRoomId);
+
             let shouldShow = true;
 
             if (roomValue && deviceRoomId !== roomValue) {
@@ -1449,6 +1624,10 @@
             }
 
             if (typeValue && !deviceType.includes(typeValue.toLowerCase())) {
+                shouldShow = false;
+            }
+
+            if (buildingValue && deviceBuildingId !== buildingValue) {
                 shouldShow = false;
             }
 
@@ -1495,6 +1674,7 @@
         if (searchDevices) searchDevices.value = '';
         if (roomFilter) roomFilter.value = '';
         if (typeFilter) typeFilter.value = '';
+        if (buildingFilter) buildingFilter.value = '';
         filterDevices();
     }
 

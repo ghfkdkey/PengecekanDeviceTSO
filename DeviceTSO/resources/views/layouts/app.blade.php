@@ -292,7 +292,7 @@
                             </div>
                             <div class="text-left hidden sm:block">
                                 <p class="text-sm font-medium text-gray-900 dark:text-white">{{ auth()->user()->full_name ?? auth()->user()->username ?? 'User' }}</p>
-                                <p class="text-xs text-gray-500 dark:text-gray-400 capitalize">{{ auth()->user()->role ?? 'user' }}</p>
+                                <p class="text-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->role_name }}</p>
 
                                 <!-- Show Regional Name for PIC GA and PIC Operational -->
                                 @if (auth()->user()->isGA() || auth()->user()->isOperational())

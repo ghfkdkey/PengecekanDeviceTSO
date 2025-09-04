@@ -350,12 +350,12 @@
                 <button type="button" onclick="closeDeleteModal()" class="px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 hover:bg-gray-50">
                     Cancel
                 </button>
-                <button id="confirm-delete-btn" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">
+                <button id="confirm-delete-btn" onclick="confirmDeleteHandler()" type="button" class="px-4 py-2 bg-red-600 text-white rounded-md text-sm font-medium hover:bg-red-700">
                     <svg id="delete-spinner" class="hidden animate-spin h-5 w-5 mr-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                         <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                         <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v16a8 8 0 01-8-8z"></path>
                     </svg>
-                    <span id="delete-text">Delete</span>
+                    <span id="delete-text">Hapus</span>
                 </button>
             </div>
         </div>
@@ -364,178 +364,176 @@
 @endsection
 
 <script>
-function viewItem(id) {
-    fetch(`/api/checklist-items/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('viewDeviceType').textContent = data.device_type;
-            document.getElementById('viewQuestion').textContent = data.question;
-            document.getElementById('viewResults').textContent = `${data.check_results_count || 0} check results`;
-            document.getElementById('viewModal').classList.remove('hidden');
-        });
-}
-
-function editItem(id) {
-    fetch(`/api/checklist-items/${id}`)
-        .then(response => response.json())
-        .then(data => {
-            document.getElementById('editItemId').value = id;
-            document.getElementById('editDeviceType').value = data.device_type;
-            document.getElementById('editQuestion').value = data.question;
-            document.getElementById('editModal').classList.remove('hidden');
-        });
-}
-
-function closeViewModal() {
-    document.getElementById('viewModal').classList.add('hidden');
-}
-
-function closeEditModal() {
-    document.getElementById('editModal').classList.add('hidden');
-    document.getElementById('editForm').reset();
-}
-
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-}
-
-function updateItem(e) {
-    e.preventDefault();
-    const id = document.getElementById('editItemId').value;
-    const formData = new FormData(e.target);
-
-    fetch(`/api/checklist-items/${id}`, { // Perbaiki URL
-        method: 'PUT',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            device_type: formData.get('device_type'),
-            question: formData.get('question')
-        })
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error('Network response was not ok');
-        }
-        return response.json();
-    })
-    .then(data => {
-        if (data.errors) {
-            throw new Error(Object.values(data.errors).join('\n'));
-        }
-        closeEditModal();
-        window.location.reload();
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        alert(error.message || 'Failed to update checklist item');
-    });
-}
-
-// Fixed JavaScript untuk delete checklist item
-function deleteItem(id, question) {
-    // Set data untuk modal konfirmasi delete
-    document.getElementById('delete-item-question').textContent = question;
-    document.getElementById('confirm-delete-btn').setAttribute('data-item-id', id);
-    document.getElementById('deleteModal').classList.remove('hidden');
-}
-
-// Fixed confirm delete handler dengan error handling yang lebih baik
-document.getElementById('confirm-delete-btn').addEventListener('click', async function() {
-    const id = this.getAttribute('data-item-id');
-    const deleteText = document.getElementById('delete-text');
-    const deleteSpinner = document.getElementById('delete-spinner');
-
-    // Validasi ID
-    if (!id) {
-        alert('ID checklist item tidak valid');
-        return;
+    function viewItem(id) {
+        fetch(`/api/checklist-items/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('viewDeviceType').textContent = data.device_type;
+                document.getElementById('viewQuestion').textContent = data.question;
+                document.getElementById('viewResults').textContent = `${data.check_results_count || 0} check results`;
+                document.getElementById('viewModal').classList.remove('hidden');
+            });
     }
 
-    // Show loading state
-    this.disabled = true;
-    deleteText.classList.add('hidden');
-    deleteSpinner.classList.remove('hidden');
-
-    try {
-        // PERBAIKAN: Gunakan route yang benar sesuai dengan web.php
-        const response = await fetch(`/checklist-items/${id}`, {
-            method: 'DELETE',
-            headers: {
-                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                'X-Requested-With': 'XMLHttpRequest',
-                'Accept': 'application/json',
-                'Content-Type': 'application/json'
+    function editItem(id) {
+        fetch(`/api/checklist-items/${id}`)
+            .then(response => response.json())
+            .then(data => {
+                document.getElementById('editItemId').value = id;
+                document.getElementById('editDeviceType').value = data.device_type;
+                document.getElementById('editQuestion').value = data.question;
+                document.getElementById('editModal').classList.remove('hidden');
+            });
+    }
+    function showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg text-white ${
+            type === 'success' ? 'bg-green-500' : 
+            type === 'error' ? 'bg-red-500' : 
+            'bg-blue-500'
+        }`;
+        notification.textContent = message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (document.body.contains(notification)) {
+                document.body.removeChild(notification);
             }
+        }, 3000);
+    }
+
+    function closeViewModal() {
+        document.getElementById('viewModal').classList.add('hidden');
+    }
+
+    function closeEditModal() {
+        document.getElementById('editModal').classList.add('hidden');
+        document.getElementById('editForm').reset();
+    }
+
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
+    }
+
+    function updateItem(e) {
+        e.preventDefault();
+        const id = document.getElementById('editItemId').value;
+        const formData = new FormData(e.target);
+
+        fetch(`/api/checklist-items/${id}`, { // Perbaiki URL
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                device_type: formData.get('device_type'),
+                question: formData.get('question')
+            })
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.errors) {
+                throw new Error(Object.values(data.errors).join('\n'));
+            }
+            closeEditModal();
+            window.location.reload();
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message || 'Failed to update checklist item');
         });
+    }
 
-        // PERBAIKAN: Cek status response terlebih dahulu
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+    // Fixed JavaScript untuk delete checklist item
+    function deleteItem(id, question) {
+        // Set data untuk modal konfirmasi delete
+        document.getElementById('delete-item-question').textContent = question;
+        document.getElementById('confirm-delete-btn').setAttribute('data-item-id', id);
+        document.getElementById('deleteModal').classList.remove('hidden');
+    }
+
+    async function confirmDeleteHandler() {
+        const confirmBtn = document.getElementById('confirm-delete-btn');
+        const id = confirmBtn.getAttribute('data-item-id');
+        const deleteText = document.getElementById('delete-text');
+        const deleteSpinner = document.getElementById('delete-spinner');
+
+        if (!id) {
+            showNotification('ID checklist item tidak valid', 'error');
+            return;
         }
 
-        const result = await response.json();
+        // Tampilkan loading
+        confirmBtn.disabled = true;
+        deleteText.classList.add('hidden');
+        deleteSpinner.classList.remove('hidden');
 
-        if (result.success) {
-            // PERBAIKAN: Tutup modal dulu sebelum reload
-            closeDeleteModal();
+        try {
+            // PERBAIKAN 1: URL fetch sudah diperbaiki
+            const response = await fetch(`/checklist-items/${id}`, {
+                method: 'DELETE',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    'Accept': 'application/json'
+                }
+            });
             
-            // Optional: Tampilkan notifikasi sukses sebelum reload
-            showNotification('Checklist item berhasil dihapus', 'success');
+            const result = await response.json();
+
+            if (response.ok && result.success) {
+                closeDeleteModal();
+                showNotification(result.message || 'Checklist item berhasil dihapus', 'success');
+                setTimeout(() => {
+                    window.location.reload();
+                }, 1000);
+            } else {
+                // Jika gagal, lempar error dengan pesan dari server
+                throw new Error(result.message || `Gagal menghapus. Status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error('Delete error:', error);
+            showNotification(error.message, 'error');
             
-            // Delay sedikit untuk menampilkan notifikasi
-            setTimeout(() => {
-                window.location.reload();
-            }, 1000);
-        } else {
-            throw new Error(result.message || 'Gagal menghapus checklist item');
+            // PERBAIKAN 3: Reset tampilan tombol jika terjadi error
+            confirmBtn.disabled = false;
+            deleteText.classList.remove('hidden');
+            deleteSpinner.classList.add('hidden');
         }
-    } catch (error) {
-        console.error('Delete error:', error);
+    }
+
+    // Close delete modal function
+    function closeDeleteModal() {
+        document.getElementById('deleteModal').classList.add('hidden');
         
         // Reset button state
-        this.disabled = false;
+        const confirmBtn = document.getElementById('confirm-delete-btn');
+        const deleteText = document.getElementById('delete-text');
+        const deleteSpinner = document.getElementById('delete-spinner');
+        
+        confirmBtn.disabled = false;
         deleteText.classList.remove('hidden');
         deleteSpinner.classList.add('hidden');
-        
-        // Tampilkan error yang lebih informatif
-        let errorMessage = 'Terjadi kesalahan saat menghapus checklist item';
-        if (error.message && error.message !== 'Failed to fetch') {
-            errorMessage = error.message;
+        confirmBtn.removeAttribute('data-item-id');
+    }
+
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.id === 'viewModal') {
+            closeViewModal();
         }
-        
-        showNotification(errorMessage, 'error');
-    }
-});
-
-// Close delete modal function
-function closeDeleteModal() {
-    document.getElementById('deleteModal').classList.add('hidden');
-    
-    // Reset button state
-    const confirmBtn = document.getElementById('confirm-delete-btn');
-    const deleteText = document.getElementById('delete-text');
-    const deleteSpinner = document.getElementById('delete-spinner');
-    
-    confirmBtn.disabled = false;
-    deleteText.classList.remove('hidden');
-    deleteSpinner.classList.add('hidden');
-    confirmBtn.removeAttribute('data-item-id');
-}
-
-// Close modals when clicking outside
-document.addEventListener('click', function(e) {
-    if (e.target.id === 'viewModal') {
-        closeViewModal();
-    }
-    if (e.target.id === 'editModal') {
-        closeEditModal();
-    }
-    if (e.target.id === 'deleteModal') {
-        closeDeleteModal();
-    }
-});
+        if (e.target.id === 'editModal') {
+            closeEditModal();
+        }
+        if (e.target.id === 'deleteModal') {
+            closeDeleteModal();
+        }
+    });
 </script>

@@ -22,6 +22,20 @@
         </div>
     </div>
 
+    <div class="bg-white rounded-xl shadow-sm p-4 border border-gray-200 mb-6 w-full md:w-1/4">
+        <div class="flex items-end space-x-2">
+            <div class="flex-1">
+                <label for="dateFilter" class="block text-sm font-medium text-gray-700">
+                    Filter Tanggal
+                </label>
+                <input type="date" id="dateFilter" class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500">
+            </div>
+            <div>
+                <button id="resetDateFilter" class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300">Reset</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Statistics Cards -->
     <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
         <!-- Total Devices -->
@@ -189,15 +203,20 @@
     // Load dashboard data
     async function loadDashboardData() {
         try {
-            // Load statistics from database
-            const statsResponse = await fetch('/api/dashboard/stats');
+            const selectedDate = document.getElementById('dateFilter').value;
+            let statsUrl = '/api/dashboard/stats';
+
+            if (selectedDate) {
+                statsUrl += `?date=${selectedDate}`;
+            }
+
+            const statsResponse = await fetch(statsUrl);
             if (statsResponse.ok) {
                 dashboardData.stats = await statsResponse.json();
                 updateStats();
                 updateChart();
             }
 
-            // Load recent activities (5 most recent)
             const activitiesResponse = await fetch('/api/dashboard/activities?limit=5');
             if (activitiesResponse.ok) {
                 dashboardData.activities = await activitiesResponse.json();
@@ -208,7 +227,6 @@
         }
     }
 
-    // Update statistics
     function updateStats() {
         const stats = dashboardData.stats;
         document.getElementById('totalDevices').textContent = stats.total_devices || 0;
@@ -217,7 +235,6 @@
         document.getElementById('failedDevices').textContent = stats.failed_devices || 0;
     }
 
-    // Update pie chart
     function updateChart() {
         const stats = dashboardData.stats;
         const ctx = document.getElementById('deviceStatusChart').getContext('2d');
@@ -227,18 +244,15 @@
         const failedCount = stats.failed_devices || 0;
         const maintenanceCount = stats.maintenance_devices || 0;
         
-        // Update legend
         document.getElementById('pendingLegend').textContent = pendingCount;
         document.getElementById('passedLegend').textContent = passedCount;
         document.getElementById('failedLegend').textContent = failedCount;
         document.getElementById('maintenanceLegend').textContent = maintenanceCount;
 
-        // Destroy existing chart if it exists
         if (deviceStatusChart) {
             deviceStatusChart.destroy();
         }
 
-        // Create new chart
         deviceStatusChart = new Chart(ctx, {
             type: 'pie',
             data: {
@@ -246,10 +260,10 @@
                 datasets: [{
                     data: [pendingCount, passedCount, failedCount, maintenanceCount],
                     backgroundColor: [
-                        '#EAB308', // Yellow for pending
-                        '#22C55E', // Green for passed
-                        '#EF4444', // Red for failed
-                        '#6B7280'  // Gray for maintenance
+                        '#EAB308', 
+                        '#22C55E', 
+                        '#EF4444', 
+                        '#6B7280'  
                     ],
                     borderColor: [
                         '#EAB308',
@@ -266,7 +280,7 @@
                 maintainAspectRatio: false,
                 plugins: {
                     legend: {
-                        display: false // We're using custom legend
+                        display: false 
                     },
                     tooltip: {
                         callbacks: {
@@ -282,7 +296,6 @@
         });
     }
 
-    // Fungsi untuk format time ago dengan timezone yang benar
     function formatTimeAgo(dateString) {
         try {
             const date = new Date(dateString);
@@ -421,12 +434,19 @@
         return icons[type] || icons.default;
     }
 
-    // Initialize dashboard
     document.addEventListener('DOMContentLoaded', function() {
         loadDashboardData();
         
-        // Auto refresh every 30 seconds
-        setInterval(loadDashboardData, 30000);
+        const dateFilter = document.getElementById('dateFilter');
+        const resetDateFilter = document.getElementById('resetDateFilter');
+
+        dateFilter.addEventListener('change', loadDashboardData);
+
+        resetDateFilter.addEventListener('click', () => {
+            dateFilter.value = ''; 
+            loadDashboardData();   
+        });
+    
     });
 </script>
 @endpush

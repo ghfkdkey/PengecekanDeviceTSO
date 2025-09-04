@@ -82,7 +82,7 @@
                         </svg>
                     </div>
                     <div class="ml-4">
-                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Total Maintenance</p>
+                        <p class="text-sm font-medium text-gray-600" style="font-family: 'Poppins', sans-serif;">Maintenance</p>
                         <p class="text-2xl font-bold text-orange-600" id="maintenanceCount" style="font-family: 'Telkomsel Batik Sans', sans-serif;">-</p>
                     </div>
                 </div>
@@ -94,9 +94,9 @@
             <div class="p-6">
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                     <div>
-                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Search</label>
+                        <label for="searchInput" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Pencarian</label>
                         <div class="relative">
-                            <input type="text" id="searchInput" placeholder="Search device, user..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                            <input type="text" id="searchInput" placeholder="Cari device, user..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
                             <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                 <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -107,7 +107,7 @@
                     <div>
                         <label for="statusFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Status</label>
                         <select id="statusFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
-                            <option value="">All Status</option>
+                            <option value="">Semua Status</option>
                             <option value="passed">Passed</option>
                             <option value="failed">Failed</option>
                             <option value="pending">Pending</option>
@@ -115,14 +115,20 @@
                         </select>
                     </div>
                     <div>
-                        <label for="deviceTypeFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Device Type</label>
+                        <label for="deviceTypeFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Tipe Device</label>
                         <select id="deviceTypeFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
-                            <option value="">All Types</option>
+                            <option value="">Semua Tipe</option>
                         </select>
                     </div>
-                    <div>
-                        <label for="dateFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Date Range</label>
-                        <input type="date" id="dateFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="startDateFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Tanggal Mulai</label>
+                            <input type="date" id="startDateFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                        </div>
+                        <div>
+                            <label for="endDateFilter" class="block text-sm font-medium text-gray-700 mb-2" style="font-family: 'Poppins', sans-serif;">Tanggal Akhir</label>
+                            <input type="date" id="endDateFilter" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-red-500" style="font-family: 'Poppins', sans-serif;">
+                        </div>
                     </div>
                 </div>
                 <div class="mt-4 flex justify-between items-center">
@@ -151,11 +157,11 @@
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Device</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Location</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Lokasi</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Checked By</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Date</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Actions</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Dicek oleh</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Tanggal</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider" style="font-family: 'Poppins', sans-serif;">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="resultsTableBody">
@@ -166,7 +172,7 @@
             <div class="px-6 py-4 border-t border-gray-200">
                 <div class="flex items-center justify-between">
                     <div class="text-sm text-gray-700" style="font-family: 'Poppins', sans-serif;">
-                        Showing <span id="showingFrom">0</span> to <span id="showingTo">0</span> of <span id="totalResults">0</span> results
+                        Menampilkan <span id="showingFrom">0</span> hingga <span id="showingTo">0</span> dari <span id="totalResults">0</span> hasil
                     </div>
                     <div class="flex space-x-2" id="pagination">
                         <!-- Pagination will be generated here -->
@@ -183,7 +189,7 @@
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;" id="modalTitle">
-                    Add New Check Result
+                    Tambahkan Hasil Pengecekan Baru
                 </h3>
                 <button onclick="closeAddModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -249,7 +255,7 @@
         <div class="mt-3">
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900" style="font-family: 'Telkomsel Batik Sans', sans-serif;">
-                    Check Result Details
+                    Detail Hasil Pengecekan
                 </h3>
                 <button onclick="closeDetailModal()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -401,7 +407,8 @@ function setupEventListeners() {
     // Filter selects
     document.getElementById('statusFilter').addEventListener('change', filterResults);
     document.getElementById('deviceTypeFilter').addEventListener('change', filterResults);
-    document.getElementById('dateFilter').addEventListener('change', filterResults);
+    document.getElementById('startDateFilter').addEventListener('change', filterResults);
+    document.getElementById('endDateFilter').addEventListener('change', filterResults);
     
     // Form submission
     document.getElementById('checkResultForm').addEventListener('submit', handleFormSubmit);
@@ -412,9 +419,12 @@ function filterResults() {
     const searchTerm = document.getElementById('searchInput').value.toLowerCase();
     const statusFilter = document.getElementById('statusFilter').value;
     const deviceTypeFilter = document.getElementById('deviceTypeFilter').value;
-    const dateFilter = document.getElementById('dateFilter').value;
+    const startDateFilter = document.getElementById('startDateFilter').value;
+    const endDateFilter = document.getElementById('endDateFilter').value;
     
     filteredResults = checkResults.filter(result => {
+        const sessionStatus = getSessionStatus(result); 
+
         const matchesSearch = !searchTerm || 
             (result.device_name && result.device_name.toLowerCase().includes(searchTerm)) ||
             (result.checked_by && result.checked_by.toLowerCase().includes(searchTerm)) ||
@@ -424,8 +434,15 @@ function filterResults() {
         const matchesStatus = !statusFilter || sessionStatus === statusFilter;
         const matchesDeviceType = !deviceTypeFilter || result.device_type === deviceTypeFilter;
         
-        const matchesDate = !dateFilter || 
-            (result.checked_at && result.checked_at.startsWith(dateFilter));
+        const checkDate = (result.updated_at_custom || result.checked_at).substring(0, 10);
+        
+        let matchesDate = true; 
+        if (startDateFilter && checkDate < startDateFilter) {
+            matchesDate = false;
+        }
+        if (endDateFilter && checkDate > endDateFilter) {
+            matchesDate = false;
+        }
         
         return matchesSearch && matchesStatus && matchesDeviceType && matchesDate;
     });
@@ -680,21 +697,21 @@ async function viewDetailSession(deviceId, checkedAt) {
                     <p class="text-xs text-gray-500">${first.device?.device_type || 'N/A'} • ${first.device?.serial_number || 'N/A'}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Location</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Lokasi</label>
                     <p class="text-sm text-gray-900">${first.device?.room?.room_name || 'N/A'}</p>
                     <p class="text-xs text-gray-500">${first.device?.room?.floor?.floor_name || 'N/A'}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Checked By</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dicek Oleh</label>
                     <p class="text-sm text-gray-900">${first.user?.full_name || 'N/A'}</p>
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">First Check Date</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Tanggal Cek Pertama</label>
                     <p class="text-sm text-gray-900">${formatDate(firstCheckedDate)}</p>
                 </div>
                 ${lastUpdatedDate ? `
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">Last Updated</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Update Terbaru</label>
                     <p class="text-sm text-gray-900">${formatDate(lastUpdatedDate)}</p>
                 </div>
                 ` : ''}
@@ -702,14 +719,14 @@ async function viewDetailSession(deviceId, checkedAt) {
         `;
         
         const tableStructure = `
-            <div class="border rounded-lg overflow-hidden">
+            <div class="border rounded-lg overflow-hidden overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
                     <thead class="bg-gray-50">
                         <tr>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Checklist</th>
                             <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Notes</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Catatan</th>
+                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aksi</th>
                         </tr>
                     </thead>
                     <tbody class="bg-white divide-y divide-gray-200" id="session-detail-tbody">
@@ -866,7 +883,6 @@ async function handleEditSubmit(e) {
     const notes = formData.get('notes');
     
     try {
-        // Find the actual result_id from current session data
         const url = `/api/device-check-session-detail?device_id=${editingChecklistResult.deviceId}&checked_at=${encodeURIComponent(editingChecklistResult.checkedAt)}`;
         const response = await fetch(url);
         const items = await response.json();
@@ -877,29 +893,25 @@ async function handleEditSubmit(e) {
             throw new Error('Result not found in the session');
         }
         
-        // Update the result
         const updateResponse = await fetch(`/api/device-check-results/${targetResult.result_id}/update-status`, {
             method: 'PUT',
             headers: {
                 'Content-Type': 'application/json',
                 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
             },
-            body: JSON.stringify({
-                status: status,
-                notes: notes
-            })
+            body: JSON.stringify({ status, notes })
         });
-        
+
         if (updateResponse.ok) {
             const deviceIdToRefresh = editingChecklistResult.deviceId;
             const checkedAtToRefresh = editingChecklistResult.checkedAt;
 
-            closeEditModal();
-
-            showNotification('Checklist result updated successfully', 'success');
-            viewDetailSession(deviceIdToRefresh, checkedAtToRefresh); 
-            loadCheckResults(); 
+            await loadCheckResults();
             
+            viewDetailSession(deviceIdToRefresh, checkedAtToRefresh);
+
+            closeEditModal(); 
+            showNotification('Checklist result updated successfully', 'success');            
         } else {
             const errorData = await updateResponse.json();
             throw new Error(errorData.message || 'Failed to update result');
